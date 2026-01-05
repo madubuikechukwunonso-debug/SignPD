@@ -25,12 +25,12 @@ import {
   MessageCircle,
   Activity,
   Settings,
-  History,
   PhoneOff,
   ScreenShare,
   StopScreenShare,
   PushPin,
   Info,
+  FileText, // ← Added for file icon in messages
 } from 'lucide-react';
 
 interface User {
@@ -48,29 +48,13 @@ interface User {
 
 interface Message {
   id: number;
-  sender: 'me' | 'other' | 'system'; // ← Fixed: added 'system'
+  sender: 'me' | 'other' | 'system';
   text: string;
   timestamp: string;
   type: 'text' | 'file' | 'image' | 'system';
   fileName?: string;
   fileSize?: string;
   reactions?: { emoji: string; users: string[] }[];
-}
-
-interface Team {
-  id: number;
-  name: string;
-  members: number;
-  avatar: string;
-  lastActivity: string;
-}
-
-interface ActivityItem {
-  id: string;
-  user: string;
-  action: string;
-  timestamp: string;
-  type: 'document' | 'message' | 'meeting' | 'file';
 }
 
 export function DockChat() {
@@ -142,45 +126,41 @@ export function DockChat() {
       role: 'Legal Advisor',
       department: 'Legal',
     },
-    // ... (other users unchanged)
+    {
+      id: 3,
+      name: 'Emily Davis',
+      avatar: 'https://i.pravatar.cc/150?img=3',
+      status: 'away',
+      lastMessage: 'Can you send me the NDA template?',
+      timestamp: 'Yesterday',
+      unread: 0,
+      role: 'Project Manager',
+      department: 'Operations',
+    },
+    {
+      id: 4,
+      name: 'James Wilson',
+      avatar: 'https://i.pravatar.cc/150?img=4',
+      status: 'busy',
+      lastMessage: 'Thanks for the recommendation!',
+      timestamp: 'Yesterday',
+      unread: 0,
+      role: 'Business Analyst',
+      department: 'Strategy',
+    },
+    {
+      id: 5,
+      name: 'Lisa Anderson',
+      avatar: 'https://i.pravatar.cc/150?img=5',
+      status: 'online',
+      lastMessage: 'Just signed the document!',
+      timestamp: '8:20 AM',
+      unread: 1,
+      role: 'HR Manager',
+      department: 'Human Resources',
+      isPinned: true,
+    },
   ];
-
-  const teams: Team[] = [
-    { id: 1, name: 'Design Team', members: 8, avatar: 'https://i.pravatar.cc/150?img=11', lastActivity: '2 min ago' },
-    { id: 2, name: 'Legal Department', members: 5, avatar: 'https://i.pravatar.cc/150?img=12', lastActivity: '15 min ago' },
-    { id: 3, name: 'Finance Team', members: 12, avatar: 'https://i.pravatar.cc/150?img=13', lastActivity: '1 hour ago' },
-  ];
-
-  const activities: ActivityItem[] = [
-    { id: '1', user: 'Sarah Johnson', action: 'shared a document template', timestamp: '2 min ago', type: 'document' },
-    { id: '2', user: 'Mike Chen', action: 'completed contract review', timestamp: '5 min ago', type: 'file' },
-    { id: '3', user: 'Emily Davis', action: 'started a video call', timestamp: '12 min ago', type: 'meeting' },
-  ];
-
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.department.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        sender: 'me',
-        text: messageText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: 'text',
-      };
-      setMessages([...messages, newMessage]);
-      setMessageText('');
-
-      setTimeout(() => {
-        setTypingUsers([selectedUser?.name || 'Other']);
-        setTimeout(() => setTypingUsers([]), 2000);
-      }, 1000);
-    }
-  };
 
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
@@ -228,8 +208,8 @@ export function DockChat() {
   const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
 
   const handleReaction = (messageId: number, emoji: string) => {
-    setMessages((messages) =>
-      messages.map((msg) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => {
         if (msg.id === messageId) {
           const existing = msg.reactions?.find((r) => r.emoji === emoji);
           if (existing) {
@@ -237,17 +217,43 @@ export function DockChat() {
               ...msg,
               reactions: msg.reactions?.map((r) =>
                 r.emoji === emoji
-                  ? { ...r, users: r.users.includes('You') ? r.users.filter((u) => u !== 'You') : [...r.users, 'You'] }
+                  ? {
+                      ...r,
+                      users: r.users.includes('You')
+                        ? r.users.filter((u) => u !== 'You')
+                        : [...r.users, 'You'],
+                    }
                   : r
               ),
             };
-          } else {
-            return { ...msg, reactions: [...(msg.reactions || []), { emoji, users: ['You'] }] };
           }
+          return {
+            ...msg,
+            reactions: [...(msg.reactions || []), { emoji, users: ['You'] }],
+          };
         }
         return msg;
       })
     );
+  };
+
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      const newMessage: Message = {
+        id: messages.length + 1,
+        sender: 'me',
+        text: messageText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: 'text',
+      };
+      setMessages([...messages, newMessage]);
+      setMessageText('');
+
+      setTimeout(() => {
+        setTypingUsers([selectedUser?.name || 'Someone']);
+        setTimeout(() => setTypingUsers([]), 2000);
+      }, 1000);
+    }
   };
 
   return (
@@ -263,12 +269,22 @@ export function DockChat() {
           </p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - placeholder (you can fill in real data later) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {/* ... (stats cards unchanged) */}
+          <Card className="bg-gradient-to-br from-green-500 to-teal-400 text-white">
+            <CardContent className="p-6">
+              <div className="flex justify-between mb-4">
+                <Users className="h-8 w-8" />
+                <Badge variant="secondary">+12</Badge>
+              </div>
+              <h3 className="text-3xl font-bold">247</h3>
+              <p>Active Users</p>
+            </CardContent>
+          </Card>
+          {/* Add other stat cards similarly */}
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Tabs */}
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -292,7 +308,7 @@ export function DockChat() {
                   <Input
                     placeholder="Search conversations..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -309,18 +325,42 @@ export function DockChat() {
           <div className="lg:col-span-4">
             <Card className="h-full flex flex-col">
               <CardHeader className="bg-gradient-to-r from-green-500/10 to-teal-400/10">
-                <CardTitle>
-                  {viewMode === 'chats' ? 'Conversations' : viewMode === 'teams' ? 'Teams & Channels' : 'Recent Activity'}
-                </CardTitle>
-                {viewMode === 'chats' && (
-                  <div className="flex gap-2 mt-3">
-                    <Badge variant="secondary"><PushPin className="h-3 w-3 mr-1" />Pinned</Badge>
-                    <Badge variant="secondary">Recent</Badge>
-                  </div>
-                )}
+                <CardTitle>Conversations</CardTitle>
               </CardHeader>
               <ScrollArea className="flex-1">
-                {/* ... (sidebar content unchanged, using filteredUsers, teams, activities) */}
+                <div className="space-y-0">
+                  {users.map((user) => (
+                    <button
+                      key={user.id}
+                      onClick={() => handleUserClick(user)}
+                      className={`
+                        w-full text-left p-4 hover:bg-accent transition-colors flex items-center gap-4
+                        ${selectedUser?.id === user.id ? 'bg-accent border-l-4 border-green-500' : ''}
+                      `}
+                    >
+                      <div className="relative">
+                        <Avatar>
+                          <AvatarImage src={user.avatar} />
+                          <AvatarFallback>{user.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute bottom-0 right-0">
+                          {getStatusDot(user.status)}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold truncate">{user.name}</p>
+                          {user.isPinned && <PushPin className="h-4 w-4 text-green-500" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">{user.lastMessage}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{user.timestamp}</p>
+                      </div>
+                      {user.unread > 0 && (
+                        <Badge className="bg-green-500 text-white">{user.unread}</Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </ScrollArea>
             </Card>
           </div>
@@ -330,7 +370,6 @@ export function DockChat() {
             <Card className="h-full flex flex-col">
               {selectedUser ? (
                 <>
-                  {/* Chat Header */}
                   <div className="p-4 bg-gradient-to-r from-green-500/10 to-teal-400/10 border-b flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="relative">
@@ -342,16 +381,12 @@ export function DockChat() {
                       </div>
                       <div>
                         <h3 className="font-bold">{selectedUser.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span className={`font-medium ${getStatusColor(selectedUser.status).replace('bg-', 'text-')}`}>
-                            {selectedUser.status}
-                          </span>
-                          <span>• {selectedUser.role}</span>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedUser.status} • {selectedUser.role}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                       <Button variant={isVideoCall ? "destructive" : "secondary"} size="icon" onClick={toggleVideoCall}>
                         {isVideoCall ? <PhoneOff className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
                       </Button>
@@ -363,7 +398,6 @@ export function DockChat() {
                     </div>
                   </div>
 
-                  {/* Messages */}
                   <ScrollArea className="flex-1 p-6 bg-muted/30">
                     <div className="space-y-4">
                       {messages.map((message) => (
@@ -388,19 +422,19 @@ export function DockChat() {
                               <p className="text-sm">{message.text}</p>
 
                               {message.reactions && message.reactions.length > 0 && (
-                                <div className="flex gap-1 mt-2 flex-wrap">
+                                <div className="flex gap-1 mt-2">
                                   {message.reactions.map((r, i) => (
                                     <Tooltip key={i}>
                                       <TooltipTrigger asChild>
                                         <Badge
                                           variant="secondary"
-                                          className={`cursor-pointer ${r.users.includes('You') ? 'bg-green-500/20' : ''}`}
+                                          className="cursor-pointer"
                                           onClick={() => handleReaction(message.id, r.emoji)}
                                         >
                                           {r.emoji} {r.users.length}
                                         </Badge>
                                       </TooltipTrigger>
-                                      <TooltipContent>{r.users.join(', ')} reacted with {r.emoji}</TooltipContent>
+                                      <TooltipContent>{r.users.join(', ')} reacted</TooltipContent>
                                     </Tooltip>
                                   ))}
                                 </div>
@@ -426,7 +460,6 @@ export function DockChat() {
                     </div>
                   </ScrollArea>
 
-                  {/* Input Area */}
                   <div className="p-4 border-t">
                     <div className="flex items-end gap-3">
                       <input type="file" onChange={handleFileUpload} className="hidden" id="file-attachment" />
@@ -435,16 +468,14 @@ export function DockChat() {
                           <Paperclip className="h-5 w-5" />
                         </label>
                       </Button>
-
                       <Button variant="ghost" size="icon" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                         <Smile className="h-5 w-5" />
                       </Button>
-
                       <Input
                         placeholder="Type a message..."
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        onKeyDown={(e) => {
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessageText(e.target.value)}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSendMessage();
@@ -452,7 +483,6 @@ export function DockChat() {
                         }}
                         className="flex-1"
                       />
-
                       <Button
                         onClick={handleSendMessage}
                         disabled={!messageText.trim()}
@@ -470,7 +500,7 @@ export function DockChat() {
                       <MessageCircle className="h-16 w-16 text-white" />
                     </div>
                     <h3 className="text-2xl font-bold mb-2">Select a Conversation</h3>
-                    <p className="text-muted-foreground mb-6">Choose a contact or team to start collaborating</p>
+                    <p className="text-muted-foreground">Choose a contact or team to start collaborating</p>
                   </div>
                 </div>
               )}
