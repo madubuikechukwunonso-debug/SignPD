@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-directives --max-warnings 0",
     "preview": "vite preview",
-    "postinstall": "npx shadcn@latest init --yes && npx shadcn@latest add accordion alert alert-dialog aspect-ratio avatar badge breadcrumb button calendar card carousel chart checkbox collapsible command context-menu data-table dialog drawer dropdown-menu form hover-card input input-otp label menubar navigation-menu pagination popover progress radio-group scroll-area select separator sheet sidebar skeleton slider sonner switch table tabs textarea toast toggle toggle-group tooltip --yes || true"
+    "postinstall": "npx shadcn@latest init --yes && npx shadcn@latest add accordion alert avatar badge button card dialog dropdown-menu input label popover progress scroll-area select separator sheet switch tabs textarea toggle toggle-group tooltip --yes || true"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
