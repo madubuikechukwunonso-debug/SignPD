@@ -234,7 +234,7 @@ const animations = {
 const getInitials = (name: string): string => {
   return name
     .split(' ')
-n    .map(word => word[0])
+    .map(word => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -245,7 +245,6 @@ const getStatusColor = (status: AvatarStatus): string => {
 };
 
 const getContrastColor = (backgroundColor: string): string => {
-  // Simple contrast calculation
   const rgb = backgroundColor.match(/\d+/g);
   if (!rgb) return '#000000';
   
@@ -478,7 +477,7 @@ export function Avatar({
           </Tooltip>
         ))}
       </Box>
-n    );
+    );
   };
 
   // Avatar content
@@ -568,9 +567,8 @@ n    );
   const AnimationWrapper = ({ children }: { children: React.ReactNode }) => {
     if (animation === 'none') return <>{children}</>;
 
-    const ZoomComponent = Zoom;
     return (
-      <ZoomComponent
+      <Zoom
         in={!skeleton}
         timeout={transitionDuration}
         style={{
@@ -578,7 +576,7 @@ n    );
         }}
       >
         <Box>{children}</Box>
-      </ZoomComponent>
+      </Zoom>
     );
   };
 
@@ -598,7 +596,7 @@ n    );
         style={style}
       />
     );
-n  }
+  }
 
   // File input for uploads
   const FileInput = () => (
@@ -663,7 +661,7 @@ n  }
                   )}
                 </Box>
               </label>
-n            )}
+            )}
 
             {/* Download overlay */}
             {downloadable && (
@@ -818,6 +816,25 @@ function AvatarDetails({
       )}
 
       {showActions && actions && actions.length > 0 && (
-        <>\n          <Divider sx={{ my: 1 }} />\n          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>\n            {actions.slice(0, 3).map((action, index) => (\n              <Chip\n                key={index}\n                size="small"\n                label={action.label}\n                onClick={action.onClick}\n                disabled={action.disabled}\n                icon={action.loading ? undefined : action.icon}\n                sx={{ fontSize: '0.75rem' }}\n              />\n            ))}\n          </Box>\n        </>\n      )}\n    </Box>\n  );\n}
+        <>
+          <Divider sx={{ my: 1 }} />
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+            {actions.slice(0, 3).map((action, index) => (
+              <Chip
+                key={index}
+                size="small"
+                label={action.label}
+                onClick={action.onClick}
+                disabled={action.disabled}
+                icon={action.loading ? undefined : action.icon}
+                sx={{ fontSize: '0.75rem' }}
+              />
+            ))}
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+}
 
 export default Avatar;
