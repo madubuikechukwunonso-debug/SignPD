@@ -42,7 +42,8 @@ import {
   Activity,
   Users,
   FileText,
-  Link
+  Link,
+  Ban
 } from 'lucide-react';
 
 // Types
@@ -159,7 +160,7 @@ interface AvatarGroupProps {
   variant?: AvatarGroupVariant;
   spacing?: 'small' | 'medium' | 'large' | number;
   totalCount?: number;
-  show surplus?: boolean;
+  showSurplus?: boolean;
   surplusColor?: 'primary' | 'secondary' | 'default';
   surplusBackground?: string;
   onSurplusClick?: () => void;
@@ -233,7 +234,7 @@ const animations = {
 const getInitials = (name: string): string => {
   return name
     .split(' ')
-    .map(word => word[0])
+n    .map(word => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -263,7 +264,7 @@ const generateAvatarColor = (name: string): string => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-// Avatar Component
+// Main Avatar Component
 export function Avatar({
   user,
   src,
@@ -477,7 +478,7 @@ export function Avatar({
           </Tooltip>
         ))}
       </Box>
-    );
+n    );
   };
 
   // Avatar content
@@ -597,7 +598,7 @@ export function Avatar({
         style={style}
       />
     );
-  }
+n  }
 
   // File input for uploads
   const FileInput = () => (
@@ -662,7 +663,7 @@ export function Avatar({
                   )}
                 </Box>
               </label>
-            )}
+n            )}
 
             {/* Download overlay */}
             {downloadable && (
@@ -817,426 +818,6 @@ function AvatarDetails({
       )}
 
       {showActions && actions && actions.length > 0 && (
-        <>
-          <Divider sx={{ my: 1 }} />
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-            {actions.slice(0, 3).map((action, index) => (
-              <Chip
-                key={index}
-                size="small"
-                label={action.label}
-                onClick={action.onClick}
-                disabled={action.disabled}
-                icon={action.loading ? undefined : action.icon}
-                sx={{ fontSize: '0.75rem' }}
-              />
-            ))}
-          </Box>
-        </>
-      )}
-    </Box>
-  );
-}
-
-// Avatar Group Component
-export function AvatarGroup({
-  users,
-  max = 4,
-  size = 'md',
-  variant = 'circular',
-  spacing = 'medium',
-  totalCount,
-  showSurplus = true,
-  surplusColor = 'primary',
-  surplusBackground,
-  onSurplusClick,
-  className,
-  style,
-  animation = 'fade',
-  transitionDuration = 300,
-  showTooltip = true,
-  tooltipPlacement = 'top',
-  clickable = false,
-  onAvatarClick
-}: AvatarGroupProps) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const displayUsers = users.slice(0, max);
-  const surplusCount = totalCount !== undefined 
-    ? Math.max(0, totalCount - max) 
-    : Math.max(0, users.length - max);
-
-  const spacingValue = typeof spacing === 'number' 
-    ? spacing 
-    : spacing === 'small' ? -8 : spacing === 'large' ? -16 : -12;
-
-  const surplusBackgroundColor = surplusBackground || theme.palette.grey[400];
-
-  const AnimationComponent = animation === 'none' ? React.Fragment : 
-    animation === 'slide' ? Slide : Fade;
-
-  return (
-    <Box
-      className={className}
-      style={style}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        position: 'relative'
-      }}
-    >
-      {displayUsers.map((user, index) => (
-        <AnimationComponent
-          key={user.id}
-          in={true}
-          timeout={transitionDuration}
-          direction="right"
-          style={{
-            transitionDelay: `${index * 50}ms`,
-            zIndex: displayUsers.length - index
-          }}
-        >
-          <Box sx={{ ml: index === 0 ? 0 : spacingValue }}>
-            <Avatar
-              user={user}
-              size={size}
-              variant={variant}
-              clickable={clickable}
-              onAvatarClick={() => onAvatarClick?.(user)}
-              showTooltip={showTooltip}
-              tooltipPlacement={tooltipPlacement}
-              tooltipArrow={false}
-            />
-          </Box>
-        </AnimationComponent>
-      ))}
-
-      {surplusCount > 0 && showSurplus && (
-        <AnimationComponent
-          in={true}
-          timeout={transitionDuration}
-          style={{ zIndex: 0 }}
-        >
-          <Box sx={{ ml: spacingValue }}>
-            <Tooltip
-              title={`${surplusCount} more ${surplusCount === 1 ? 'user' : 'users'}`}
-              placement={tooltipPlacement}
-              arrow={false}
-            >
-              <Chip
-                label={`+${surplusCount}`}
-                size={size === 'xs' || size === 'sm' ? 'small' : 'medium'}
-                color={surplusColor as any}
-                onClick={onSurplusClick}
-                sx={{
-                  cursor: onSurplusClick ? 'pointer' : 'default',
-                  fontWeight: 600,
-                  backgroundColor: surplusBackgroundColor,
-                  color: theme.palette.getContrastText(surplusBackgroundColor)
-                }}
-              />
-            </Tooltip>
-          </Box>
-        </AnimationComponent>
-      )}
-    </Box>
-  );
-}
-
-// Avatar Stack Component
-export function AvatarStack({
-  direction = 'horizontal',
-  overlap = 12,
-  spread = 'normal',
-  showCount = false,
-  countPosition = 'right',
-  ...avatarGroupProps
-}: AvatarStackProps) {
-  const spreadMultiplier = spread === 'compact' ? 0.5 : spread === 'wide' ? 1.5 : 1;
-  const actualOverlap = overlap * spreadMultiplier;
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: direction === 'horizontal' ? 'row' : 'column',
-        alignItems: 'center',
-        gap: direction === 'horizontal' ? -actualOverlap : direction === 'vertical' ? -actualOverlap : 0,
-        '& > *': {
-          position: 'relative'
-        }
-      }}
-    >
-      <AvatarGroup {...avatarGroupProps} spacing={-actualOverlap} />
-
-      {showCount && avatarGroupProps.users.length > 1 && (
-        <Box
-          sx={{
-            ml: direction === 'horizontal' && countPosition === 'right' ? 1 : 0,
-            mt: direction === 'vertical' && countPosition === 'bottom' ? 1 : 0,
-            mr: direction === 'horizontal' && countPosition === 'left' ? 1 : 0,
-            mb: direction === 'vertical' && countPosition === 'top' ? 1 : 0
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            {avatarGroupProps.users.length} members
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  );
-}
-
-// Presence Indicator Component
-export function PresenceIndicator({
-  presence,
-  size = 'sm',
-  showIcon = true,
-  showText = false,
-  className
-}: {
-  presence: AvatarPresence;
-  size?: AvatarSize;
-  showIcon?: boolean;
-  showText?: boolean;
-  className?: string;
-}) {
-  const theme = useTheme();
-  const sizeConfig = sizeMap[size];
-
-  const presenceConfig = {
-    active: { color: 'success', icon: <Circle size={sizeConfig.badgeSize} fill="currentColor" />, text: 'Active' },
-    inactive: { color: 'default', icon: <Circle size={sizeConfig.badgeSize} />, text: 'Inactive' },
-    pending: { color: 'warning', icon: <Clock size={sizeConfig.badgeSize} />, text: 'Pending' }
-  };
-
-  const config = presenceConfig[presence] || presenceConfig.inactive;
-
-  return (
-    <Box
-      className={className}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5
-      }}
-    >
-      {showIcon && (
-        <Box
-          sx={{
-            color: `${config.color}.main`,
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          {config.icon}
-        </Box>
-      )}
-      
-      {showText && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: `${config.color}.main`,
-            fontWeight: 600,
-            textTransform: 'capitalize'
-          }}
-        >
-          {config.text}
-        </Typography>
-      )}
-    </Box>
-  );
-}
-
-// Status Indicator Component
-export function StatusIndicator({
-  status,
-  size = 'sm',
-  showIcon = true,
-  showText = false,
-  className
-}: {
-  status: AvatarStatus;
-  size?: AvatarSize;
-  showIcon?: boolean;
-  showText?: boolean;
-  className?: string;
-}) {
-  const theme = useTheme();
-  const sizeConfig = sizeMap[size];
-
-  return (
-    <Box
-      className={className}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.5
-      }}
-    >
-      {showIcon && (
-        <Box
-          sx={{
-            color: `${statusColors[status]}.main`,
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          {statusIcons[status]}
-        </Box>
-      )}
-      
-      {showText && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: `${statusColors[status]}.main`,
-            fontWeight: 600,
-            textTransform: 'capitalize'
-          }}
-        >
-          {status}
-        </Typography>
-      )}
-    </Box>
-  );
-}
-
-// Achievement Badge Component
-export function AchievementBadge({
-  achievement,
-  size = 'sm',
-  showTooltip = true,
-  className
-}: {
-  achievement: string;
-  size?: AvatarSize;
-  showTooltip?: boolean;
-  className?: string;
-}) {
-  const theme = useTheme();
-  const sizeConfig = sizeMap[size];
-
-  const achievementIcons: Record<string, React.ReactNode> = {
-    'verified': <CheckCircle size={sizeConfig.badgeSize} />,
-    'premium': <Star size={sizeConfig.badgeSize} />,
-    'top-contributor': <Award size={sizeConfig.badgeSize} />,
-    'early-adopter': <Shield size={sizeConfig.badgeSize} />,
-    'default': <Award size={sizeConfig.badgeSize} />
-  };
-
-  const badge = (
-    <Box
-      className={className}
-      sx={{
-        width: sizeConfig.badgeSize,
-        height: sizeConfig.badgeSize,
-        borderRadius: '50%',
-        backgroundColor: theme.palette.warning.main,
-        color: theme.palette.warning.contrastText,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: sizeConfig.badgeSize * 0.6
-      }}
-    >
-      {achievementIcons[achievement] || achievementIcons.default}
-    </Box>
-  );
-
-  if (!showTooltip) return badge;
-
-  return (
-    <Tooltip title={achievement} arrow>
-      {badge}
-    </Tooltip>
-  );
-}
-
-// Avatar Selector Component
-interface AvatarSelectorProps {
-  currentAvatar?: string;
-  onAvatarSelect: (avatar: string) => void;
-  avatars: string[];
-  size?: AvatarSize;
-  showUpload?: boolean;
-  onUpload?: (file: File) => void;
-}
-
-export function AvatarSelector({
-  currentAvatar,
-  onAvatarSelect,
-  avatars,
-  size = 'md',
-  showUpload = true,
-  onUpload
-}: AvatarSelectorProps) {
-  const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar);
-
-  const handleAvatarSelect = (avatar: string) => {
-    setSelectedAvatar(avatar);
-    onAvatarSelect(avatar);
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && onUpload) {
-      onUpload(file);
-    }
-  };
-
-  return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-      {avatars.map((avatar, index) => (
-        <IconButton
-          key={index}
-          onClick={() => handleAvatarSelect(avatar)}
-          sx={{
-            border: selectedAvatar === avatar ? 2 : 1,
-            borderColor: selectedAvatar === avatar ? 'primary.main' : 'divider',
-            borderRadius: '50%',
-            p: 0.5
-          }}
-        >
-          <Avatar
-            src={avatar}
-            size={size}
-            border={selectedAvatar === avatar}
-            borderColor="primary.main"
-          />
-        </IconButton>
-      ))}
-      
-      {showUpload && onUpload && (
-        <label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            style={{ display: 'none' }}
-          />
-          <IconButton
-            component="span"
-            sx={{
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: '50%',
-              borderStyle: 'dashed'
-            }}
-          >
-            <Upload size={20} />
-          </IconButton>
-        </label>
-      )}
-    </Box>
-  );
-}
-
-/* ============================
- * Export Default
- * ============================
- */
+        <>\n          <Divider sx={{ my: 1 }} />\n          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>\n            {actions.slice(0, 3).map((action, index) => (\n              <Chip\n                key={index}\n                size="small"\n                label={action.label}\n                onClick={action.onClick}\n                disabled={action.disabled}\n                icon={action.loading ? undefined : action.icon}\n                sx={{ fontSize: '0.75rem' }}\n              />\n            ))}\n          </Box>\n        </>\n      )}\n    </Box>\n  );\n}
 
 export default Avatar;
