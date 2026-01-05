@@ -18,6 +18,7 @@ import {
   Stack,
   alpha,
   Avatar,
+  AvatarGroup,
   List,
   ListItem,
   ListItemIcon,
@@ -33,6 +34,7 @@ import {
   Select,
   LinearProgress,
   Tooltip,
+  Fab,
   Divider
 } from '@mui/material';
 import {
@@ -43,7 +45,7 @@ import {
   TrendingUp,
   Users,
   Award,
-n  Filter,
+  Filter,
   SortAsc,
   Heart,
   Share2,
@@ -184,4 +186,906 @@ export function DocPawn() {
       category: 'Finance',
       image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
       author: 'Emily Davis',
-n      sales: 4134,\n      featured: false,\n      tags: ['Finance', 'Excel', 'Dashboard'],\n      createdAt: '2024-01-08',\n      fileSize: '1.2 MB',\n      format: ['XLSX', 'Google Sheets'],\n      preview: true,\n      reviews: 203\n    },\n    {\n      id: 4,\n      title: 'Startup Pitch Deck',\n      description: 'Investor-ready pitch deck template with comprehensive slides for startup presentations',\n      price: 34.99,\n      rating: 4.9,\n      downloads: 2678,\n      category: 'Business',\n      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',\n      author: 'James Wilson',\n      sales: 2678,\n      featured: true,\n      tags: ['Startup', 'Pitch', 'Investment'],\n      createdAt: '2024-01-12',\n      fileSize: '8.5 MB',\n      format: ['PPTX', 'PDF'],\n      preview: true,\n      reviews: 156\n    },\n    {\n      id: 5,\n      title: 'Meeting Minutes Template',\n      description: 'Organized meeting minutes template with action items, follow-up sections, and decision tracking',\n      price: 12.99,\n      rating: 4.5,\n      downloads: 2543,\n      category: 'Productivity',\n      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',\n      author: 'Lisa Anderson',\n      sales: 2543,\n      featured: false,\n      tags: ['Meeting', 'Productivity', 'Organization'],\n      createdAt: '2024-01-05',\n      fileSize: '856 KB',\n      format: ['DOCX', 'PDF'],\n      preview: true,\n      reviews: 98\n    },\n    {\n      id: 6,\n      title: 'Marketing Campaign Planner',\n      description: 'Comprehensive marketing campaign planning template with budget tracking and ROI analysis',\n      price: 22.99,\n      rating: 4.6,\n      downloads: 1987,\n      category: 'Marketing',\n      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',\n      author: 'Robert Taylor',\n      sales: 1987,\n      featured: false,\n      tags: ['Marketing', 'Campaign', 'ROI'],\n      createdAt: '2024-01-03',\n      fileSize: '3.2 MB',\n      format: ['XLSX', 'PDF'],\n      preview: true,\n      reviews: 76\n    }\n  ];\n\n  const filteredTemplates = templates.filter(\n    (template) =>\n      (selectedCategory === 'All' || template.category === selectedCategory) &&\n      (template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||\n       template.category.toLowerCase().includes(searchQuery.toLowerCase()) ||\n       template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))\n  );\n\n  const handleViewDetails = (template: DocumentTemplate) => {\n    setSelectedDoc(template);\n    setDialogOpen(true);\n  };\n\n  const handlePurchase = () => {\n    if (selectedDoc) {\n      alert(`Purchasing: ${selectedDoc.title} for $${selectedDoc.price}`);\n      setDialogOpen(false);\n    }\n  };\n\n  const toggleWishlist = (templateId: number) => {\n    setWishlist(prev => \n      prev.includes(templateId) \n        ? prev.filter(id => id !== templateId)\n        : [...prev, templateId]\n    );\n  };\n\n  const toggleCart = (templateId: number) => {\n    setCart(prev => \n      prev.includes(templateId) \n        ? prev.filter(id => id !== templateId)\n        : [...prev, templateId]\n    );\n  };\n\n  const handleSortMenuOpen = (event: React.MouseEvent<HTMLElement>) => {\n    setAnchorEl(event.currentTarget);\n  };\n\n  const handleSortMenuClose = () => {\n    setAnchorEl(null);\n  };\n\n  const getStatusChip = (template: DocumentTemplate) => {\n    if (template.featured) {\n      return (\n        <Chip\n          icon={<Award size={14} />}\n          label=\"Featured\"\n          size=\"small\"\n          sx={{\n            background: 'linear-gradient(135deg, #ffd89b 0%, #19547b 100%)',\n            color: 'white',\n            fontWeight: 600\n          }}\n        />\n      );\n    }\n    return null;\n  };\n\n  return (\n    <Box>\n      {/* Enhanced Header */}\n      <Box sx={{ mb: 6 }}>\n        <Typography\n          variant=\"h3\"\n          sx={{\n            fontWeight: 800,\n            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n            backgroundClip: 'text',\n            WebkitBackgroundClip: 'text',\n            WebkitTextFillColor: 'transparent',\n            mb: 2,\n            fontSize: '2.5rem'\n          }}\n        >\n          Enterprise Template Marketplace\n        </Typography>\n        <Typography variant=\"body1\" color=\"text.secondary\" sx={{ fontSize: '1.2rem', maxWidth: 600 }}>\n          Discover premium templates crafted by industry professionals and certified designers\n        </Typography>\n      </Box>\n\n      {/* Enhanced Marketplace Stats */}\n      <Grid container spacing={3} sx={{ mb: 6 }}>\n        {[\n          { icon: <ShoppingCart size={24} />, label: 'Total Products', value: '2,450+', color: '#4facfe', change: '+245 this month' },\n          { icon: <Users size={24} />, label: 'Active Creators', value: '850+', color: '#00f2fe', change: '+89 this month' },\n          { icon: <TrendingUp size={24} />, label: 'Monthly Sales', value: '$125K', color: '#43e97b', change: '+23% growth' },\n          { icon: <Star size={24} />, label: 'Avg. Rating', value: '4.8', color: '#f093fb', change: 'from 15k reviews' }\n        ].map((stat, index) => (\n          <Grid item xs={12} md={3} key={index}>\n            <Card\n              elevation={0}\n              sx={{\n                background: `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.8)} 100%)`,\n                color: 'white',\n                borderRadius: 4,\n                transition: 'all 0.3s ease',\n                '&:hover': {\n                  transform: 'translateY(-4px)',\n                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'\n                }\n              }}\n            >\n              <CardContent sx={{ p: 3 }}>\n                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>\n                  <Box\n                    sx={{\n                      p: 1.5,\n                      borderRadius: 2,\n                      bgcolor: 'rgba(255,255,255,0.2)',\n                      backdropFilter: 'blur(10px)'\n                    }}\n                  >\n                    {stat.icon}\n                  </Box>\n                  <Chip\n                    label={stat.change}\n                    size=\"small\"\n                    sx={{\n                      bgcolor: 'rgba(255,255,255,0.2)',\n                      color: 'white',\n                      fontWeight: 600,\n                      fontSize: '0.7rem'\n                    }}\n                  />\n                </Box>\n                <Typography variant=\"h4\" sx={{ fontWeight: 700, mb: 0.5 }}>\n                  {stat.value}\n                </Typography>\n                <Typography variant=\"body2\" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>\n                  {stat.label}\n                </Typography>\n              </CardContent>\n            </Card>\n          </Grid>\n        ))}\n      </Grid>\n\n      {/* Enhanced Search and Filters */}\n      <Card\n        elevation={0}\n        sx={{\n          mb: 4,\n          borderRadius: 4,\n          border: '1px solid',\n          borderColor: 'divider',\n          background: 'white'\n        }}\n      >\n        <CardContent sx={{ p: 4 }}>\n          {/* Search and Controls */}\n          <Stack direction=\"row\" spacing={2} alignItems=\"center\" sx={{ mb: 3 }}>\n            <TextField\n              fullWidth\n              placeholder=\"Search templates by name, category, or tags...\"\n              value={searchQuery}\n              onChange={(e) => setSearchQuery(e.target.value)}\n              InputProps={{\n                startAdornment: (\n                  <InputAdornment position=\"start\">\n                    <Search size={20} />\n                  </InputAdornment>\n                ),\n                endAdornment: (\n                  <InputAdornment position=\"end\">\n                    <IconButton onClick={() => setShowFilters(!showFilters)}>\n                      <Filter size={18} />\n                    </IconButton>\n                  </InputAdornment>\n                )\n              }}\n              sx={{\n                '& .MuiOutlinedInput-root': {\n                  borderRadius: 3,\n                  background: '#f8fafc'\n                }\n              }}\n            />\n            \n            <ToggleButtonGroup\n              value={viewMode}\n              exclusive\n              onChange={(e, value) => value && setViewMode(value)}\n              sx={{\n                '& .MuiToggleButton-root': {\n                  borderRadius: 2,\n                  border: 'none',\n                  background: '#f8fafc',\n                  '&.Mui-selected': {\n                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                    color: 'white'\n                  }\n                }\n              }}\n            >\n              <ToggleButton value=\"grid\">\n                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0.5 }}>\n                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />\n                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />\n                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />\n                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />\n                  </Box>\n                  Grid\n                </Box>\n              </ToggleButton>\n              <ToggleButton value=\"list\">\n                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>\n                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />\n                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />\n                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />\n                  </Box>\n                  List\n                </Box>\n              </ToggleButton>\n            </ToggleButtonGroup>\n\n            <Button\n              variant=\"outlined\"\n              onClick={handleSortMenuOpen}\n              startIcon={<SortAsc size={18} />}\n              sx={{ borderRadius: 2, fontWeight: 600 }}\n            >\n              Sort\n            </Button>\n          </Stack>\n\n          {/* Category Pills */}\n          <Stack direction=\"row\" spacing={1} flexWrap=\"wrap\" useFlexGap sx={{ mb: showFilters ? 3 : 0 }}>\n            {categories.map((category) => (\n              <Chip\n                key={category.id}\n                label={\n                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                    {category.icon}\n                    <Box>\n                      <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                        {category.name}\n                      </Typography>\n                      <Typography variant=\"caption\" sx={{ opacity: 0.7 }}>\n                        {category.count}\n                      </Typography>\n                    </Box>\n                  </Box>\n                }\n                onClick={() => setSelectedCategory(category.id)}\n                sx={{\n                  fontWeight: 600,\n                  background: selectedCategory === category.id\n                    ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'\n                    : alpha('#4facfe', 0.1),\n                  color: selectedCategory === category.id ? 'white' : '#4facfe',\n                  borderRadius: 3,\n                  px: 1.5,\n                  py: 1,\n                  '&:hover': {\n                    background: selectedCategory === category.id\n                      ? 'linear-gradient(135deg, #3e9bee 0%, #00d9ee 100%)'\n                      : alpha('#4facfe', 0.2)\n                  }\n                }}\n              />\n            ))}\n          </Stack>\n\n          {/* Advanced Filters */}\n          {showFilters && (\n            <Box sx={{ \n              borderTop: '1px solid',\n              borderColor: 'divider',\n              pt: 3,\n              mt: 3\n            }}>\n              <Grid container spacing={3}>\n                <Grid item xs={12} md={4}>\n                  <FormControl fullWidth>\n                    <InputLabel>Price Range</InputLabel>\n                    <Select\n                      value={`${priceRange[0]}-${priceRange[1]}`}\n                      label=\"Price Range\"\n                      onChange={(e) => {\n                        const [min, max] = e.target.value.split('-').map(Number);\n                        setPriceRange([min, max]);\n                      }}\n                      sx={{ borderRadius: 2 }}\n                    >\n                      <MenuItem value=\"0-50\">$0 - $50</MenuItem>\n                      <MenuItem value=\"0-25\">$0 - $25</MenuItem>\n                      <MenuItem value=\"25-50\">$25 - $50</MenuItem>\n                      <MenuItem value=\"50-100\">$50+</MenuItem>\n                    </Select>\n                  </FormControl>\n                </Grid>\n                <Grid item xs={12} md={4}>\n                  <FormControl fullWidth>\n                    <InputLabel>Minimum Rating</InputLabel>\n                    <Select\n                      defaultValue=\"4\"\n                      label=\"Minimum Rating\"\n                      sx={{ borderRadius: 2 }}\n                    >\n                      <MenuItem value=\"0\">Any Rating</MenuItem>\n                      <MenuItem value=\"3\">3+ Stars</MenuItem>\n                      <MenuItem value=\"4\">4+ Stars</MenuItem>\n                      <MenuItem value=\"4.5\">4.5+ Stars</MenuItem>\n                    </Select>\n                  </FormControl>\n                </Grid>\n                <Grid item xs={12} md={4}>\n                  <FormControl fullWidth>\n                    <InputLabel>File Format</InputLabel>\n                    <Select\n                      defaultValue=\"\"\n                      label=\"File Format\"\n                      sx={{ borderRadius: 2 }}\n                    >\n                      <MenuItem value=\"\">All Formats</MenuItem>\n                      <MenuItem value=\"pdf\">PDF</MenuItem>\n                      <MenuItem value=\"docx\">DOCX</MenuItem>\n                      <MenuItem value=\"xlsx\">XLSX</MenuItem>\n                      <MenuItem value=\"pptx\">PPTX</MenuItem>\n                    </Select>\n                  </FormControl>\n                </Grid>\n              </Grid>\n            </Box>\n          )}\n        </CardContent>\n      </Card>\n\n      {/* Sort Menu */}\n      <Menu\n        anchorEl={anchorEl}\n        open={Boolean(anchorEl)}\n        onClose={handleSortMenuClose}\n        PaperProps={{\n          sx: {\n            borderRadius: 3,\n            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'\n          }\n        }}\n      >\n        {sortOptions.map((option) => (\n          <MenuItem\n            key={option.value}\n            onClick={() => {\n              setSortBy(option.value);\n              handleSortMenuClose();\n            }}\n            sx={{ \n              borderRadius: 1,\n              mb: 0.5,\n              background: sortBy === option.value ? alpha('#4facfe', 0.1) : 'transparent'\n            }}\n          >\n            <ListItemIcon sx={{ minWidth: 32 }}>\n              {option.icon}\n            </ListItemIcon>\n            <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n              {option.label}\n            </Typography>\n            {sortBy === option.value && (\n              <CheckCircle size={16} color=\"#4facfe\" style={{ marginLeft: 'auto' }} />\n            )}\n          </MenuItem>\n        ))}\n      </Menu>\n\n      {/* Enhanced Templates Grid/List - FIXED JSX CLOSING TAGS */}\n      {viewMode === 'grid' ? (\n        <Grid container spacing={4}>\n          {filteredTemplates.map((template) => (\n            <Grid item xs={12} sm={6} md={4} lg={3} key={template.id}>\n              <Card\n                elevation={0}\n                sx={{\n                  height: '100%',\n                  display: 'flex',\n                  flexDirection: 'column',\n                  border: '1px solid',\n                  borderColor: 'divider',\n                  borderRadius: 4,\n                  transition: 'all 0.3s ease',\n                  '&:hover': {\n                    transform: 'translateY(-8px)',\n                    boxShadow: '0 20px 40px rgba(79, 172, 254, 0.15)',\n                    borderColor: '#4facfe'\n                  }\n                }}\n              >\n                <CardMedia\n                  component=\"div\"\n                  sx={{ height: 220, position: 'relative', overflow: 'hidden' }}\n                >\n                  <ImageWithFallback\n                    src={template.image}\n                    alt={template.title}\n                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}\n                  />\n                  <Box\n                    sx={{\n                      position: 'absolute',\n                      top: 0,\n                      left: 0,\n                      right: 0,\n                      bottom: 0,\n                      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)',\n                      display: 'flex',\n                      flexDirection: 'column',\n                      justifyContent: 'space-between',\n                      p: 2\n                    }}\n                  >\n                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>\n                      <Chip\n                        label={template.category}\n                        size=\"small\"\n                        sx={{\n                          background: 'rgba(255,255,255,0.9)',\n                          backdropFilter: 'blur(10px)',\n                          fontWeight: 600\n                        }}\n                      />\n                      <Stack direction=\"row\" spacing={0.5}>\n                        {getStatusChip(template)}\n                        <IconButton\n                          size=\"small\"\n                          onClick={() => toggleWishlist(template.id)}\n                          sx={{\n                            background: 'rgba(255,255,255,0.9)',\n                            '&:hover': { background: 'white' },\n                            color: wishlist.includes(template.id) ? '#f44336' : '#666'\n                          }}\n                        >\n                          <Heart size={14} fill={wishlist.includes(template.id) ? '#f44336' : 'none'} />\n                        </IconButton>\n                      </Stack>\n                    </Box>\n                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                      <Avatar sx={{ width: 32, height: 32, border: '2px solid white' }}>\n                        {template.author[0]}\n                      </Avatar>\n                      <Typography variant=\"body2\" sx={{ color: 'white', fontWeight: 600 }}>\n                        {template.author}\n                      </Typography>\n                    </Box>\n                  </Box>\n                </CardMedia>\n                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>\n                  <Typography variant=\"h6\" gutterBottom sx={{ fontWeight: 700 }}>\n                    {template.title}\n                  </Typography>\n                  <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mb: 2, flexGrow: 1 }}>\n                    {template.description}\n                  </Typography>\n\n                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>\n                    <Rating value={template.rating} precision={0.1} readOnly size=\"small\" />\n                    <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                      {template.rating}\n                    </Typography>\n                    <Typography variant=\"caption\" color=\"text.secondary\">\n                      ({template.reviews} reviews)\n                    </Typography>\n                  </Box>\n\n                  <Stack direction=\"row\" spacing={1} sx={{ mb: 2 }}>\n                    {template.tags.slice(0, 2).map((tag) => (\n                      <Chip\n                        key={tag}\n                        label={tag}\n                        size=\"small\"\n                        sx={{\n                          fontSize: '0.7rem',\n                          background: alpha('#4facfe', 0.1),\n                          color: '#4facfe'\n                        }}\n                      />\n                    ))}\n                  </Stack>\n\n                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>\n                    <Typography\n                      variant=\"h5\"\n                      sx={{\n                        fontWeight: 800,\n                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                        backgroundClip: 'text',\n                        WebkitBackgroundClip: 'text',\n                        WebkitTextFillColor: 'transparent'\n                      }}\n                    >\n                      ${template.price}\n                    </Typography>\n                    <Stack direction=\"row\" spacing={1}>\n                      <IconButton\n                        size=\"small\"\n                        onClick={() => toggleCart(template.id)}\n                        sx={{\n                          background: cart.includes(template.id) ? '#4facfe' : alpha('#4facfe', 0.1),\n                          color: cart.includes(template.id) ? 'white' : '#4facfe',\n                          '&:hover': {\n                            background: cart.includes(template.id) ? '#3e9bee' : alpha('#4facfe', 0.2)\n                          }\n                        }}\n                      >\n                        <ShoppingCart size={16} />\n                      </IconButton>\n                      <Button\n                        variant=\"contained\"\n                        size=\"small\"\n                        onClick={() => handleViewDetails(template)}\n                        startIcon={<Eye size={16} />}\n                        sx={{\n                          borderRadius: 2,\n                          fontWeight: 600,\n                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                          boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)',\n                          '&:hover': {\n                            background: 'linear-gradient(135deg, #3e9bee 0%, #00d9ee 100%)'\n                          }\n                        }}\n                      >\n                        Preview\n                      </Button>\n                    </Stack>\n                  </Box>\n                </CardContent>\n              </Card>\n            </Grid>  {/* FIXED: Added missing closing Grid item tag */}\n          ))}\n        </Grid>  {/* FIXED: Added missing closing Grid container tag */}\n      ) : (\n        <Stack spacing={3}>\n          {filteredTemplates.map((template) => (\n            <Card\n              key={template.id}\n              elevation={0}\n              sx={{\n                borderRadius: 4,\n                border: '1px solid',\n                borderColor: 'divider',\n                transition: 'all 0.3s ease',\n                '&:hover': {\n                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',\n                  borderColor: '#4facfe'\n                }\n              }}\n            >\n              <CardContent sx={{ p: 3 }}>\n                <Stack direction=\"row\" spacing={3} alignItems=\"center\">\n                  <CardMedia\n                    component=\"div\"\n                    sx={{ \n                      width: 120, \n                      height: 90, \n                      borderRadius: 2,\n                      overflow: 'hidden'\n                    }}\n                  >\n                    <ImageWithFallback\n                      src={template.image}\n                      alt={template.title}\n                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}\n                    />\n                  </CardMedia>\n                  \n                  <Box sx={{ flexGrow: 1 }}>\n                    <Stack direction=\"row\" spacing={1} alignItems=\"center\" sx={{ mb: 1 }}>\n                      <Typography variant=\"h6\" sx={{ fontWeight: 700 }}>\n                        {template.title}\n                      </Typography>\n                      {getStatusChip(template)}\n                    </Stack>\n                    \n                    <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mb: 2 }}>\n                      {template.description}\n                    </Typography>\n                    \n                    <Stack direction=\"row\" spacing={3} alignItems=\"center\">\n                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>\n                        <Rating value={template.rating} precision={0.1} readOnly size=\"small\" />\n                        <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                          {template.rating}\n                        </Typography>\n                        <Typography variant=\"caption\" color=\"text.secondary\">\n                          ({template.reviews} reviews)\n                        </Typography>\n                      </Box>\n                      \n                      <Typography variant=\"caption\" color=\"text.secondary\">\n                        • {template.downloads.toLocaleString()} downloads\n                      </Typography>\n                      \n                      <Typography variant=\"caption\" color=\"text.secondary\">\n                        • {template.fileSize}\n                      </Typography>\n                    </Stack>\n                  </Box>\n                  \n                  <Stack direction=\"row\" spacing={2} alignItems=\"center\">\n                    <Typography\n                      variant=\"h5\"\n                      sx={{\n                        fontWeight: 800,\n                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                        backgroundClip: 'text',\n                        WebkitBackgroundClip: 'text',\n                        WebkitTextFillColor: 'transparent'\n                      }}\n                    >\n                      ${template.price}\n                    </Typography>\n                    \n                    <Stack direction=\"row\" spacing={1}>\n                      <IconButton\n                        onClick={() => toggleWishlist(template.id)}\n                        sx={{\n                          color: wishlist.includes(template.id) ? '#f44336' : '#666'\n                        }}\n                      >\n                        <Heart size={18} fill={wishlist.includes(template.id) ? '#f44336' : 'none'} />\n                      </IconButton>\n                      \n                      <Button\n                        variant=\"contained\"\n                        onClick={() => handleViewDetails(template)}\n                        startIcon={<Eye size={16} />}\n                        sx={{\n                          borderRadius: 2,\n                          fontWeight: 600,\n                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                          boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)'\n                        }}\n                      >\n                        Preview\n                      </Button>\n                    </Stack>\n                  </Stack>\n                </Stack>\n              </CardContent>\n            </Card>\n          ))}\n        </Stack>\n      )}\n\n      {/* Enhanced Detail Dialog */}\n      <Dialog\n        open={dialogOpen}\n        onClose={() => setDialogOpen(false)}\n        maxWidth=\"lg\"\n        fullWidth\n        PaperProps={{\n          sx: {\n            borderRadius: 4,\n            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'\n          }\n        }}\n      >\n        {selectedDoc && (\n          <>\n            <DialogTitle sx={{ p: 4, pb: 2 }}>\n              <Stack direction=\"row\" spacing={2} alignItems=\"center\" justifyContent=\"space-between\">\n                <Box>\n                  <Typography variant=\"h4\" sx={{ fontWeight: 700 }}>\n                    {selectedDoc.title}\n                  </Typography>\n                  <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mt: 0.5 }}>\n                    by {selectedDoc.author} • {selectedDoc.createdAt}\n                  </Typography>\n                </Box>\n                <Stack direction=\"row\" spacing={1}>\n                  <IconButton\n                    onClick={() => toggleWishlist(selectedDoc.id)}\n                    sx={{\n                      color: wishlist.includes(selectedDoc.id) ? '#f44336' : '#666'\n                    }}\n                  >\n                    <Heart size={20} fill={wishlist.includes(selectedDoc.id) ? '#f44336' : 'none'} />\n                  </IconButton>\n                  <IconButton>\n                    <Share2 size={20} />\n                  </IconButton>\n                </Stack>\n              </Stack>\n            </DialogTitle>\n            <DialogContent sx={{ p: 4 }}>\n              <Grid container spacing={4}>\n                <Grid item xs={12} md={7}>\n                  <Box sx={{ mb: 3 }}>\n                    <ImageWithFallback\n                      src={selectedDoc.image}\n                      alt={selectedDoc.title}\n                      style={{ width: '100%', height: 300, objectFit: 'cover', borderRadius: 16 }}\n                    />\n                  </Box>\n                  \n                  <Typography variant=\"body1\" paragraph sx={{ fontSize: '1.05rem', lineHeight: 1.7 }}>\n                    {selectedDoc.description}\n                  </Typography>\n                  \n                  <Stack direction=\"row\" spacing={2} sx={{ mb: 3 }}>\n                    <Chip label={selectedDoc.category} sx={{ fontWeight: 600 }} />\n                    <Chip label={`By ${selectedDoc.author}`} variant=\"outlined\" sx={{ fontWeight: 600 }} />\n                  </Stack>\n                  \n                  <Stack direction=\"row\" spacing={3} sx={{ mb: 3 }}>\n                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                      <Rating value={selectedDoc.rating} precision={0.1} readOnly />\n                      <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                        {selectedDoc.rating} out of 5\n                      </Typography>\n                    </Box>\n                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                      <Download size={18} />\n                      <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                        {selectedDoc.sales.toLocaleString()} sales\n                      </Typography>\n                    </Box>\n                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>\n                      <Calendar size={18} />\n                      <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                        {selectedDoc.createdAt}\n                      </Typography>\n                    </Box>\n                  </Stack>\n                </Grid>\n                \n                <Grid item xs={12} md={5}>\n                  <Card elevation={0} sx={{ borderRadius: 3, background: '#f8fafc' }}>\n                    <CardContent sx={{ p: 3 }}>\n                      <Typography variant=\"h6\" sx={{ fontWeight: 700, mb: 3 }}>\n                        Template Details\n                      </Typography>\n                      \n                      <Stack spacing={3}>\n                        <Box>\n                          <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mb: 1 }}>\n                            File Information\n                          </Typography>\n                          <Stack spacing={1}>\n                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>\n                              <Typography variant=\"body2\">File Size:</Typography>\n                              <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>{selectedDoc.fileSize}</Typography>\n                            </Box>\n                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>\n                              <Typography variant=\"body2\">Formats:</Typography>\n                              <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>\n                                {selectedDoc.format.join(', ')}\n                              </Typography>\n                            </Box>\n                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>\n                              <Typography variant=\"body2\">Reviews:</Typography>\n                              <Typography variant=\"body2\" sx={{ fontWeight: 600 }}>{selectedDoc.reviews}</Typography>\n                            </Box>\n                          </Stack>\n                        </Box>\n                        \n                        <Box>\n                          <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mb: 1 }}>\n                            Tags\n                          </Typography>\n                          <Stack direction=\"row\" spacing={1} flexWrap=\"wrap\" useFlexGap>\n                            {selectedDoc.tags.map((tag) => (\n                              <Chip\n                                key={tag}\n                                label={tag}\n                                size=\"small\"\n                                sx={{\n                                  background: alpha('#4facfe', 0.1),\n                                  color: '#4facfe'\n                                }}\n                              />\n                            ))}\n                          </Stack>\n                        </Box>\n                        \n                        <Box>\n                          <Typography variant=\"body2\" color=\"text.secondary\" sx={{ mb: 1 }}>\n                            Price\n                          </Typography>\n                          <Typography\n                            variant=\"h4\"\n                            sx={{\n                              fontWeight: 800,\n                              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                              backgroundClip: 'text',\n                              WebkitBackgroundClip: 'text',\n                              WebkitTextFillColor: 'transparent'\n                            }}\n                          >\n                            ${selectedDoc.price}\n                          </Typography>\n                        </Box>\n                      </Stack>\n                    </CardContent>\n                  </Card>\n                </Grid>\n              </Grid>\n            </DialogContent>\n            <DialogActions sx={{ p: 4, pt: 0 }}>\n              <Button \n                onClick={() => setDialogOpen(false)} \n                size=\"large\"\n                sx={{ borderRadius: 2 }}\n              >\n                Close\n              </Button>\n              <Button\n                variant=\"contained\"\n                onClick={handlePurchase}\n                startIcon={<ShoppingCart size={18} />}\n                size=\"large\"\n                sx={{\n                  borderRadius: 2,\n                  px: 4,\n                  fontWeight: 600,\n                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',\n                  boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)'\n                }}\n              >\n                Purchase for ${selectedDoc.price}\n              </Button>\n            </DialogActions>\n          </>\n        )}\n      </Dialog>\n    </Box>\n  );\n}
+      sales: 4134,
+      featured: false,
+      tags: ['Finance', 'Excel', 'Dashboard'],
+      createdAt: '2024-01-08',
+      fileSize: '1.2 MB',
+      format: ['XLSX', 'Google Sheets'],
+      preview: true,
+      reviews: 203
+    },
+    {
+      id: 4,
+      title: 'Startup Pitch Deck',
+      description: 'Investor-ready pitch deck template with comprehensive slides for startup presentations',
+      price: 34.99,
+      rating: 4.9,
+      downloads: 2678,
+      category: 'Business',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'James Wilson',
+      sales: 2678,
+      featured: true,
+      tags: ['Startup', 'Pitch', 'Investment'],
+      createdAt: '2024-01-12',
+      fileSize: '8.5 MB',
+      format: ['PPTX', 'PDF'],
+      preview: true,
+      reviews: 156
+    },
+    {
+      id: 5,
+      title: 'Meeting Minutes Template',
+      description: 'Organized meeting minutes template with action items, follow-up sections, and decision tracking',
+      price: 12.99,
+      rating: 4.5,
+      downloads: 2543,
+      category: 'Productivity',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Lisa Anderson',
+      sales: 2543,
+      featured: false,
+      tags: ['Meeting', 'Productivity', 'Organization'],
+      createdAt: '2024-01-05',
+      fileSize: '856 KB',
+      format: ['DOCX', 'PDF'],
+      preview: true,
+      reviews: 98
+    },
+    {
+      id: 6,
+      title: 'Marketing Campaign Planner',
+      description: 'Comprehensive marketing campaign planning template with budget tracking and ROI analysis',
+      price: 22.99,
+      rating: 4.6,
+      downloads: 1987,
+      category: 'Marketing',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Robert Taylor',
+      sales: 1987,
+      featured: false,
+      tags: ['Marketing', 'Campaign', 'ROI'],
+      createdAt: '2024-01-03',
+      fileSize: '3.2 MB',
+      format: ['XLSX', 'PDF'],
+      preview: true,
+      reviews: 76
+    }
+  ];
+
+  const filteredTemplates = templates.filter(
+    (template) =>
+      (selectedCategory === 'All' || template.category === selectedCategory) &&
+      (template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       template.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+  );
+
+  const handleViewDetails = (template: DocumentTemplate) => {
+    setSelectedDoc(template);
+    setDialogOpen(true);
+  };
+
+  const handlePurchase = () => {
+    if (selectedDoc) {
+      alert(`Purchasing: ${selectedDoc.title} for $${selectedDoc.price}`);
+      setDialogOpen(false);
+    }
+  };
+
+  const toggleWishlist = (templateId: number) => {
+    setWishlist(prev => 
+      prev.includes(templateId) 
+        ? prev.filter(id => id !== templateId)
+        : [...prev, templateId]
+    );
+  };
+
+  const toggleCart = (templateId: number) => {
+    setCart(prev => 
+      prev.includes(templateId) 
+        ? prev.filter(id => id !== templateId)
+        : [...prev, templateId]
+    );
+  };
+
+  const handleSortMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleSortMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const getStatusChip = (template: DocumentTemplate) => {
+    if (template.featured) {
+      return (
+        <Chip
+          icon={<Award size={14} />}
+          label="Featured"
+          size="small"
+          sx={{
+            background: 'linear-gradient(135deg, #ffd89b 0%, #19547b 100%)',
+            color: 'white',
+            fontWeight: 600
+          }}
+        />
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Box>
+      {/* Enhanced Header */}
+      <Box sx={{ mb: 6 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 2,
+            fontSize: '2.5rem'
+          }}
+        >
+          Enterprise Template Marketplace
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.2rem', maxWidth: 600 }}>
+          Discover premium templates crafted by industry professionals and certified designers
+        </Typography>
+      </Box>
+
+      {/* Enhanced Marketplace Stats */}
+      <Grid container spacing={3} sx={{ mb: 6 }}>
+        {[
+          { icon: <ShoppingCart size={24} />, label: 'Total Products', value: '2,450+', color: '#4facfe', change: '+245 this month' },
+          { icon: <Users size={24} />, label: 'Active Creators', value: '850+', color: '#00f2fe', change: '+89 this month' },
+          { icon: <TrendingUp size={24} />, label: 'Monthly Sales', value: '$125K', color: '#43e97b', change: '+23% growth' },
+          { icon: <Star size={24} />, label: 'Avg. Rating', value: '4.8', color: '#f093fb', change: 'from 15k reviews' }
+        ].map((stat, index) => (
+          <Grid item xs={12} md={3} key={index}>
+            <Card
+              elevation={0}
+              sx={{
+                background: `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.8)} 100%)`,
+                color: 'white',
+                borderRadius: 4,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                }
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                  >
+                    {stat.icon}
+                  </Box>
+                  <Chip
+                    label={stat.change}
+                    size="small"
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      fontWeight: 600,
+                      fontSize: '0.7rem'
+                    }}
+                  />
+                </Box>
+                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
+                  {stat.label}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Enhanced Search and Filters */}
+      <Card
+        elevation={0}
+        sx={{
+          mb: 4,
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: 'divider',
+          background: 'white'
+        }}
+      >
+        <CardContent sx={{ p: 4 }}>
+          {/* Search and Controls */}
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              placeholder="Search templates by name, category, or tags..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={20} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowFilters(!showFilters)}>
+                      <Filter size={18} />
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                  background: '#f8fafc'
+                }
+              }}
+            />
+            
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={(e, value) => value && setViewMode(value)}
+              sx={{
+                '& .MuiToggleButton-root': {
+                  borderRadius: 2,
+                  border: 'none',
+                  background: '#f8fafc',
+                  '&.Mui-selected': {
+                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    color: 'white'
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="grid">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 0.5 }}>
+                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />
+                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />
+                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />
+                    <Box sx={{ width: 3, height: 3, background: 'currentColor', borderRadius: 0.5 }} />
+                  </Box>
+                  Grid
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="list">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />
+                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />
+                    <Box sx={{ width: 12, height: 1, background: 'currentColor' }} />
+                  </Box>
+                  List
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+
+            <Button
+              variant="outlined"
+              onClick={handleSortMenuOpen}
+              startIcon={<SortAsc size={18} />}
+              sx={{ borderRadius: 2, fontWeight: 600 }}
+            >
+              Sort
+            </Button>
+          </Stack>
+
+          {/* Category Pills */}
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: showFilters ? 3 : 0 }}>
+            {categories.map((category) => (
+              <Chip
+                key={category.id}
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {category.icon}
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {category.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ opacity: 0.7 }}>
+                        {category.count}
+                      </Typography>
+                    </Box>
+                  </Box>
+                }
+                onClick={() => setSelectedCategory(category.id)}
+                sx={{
+                  fontWeight: 600,
+                  background: selectedCategory === category.id
+                    ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                    : alpha('#4facfe', 0.1),
+                  color: selectedCategory === category.id ? 'white' : '#4facfe',
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 1,
+                  '&:hover': {
+                    background: selectedCategory === category.id
+                      ? 'linear-gradient(135deg, #3e9bee 0%, #00d9ee 100%)'
+                      : alpha('#4facfe', 0.2)
+                  }
+                }}
+              />
+            ))}
+          </Stack>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <Box sx={{ 
+              borderTop: '1px solid',
+              borderColor: 'divider',
+              pt: 3,
+              mt: 3
+            }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth>
+                    <InputLabel>Price Range</InputLabel>
+                    <Select
+                      value={`${priceRange[0]}-${priceRange[1]}`}
+                      label="Price Range"
+                      onChange={(e) => {
+                        const [min, max] = e.target.value.split('-').map(Number);
+                        setPriceRange([min, max]);
+                      }}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value="0-50">$0 - $50</MenuItem>
+                      <MenuItem value="0-25">$0 - $25</MenuItem>
+                      <MenuItem value="25-50">$25 - $50</MenuItem>
+                      <MenuItem value="50-100">$50+</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth>
+                    <InputLabel>Minimum Rating</InputLabel>
+                    <Select
+                      defaultValue="4"
+                      label="Minimum Rating"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value="0">Any Rating</MenuItem>
+                      <MenuItem value="3">3+ Stars</MenuItem>
+                      <MenuItem value="4">4+ Stars</MenuItem>
+                      <MenuItem value="4.5">4.5+ Stars</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth>
+                    <InputLabel>File Format</InputLabel>
+                    <Select
+                      defaultValue=""
+                      label="File Format"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value="">All Formats</MenuItem>
+                      <MenuItem value="pdf">PDF</MenuItem>
+                      <MenuItem value="docx">DOCX</MenuItem>
+                      <MenuItem value="xlsx">XLSX</MenuItem>
+                      <MenuItem value="pptx">PPTX</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Sort Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleSortMenuClose}
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
+          }
+        }}
+      >
+        {sortOptions.map((option) => (
+          <MenuItem
+            key={option.value}
+            onClick={() => {
+              setSortBy(option.value);
+              handleSortMenuClose();
+            }}
+            sx={{ 
+              borderRadius: 1,
+              mb: 0.5,
+              background: sortBy === option.value ? alpha('#4facfe', 0.1) : 'transparent'
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              {option.icon}
+            </ListItemIcon>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {option.label}
+            </Typography>
+            {sortBy === option.value && (
+              <CheckCircle size={16} color="#4facfe" style={{ marginLeft: 'auto' }} />
+            )}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Enhanced Templates Grid/List */}
+      {viewMode === 'grid' ? (
+        <Grid container spacing={4}>
+          {filteredTemplates.map((template) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={template.id}>
+              <Card
+                elevation={0}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 4,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: '0 20px 40px rgba(79, 172, 254, 0.15)',
+                    borderColor: '#4facfe'
+                  }
+                }}
+              >
+                <CardMedia
+                  component="div"
+                  sx={{ height: 220, position: 'relative', overflow: 'hidden' }}
+                >
+                  <ImageWithFallback
+                    src={template.image}
+                    alt={template.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      p: 2
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Chip
+                        label={template.category}
+                        size="small"
+                        sx={{
+                          background: 'rgba(255,255,255,0.9)',
+                          backdropFilter: 'blur(10px)',
+                          fontWeight: 600
+                        }}
+                      />
+                      <Stack direction="row" spacing={0.5}>
+                        {getStatusChip(template)}
+                        <IconButton
+                          size="small"
+                          onClick={() => toggleWishlist(template.id)}
+                          sx={{
+                            background: 'rgba(255,255,255,0.9)',
+                            '&:hover': { background: 'white' },
+                            color: wishlist.includes(template.id) ? '#f44336' : '#666'
+                          }}
+                        >
+                          <Heart size={14} fill={wishlist.includes(template.id) ? '#f44336' : 'none'} />
+                        </IconButton>
+                      </Stack>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar sx={{ width: 32, height: 32, border: '2px solid white' }}>
+                        {template.author[0]}
+                      </Avatar>
+                      <Typography variant="body2" sx={{ color: 'white', fontWeight: 600 }}>
+                        {template.author}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardMedia>
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
+                    {template.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
+                    {template.description}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <Rating value={template.rating} precision={0.1} readOnly size="small" />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {template.rating}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      ({template.reviews} reviews)
+                    </Typography>
+                  </Box>
+
+                  <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                    {template.tags.slice(0, 2).map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        size="small"
+                        sx={{
+                          fontSize: '0.7rem',
+                          background: alpha('#4facfe', 0.1),
+                          color: '#4facfe'
+                        }}
+                      />
+                    ))}
+                  </Stack>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}
+                    >
+                      ${template.price}
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => toggleCart(template.id)}
+                        sx={{
+                          background: cart.includes(template.id) ? '#4facfe' : alpha('#4facfe', 0.1),
+                          color: cart.includes(template.id) ? 'white' : '#4facfe',
+                          '&:hover': {
+                            background: cart.includes(template.id) ? '#3e9bee' : alpha('#4facfe', 0.2)
+                          }
+                        }}
+                      >
+                        <ShoppingCart size={16} />
+                      </IconButton>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleViewDetails(template)}
+                        startIcon={<Eye size={16} />}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #3e9bee 0%, #00d9ee 100%)'
+                          }
+                        }}
+                      >
+                        Preview
+                      </Button>
+                    </Stack>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Stack spacing={3}>
+          {filteredTemplates.map((template) => (
+            <Card
+              key={template.id}
+              elevation={0}
+              sx={{
+                borderRadius: 4,
+                border: '1px solid',
+                borderColor: 'divider',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                  borderColor: '#4facfe'
+                }
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Stack direction="row" spacing={3} alignItems="center">
+                  <CardMedia
+                    component="div"
+                    sx={{ 
+                      width: 120, 
+                      height: 90, 
+                      borderRadius: 2,
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <ImageWithFallback
+                      src={template.image}
+                      alt={template.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </CardMedia>
+                  
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        {template.title}
+                      </Typography>
+                      {getStatusChip(template)}
+                    </Stack>
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {template.description}
+                    </Typography>
+                    
+                    <Stack direction="row" spacing={3} alignItems="center">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Rating value={template.rating} precision={0.1} readOnly size="small" />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {template.rating}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          ({template.reviews} reviews)
+                        </Typography>
+                      </Box>
+                      
+                      <Typography variant="caption" color="text.secondary">
+                        • {template.downloads.toLocaleString()} downloads
+                      </Typography>
+                      
+                      <Typography variant="caption" color="text.secondary">
+                        • {template.fileSize}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                  
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                        backgroundClip: 'text',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}
+                    >
+                      ${template.price}
+                    </Typography>
+                    
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        onClick={() => toggleWishlist(template.id)}
+                        sx={{
+                          color: wishlist.includes(template.id) ? '#f44336' : '#666'
+                        }}
+                      >
+                        <Heart size={18} fill={wishlist.includes(template.id) ? '#f44336' : 'none'} />
+                      </IconButton>
+                      
+                      <Button
+                        variant="contained"
+                        onClick={() => handleViewDetails(template)}
+                        startIcon={<Eye size={16} />}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)'
+                        }}
+                      >
+                        Preview
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
+      )}
+
+      {/* Enhanced Detail Dialog */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          }
+        }}
+      >
+        {selectedDoc && (
+          <>
+            <DialogTitle sx={{ p: 4, pb: 2 }}>
+              <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    {selectedDoc.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    by {selectedDoc.author} • {selectedDoc.createdAt}
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={1}>
+                  <IconButton
+                    onClick={() => toggleWishlist(selectedDoc.id)}
+                    sx={{
+                      color: wishlist.includes(selectedDoc.id) ? '#f44336' : '#666'
+                    }}
+                  >
+                    <Heart size={20} fill={wishlist.includes(selectedDoc.id) ? '#f44336' : 'none'} />
+                  </IconButton>
+                  <IconButton>
+                    <Share2 size={20} />
+                  </IconButton>
+                </Stack>
+              </Stack>
+            </DialogTitle>
+            <DialogContent sx={{ p: 4 }}>
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={7}>
+                  <Box sx={{ mb: 3 }}>
+                    <ImageWithFallback
+                      src={selectedDoc.image}
+                      alt={selectedDoc.title}
+                      style={{ width: '100%', height: 300, objectFit: 'cover', borderRadius: 16 }}
+                    />
+                  </Box>
+                  
+                  <Typography variant="body1" paragraph sx={{ fontSize: '1.05rem', lineHeight: 1.7 }}>
+                    {selectedDoc.description}
+                  </Typography>
+                  
+                  <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                    <Chip label={selectedDoc.category} sx={{ fontWeight: 600 }} />
+                    <Chip label={`By ${selectedDoc.author}`} variant="outlined" sx={{ fontWeight: 600 }} />
+                  </Stack>
+                  
+                  <Stack direction="row" spacing={3} sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Rating value={selectedDoc.rating} precision={0.1} readOnly />
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {selectedDoc.rating} out of 5
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Download size={18} />
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {selectedDoc.sales.toLocaleString()} sales
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Calendar size={18} />
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {selectedDoc.createdAt}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
+                
+                <Grid item xs={12} md={5}>
+                  <Card elevation={0} sx={{ borderRadius: 3, background: '#f8fafc' }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+                        Template Details
+                      </Typography>
+                      
+                      <Stack spacing={3}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            File Information
+                          </Typography>
+                          <Stack spacing={1}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Typography variant="body2">File Size:</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedDoc.fileSize}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Typography variant="body2">Formats:</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                {selectedDoc.format.join(', ')}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Typography variant="body2">Reviews:</Typography>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{selectedDoc.reviews}</Typography>
+                            </Box>
+                          </Stack>
+                        </Box>
+                        
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            Tags
+                          </Typography>
+                          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                            {selectedDoc.tags.map((tag) => (
+                              <Chip
+                                key={tag}
+                                label={tag}
+                                size="small"
+                                sx={{
+                                  background: alpha('#4facfe', 0.1),
+                                  color: '#4facfe'
+                                }}
+                              />
+                            ))}
+                          </Stack>
+                        </Box>
+                        
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            Price
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 800,
+                              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                              backgroundClip: 'text',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent'
+                            }}
+                          >
+                            ${selectedDoc.price}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions sx={{ p: 4, pt: 0 }}>
+              <Button 
+                onClick={() => setDialogOpen(false)} 
+                size="large"
+                sx={{ borderRadius: 2 }}
+              >
+                Close
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handlePurchase}
+                startIcon={<ShoppingCart size={18} />}
+                size="large"
+                sx={{
+                  borderRadius: 2,
+                  px: 4,
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  boxShadow: '0 4px 12px rgba(79, 172, 254, 0.4)'
+                }}
+              >
+                Purchase for ${selectedDoc.price}
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+    </Box>
+  );
+}
