@@ -1,565 +1,823 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Avatar as MuiAvatar, 
-  AvatarGroup as MuiAvatarGroup,
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import {
   Box,
-  Typography,
+  Avatar as MuiAvatar,
   Badge,
-  Stack,
-  alpha,
+  Chip,
+  Typography,
   IconButton,
   Tooltip,
-  Chip
+  Zoom,
+  Fade,
+  alpha,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
-import { 
-  User, 
-  CheckCircle, 
-  Clock, 
+import {
+  User,
+  Circle,
+  CheckCircle,
   XCircle,
-  Shield,
+  Clock,
   Star,
+  Shield,
   Award,
   Camera,
   Edit3,
-  Settings
+  Upload,
+  Download,
+  Trash2,
+  Settings,
+  Eye,
+  EyeOff,
+  Plus,
+  Minus,
+  RotateCw,
+  Maximize2,
+  Share2,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Activity,
+  Users,
+  FileText,
+  Link,
+  Ban
 } from 'lucide-react';
 
+// Types
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+type AvatarVariant = 'circular' | 'rounded' | 'square';
+type AvatarStatus = 'online' | 'offline' | 'away' | 'busy' | 'dnd';
+type AvatarPresence = 'active' | 'inactive' | 'pending';
+type AvatarBadgeType = 'status' | 'count' | 'icon' | 'dot' | 'none';
+type AvatarGroupVariant = 'circular' | 'rounded' | 'square';
+
+interface AvatarUser {
+  id: string;
+  name: string;
+  email?: string;
+  avatar?: string;
+  status?: AvatarStatus;
+  presence?: AvatarPresence;
+  role?: string;
+  department?: string;
+  initials?: string;
+  verified?: boolean;
+  premium?: boolean;
+  lastActive?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  website?: string;
+  social?: {
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+  };
+  skills?: string[];
+  languages?: string[];
+  joinDate?: string;
+  achievements?: string[];
+}
+
+interface AvatarBadge {
+  type: AvatarBadgeType;
+  content?: string | number | React.ReactNode;
+  color?: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'default';
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  size?: 'small' | 'medium' | 'large';
+  invisible?: boolean;
+  overlap?: 'rectangular' | 'circular';
+}
+
+interface AvatarAction {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  color?: 'primary' | 'secondary' | 'default';
+  disabled?: boolean;
+  loading?: boolean;
+}
+
 interface AvatarProps {
+  user?: AvatarUser;
   src?: string;
   alt?: string;
-  name?: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  variant?: 'circular' | 'rounded' | 'square';
-  status?: 'online' | 'offline' | 'away' | 'busy' | 'new';
+  fallback?: React.ReactNode;
+  size?: AvatarSize;
+  variant?: AvatarVariant;
+  status?: AvatarStatus;
+  presence?: AvatarPresence;
+  badge?: AvatarBadge;
   showStatus?: boolean;
-  showBadge?: boolean;
-  badgeContent?: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
+  showPresence?: boolean;
   editable?: boolean;
-  onEdit?: () => void;
+  uploadable?: boolean;
+  downloadable?: boolean;
+  deletable?: boolean;
+  showDetails?: boolean;
+  showActions?: boolean;
+  actions?: AvatarAction[];
+  onImageChange?: (file: File) => void;
+  onImageUpload?: (url: string) => void;
+  onImageDownload?: () => void;
+  onImageDelete?: () => void;
+  onStatusClick?: () => void;
+  onAvatarClick?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  imageClassName?: string;
+  imageStyle?: React.CSSProperties;
+  tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right';
+  tooltipArrow?: boolean;
+  tooltipEnterDelay?: number;
+  tooltipLeaveDelay?: number;
+  animation?: 'fade' | 'zoom' | 'slide' | 'none';
+  transitionDuration?: number;
+  loading?: boolean;
+  skeleton?: boolean;
+  fallbackText?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  border?: boolean;
   borderColor?: string;
   borderWidth?: number;
-  fallbackIcon?: React.ReactNode;
-  fallbackText?: string;
-  background?: string;
-  textColor?: string;
-  fontSize?: string | number;
-  sx?: any;
+  elevation?: number;
+  hoverEffect?: boolean;
+  clickable?: boolean;
+  'data-testid'?: string;
+  'aria-label'?: string;
+  role?: string;
+  tabIndex?: number;
 }
 
 interface AvatarGroupProps {
-  avatars: Array<{
-    src?: string;
-    name?: string;
-    alt?: string;
-    status?: 'online' | 'offline' | 'away' | 'busy';
-  }>;
+  users: AvatarUser[];
   max?: number;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'circular' | 'rounded' | 'square';
-  spacing?: 'small' | 'medium' | 'large';
-  showStatus?: boolean;
+  size?: AvatarSize;
+  variant?: AvatarGroupVariant;
+  spacing?: 'small' | 'medium' | 'large' | number;
+  totalCount?: number;
+  showSurplus?: boolean;
+  surplusColor?: 'primary' | 'secondary' | 'default';
+  surplusBackground?: string;
+  onSurplusClick?: () => void;
   className?: string;
-  onAvatarClick?: (index: number) => void;
-  total?: number;
+  style?: React.CSSProperties;
+  animation?: 'fade' | 'slide' | 'none';
+  transitionDuration?: number;
+  showTooltip?: boolean;
+  tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right';
+  clickable?: boolean;
+  onAvatarClick?: (user: AvatarUser) => void;
 }
 
-interface AvatarCardProps {
-  avatar: AvatarProps;
-  title?: string;
-  subtitle?: string;
-  description?: string;
-  actions?: React.ReactNode;
-  status?: string;
-  role?: string;
-  department?: string;
-  verified?: boolean;
-  rating?: number;
-  showRole?: boolean;
-  showDepartment?: boolean;
-  showVerified?: boolean;
-  showRating?: boolean;
-  className?: string;
-}
-
-interface AvatarStackProps {
-  avatars: AvatarProps[];
+interface AvatarStackProps extends Omit<AvatarGroupProps, 'spacing'> {
   direction?: 'horizontal' | 'vertical';
-  spacing?: number;
-  showNames?: boolean;
-  showStatuses?: boolean;
-  className?: string;
+  overlap?: number;
+  spread?: 'compact' | 'normal' | 'wide';
+  showCount?: boolean;
+  countPosition?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const getStatusColor = (status: string | undefined) => {
-  switch (status) {
-    case 'online': return '#44b700';
-    case 'offline': return '#9e9e9e';
-    case 'away': return '#ffa726';
-    case 'busy': return '#f44336';
-    case 'new': return '#2196f3';
-    default: return 'transparent';
+// Size mapping
+const sizeMap = {
+  xs: { size: 24, fontSize: '0.625rem', badgeSize: 8 },
+  sm: { size: 32, fontSize: '0.75rem', badgeSize: 12 },
+  md: { size: 40, fontSize: '0.875rem', badgeSize: 14 },
+  lg: { size: 56, fontSize: '1rem', badgeSize: 16 },
+  xl: { size: 64, fontSize: '1.125rem', badgeSize: 18 },
+  '2xl': { size: 80, fontSize: '1.25rem', badgeSize: 20 },
+  '3xl': { size: 96, fontSize: '1.5rem', badgeSize: 24 }
+};
+
+// Status color mapping
+const statusColors = {
+  online: 'success',
+  offline: 'default',
+  away: 'warning',
+  busy: 'error',
+  dnd: 'error'
+};
+
+// Status icon mapping
+const statusIcons = {
+  online: <Circle size={12} fill="currentColor" />,
+  offline: <Circle size={12} />,
+  away: <Clock size={12} />,
+  busy: <XCircle size={12} />,
+  dnd: <Ban size={12} />
+};
+
+// Animation variants
+const animations = {
+  fade: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 }
+  },
+  zoom: {
+    initial: { opacity: 0, scale: 0.8 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.8 }
+  },
+  slide: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
   }
 };
 
-const getStatusIcon = (status: string | undefined) => {
-  switch (status) {
-    case 'online': return <CheckCircle size={12} color="#44b700" />;
-    case 'away': return <Clock size={12} color="#ffa726" />;
-    case 'busy': return <XCircle size={12} color="#f44336" />;
-    case 'new': return <Star size={12} color="#2196f3" />;
-    default: return null;
-  }
-};
-
-const getSize = (size: string | undefined) => {
-  switch (size) {
-    case 'xs': return 24;
-    case 'sm': return 32;
-    case 'md': return 40;
-    case 'lg': return 48;
-    case 'xl': return 56;
-    case '2xl': return 64;
-    default: return 40;
-  }
-};
-
-const getInitials = (name: string | undefined) => {
-  if (!name) return 'U';
+// Helper functions
+const getInitials = (name: string): string => {
   return name
     .split(' ')
-    .map(part => part[0])
+n    .map(word => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
 };
 
-export const Avatar: React.FC<AvatarProps> = ({
+const getStatusColor = (status: AvatarStatus): string => {
+  return statusColors[status] || 'default';
+};
+
+const getContrastColor = (backgroundColor: string): string => {
+  // Simple contrast calculation
+  const rgb = backgroundColor.match(/\d+/g);
+  if (!rgb) return '#000000';
+  
+  const [r, g, b] = rgb.map(Number);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000000' : '#ffffff';
+};
+
+const generateAvatarColor = (name: string): string => {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+  ];
+  
+  const hash = name.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+// Main Avatar Component
+export function Avatar({
+  user,
   src,
   alt,
-  name,
+  fallback,
   size = 'md',
   variant = 'circular',
   status,
-  showStatus = false,
-  showBadge = false,
-  badgeContent,
-  className,
-  onClick,
+  presence,
+  badge,
+  showStatus = true,
+  showPresence = true,
   editable = false,
-  onEdit,
+  uploadable = false,
+  downloadable = false,
+  deletable = false,
+  showDetails = false,
+  showActions = false,
+  actions = [],
+  onImageChange,
+  onImageUpload,
+  onImageDownload,
+  onImageDelete,
+  onStatusClick,
+  onAvatarClick,
+  className,
+  style,
+  imageClassName,
+  imageStyle,
+  tooltipPlacement = 'top',
+  tooltipArrow = true,
+  tooltipEnterDelay = 500,
+  tooltipLeaveDelay = 0,
+  animation = 'fade',
+  transitionDuration = 300,
+  loading = false,
+  skeleton = false,
+  fallbackText,
+  backgroundColor,
+  textColor,
+  border = false,
   borderColor,
   borderWidth = 2,
-  fallbackIcon,
-  fallbackText,
-  background,
-  textColor,
-  fontSize,
-  sx = {}
-}) => {
+  elevation = 0,
+  hoverEffect = true,
+  clickable = false,
+  'data-testid': dataTestId,
+  'aria-label': ariaLabel,
+  role = 'img',
+  tabIndex = 0
+}: AvatarProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
-  const avatarSize = getSize(size);
-  const statusColor = getStatusColor(status);
-  const statusIcon = getStatusIcon(status);
+  // Determine avatar source
+  const avatarSrc = src || user?.avatar;
+  const avatarAlt = alt || user?.name || 'Avatar';
+  const displayName = user?.name || fallbackText || 'Unknown';
+  const initials = user?.initials || getInitials(displayName);
+  const fallbackColor = backgroundColor || generateAvatarColor(displayName);
+  const textColorFinal = textColor || getContrastColor(fallbackColor);
 
-  useEffect(() => {
-    setImageError(false);
-  }, [src]);
+  // Status and presence
+  const displayStatus = status || user?.status;
+  const displayPresence = presence || user?.presence;
+  const showStatusIndicator = showStatus && displayStatus && displayStatus !== 'offline';
+  const showPresenceIndicator = showPresence && displayPresence;
 
-  const handleImageError = () => {
-    setImageError(true);
+  // Size configuration
+  const sizeConfig = sizeMap[size];
+  const avatarSize = sizeConfig.size;
+  const fontSize = sizeConfig.fontSize;
+  const badgeSize = sizeConfig.badgeSize;
+
+  // Border configuration
+  const hasBorder = border || borderColor;
+  const borderStyle = hasBorder ? {
+    border: `${borderWidth}px solid ${borderColor || theme.palette.background.paper}`,
+    boxShadow: elevation > 0 ? theme.shadows[elevation] : 'none'
+  } : {};
+
+  // Status indicator
+  const StatusIndicator = () => {
+    if (!showStatusIndicator) return null;
+
+    const statusColor = getStatusColor(displayStatus);
+    const statusIcon = statusIcons[displayStatus];
+
+    return (
+      <Badge
+        overlap="circular"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        badgeContent={
+          <Box
+            sx={{
+              width: badgeSize,
+              height: badgeSize,
+              borderRadius: '50%',
+              backgroundColor: `${statusColor}.main`,
+              border: `2px solid ${theme.palette.background.paper}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: badgeSize * 0.6,
+              color: `${statusColor}.contrastText`
+            }}
+          >
+            {statusIcon}
+          </Box>
+        }
+      />
+    );
   };
 
-  const getBackgroundColor = () => {
-    if (background) return background;
-    const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'];
-    const nameIndex = (name || 'User').charCodeAt(0) % colors.length;
-    return colors[nameIndex];
+  // Badge component
+  const BadgeComponent = () => {
+    if (!badge || badge.invisible) return null;
+
+    const { type, content, color = 'primary', position = 'bottom-right', size: badgeSize = 'medium' } = badge;
+
+    const badgeContent = type === 'count' && typeof content === 'number' && content > 99 ? '99+' : content;
+
+    return (
+      <Badge
+        overlap={badge.overlap || 'circular'}
+        anchorOrigin={{
+          vertical: position.includes('bottom') ? 'bottom' : 'top',
+          horizontal: position.includes('right') ? 'right' : 'left'
+        }}
+        badgeContent={badgeContent}
+        color={color as any}
+        max={type === 'count' ? 99 : undefined}
+        sx={{
+          '& .MuiBadge-badge': {
+            fontSize: size === 'xs' || size === 'sm' ? '0.625rem' : '0.75rem',
+            minWidth: size === 'xs' || size === 'sm' ? '16px' : '20px',
+            height: size === 'xs' || size === 'sm' ? '16px' : '20px',
+            padding: 0
+          }
+        }}
+      />
+    );
   };
 
-  const avatarContent = () => {
-    if (src && !imageError) {
-      return null; // MUI Avatar will handle the image
-    }
+  // File upload handler
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    if (fallbackText) {
-      return (
-        <Typography 
-          sx={{ 
-            fontSize: fontSize || avatarSize * 0.4,
-            fontWeight: 600,
-            color: textColor || 'white'
-          }}
-        >
-          {fallbackText}
-        </Typography>
-      );
-    }
+    setUploadLoading(true);
+    try {
+      // Validate file
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        throw new Error('File size too large');
+      }
 
-    if (fallbackIcon) {
-      return fallbackIcon;
-    }
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Invalid file type');
+      }
 
-    if (name) {
-      return (
-        <Typography 
-          sx={{ 
-            fontSize: fontSize || avatarSize * 0.4,
-            fontWeight: 600,
-            color: textColor || 'white'
-          }}
-        >
-          {getInitials(name)}
-        </Typography>
-      );
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        onImageChange?.(file);
+        onImageUpload?.(imageUrl);
+        setImageError(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+    } finally {
+      setUploadLoading(false);
     }
+  }, [onImageChange, onImageUpload]);
 
-    return <User size={avatarSize * 0.5} color={textColor || 'white'} />;
+  // Action buttons
+  const ActionButtons = () => {
+    if (!showActions || actions.length === 0) return null;
+
+    return (
+      <Box sx={{ display: 'flex', gap: 0.5, mt: 1 }}>
+        {actions.map((action, index) => (
+          <Tooltip key={index} title={action.label} arrow={tooltipArrow}>
+            <IconButton
+              size="small"
+              onClick={action.onClick}
+              disabled={action.disabled || action.loading}
+              color={action.color || 'default'}
+              sx={{ fontSize: '1rem' }}
+            >
+              {action.loading ? (
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    border: '2px solid currentColor',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}
+                />
+              ) : (
+                action.icon
+              )}
+            </IconButton>
+          </Tooltip>
+        ))}
+      </Box>
+n    );
   };
 
-  return (
-    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+  // Avatar content
+  const AvatarContent = () => (
+    <Box sx={{ position: 'relative', display: 'inline-block' }}>
       <MuiAvatar
-        src={src}
-        alt={alt || name}
-        variant={variant}
-        onClick={onClick}
-        onError={handleImageError}
+        src={avatarSrc}
+        alt={avatarAlt}
         sx={{
           width: avatarSize,
           height: avatarSize,
-          background: getBackgroundColor(),
-          cursor: onClick ? 'pointer' : 'default',
-          border: borderColor ? `${borderWidth}px solid ${borderColor}` : 'none',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            transform: onClick || editable ? 'scale(1.05)' : 'none',
-            boxShadow: onClick || editable ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-          },
-          ...sx
+          fontSize,
+          backgroundColor: imageError || !avatarSrc ? fallbackColor : undefined,
+          color: imageError || !avatarSrc ? textColorFinal : undefined,
+          borderRadius: variant === 'circular' ? '50%' : variant === 'rounded' ? 2 : 0,
+          ...borderStyle,
+          cursor: clickable || onAvatarClick ? 'pointer' : 'default',
+          transition: `all ${transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+          ...(hoverEffect && {
+            '&:hover': {
+              transform: 'scale(1.05)',
+              boxShadow: theme.shadows[4]
+            }
+          }),
+          ...(isHovered && {
+            transform: 'scale(1.02)',
+            boxShadow: theme.shadows[2]
+          })
         }}
-        className={className}
+        className={imageClassName}
+        style={imageStyle}
+        imgProps={{
+          onError: () => setImageError(true),
+          loading: 'lazy',
+          decoding: 'async'
+        }}
+        onClick={onAvatarClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        data-testid={dataTestId}
+        aria-label={ariaLabel || displayName}
+        role={role}
+        tabIndex={tabIndex}
       >
-        {avatarContent()}
+        {imageError || !avatarSrc ? (
+          fallback || initials
+        ) : null}
       </MuiAvatar>
 
-      {showStatus && status && (
-        <Badge
-          overlap="circular"
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          badgeContent={
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                backgroundColor: statusColor,
-                border: '2px solid white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {statusIcon}
-            </Box>
-          }
-        />
-      )}
-
-      {showBadge && badgeContent && (
-        <Badge
-          overlap="circular"
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          badgeContent={badgeContent}
-        />
-      )}
-
-      {editable && (
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '50%',
-            width: 24,
-            height: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            '&:hover': {
-              transform: 'scale(1.1)',
-            }
-          }}
-          onClick={onEdit}
-        >
-          <Edit3 size={12} color="white" />
-        </Box>
-      )}
-
-      {editable && isHovered && (
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            borderRadius: variant === 'circular' ? '50%' : variant === 'rounded' ? '8px' : '0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s ease',
-          }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={onEdit}
-        >
-          <Camera size={avatarSize * 0.3} color="white" />
-        </Box>
-      )}
+      <StatusIndicator />
+      <BadgeComponent />
     </Box>
   );
-};
 
-export const AvatarGroup: React.FC<AvatarGroupProps> = ({
-  avatars,
-  max = 4,
-  size = 'md',
-  variant = 'circular',
-  spacing = 'medium',
-  showStatus = false,
-  className,
-  onAvatarClick,
-  total
-}) => {
-  const spacingMap = {
-    small: -8,
-    medium: -16,
-    large: -24
+  // Tooltip wrapper
+  const TooltipWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (!showDetails && !user) return <>{children}</>;
+
+    const tooltipContent = showDetails && user ? (
+      <AvatarDetails
+        user={user}
+        status={displayStatus}
+        presence={displayPresence}
+        onStatusClick={onStatusClick}
+        actions={actions}
+        showActions={showActions}
+      />
+    ) : (
+      <Typography variant="body2">{displayName}</Typography>
+    );
+
+    return (
+      <Tooltip
+        title={tooltipContent}
+        placement={tooltipPlacement}
+        arrow={tooltipArrow}
+        enterDelay={tooltipEnterDelay}
+        leaveDelay={tooltipLeaveDelay}
+        disableHoverListener={!showDetails && !user}
+      >
+        {children}
+      </Tooltip>
+    );
   };
 
-  const displayAvatars = avatars.slice(0, max);
-  const remainingCount = total || Math.max(0, avatars.length - max);
+  // Main component with animation
+  const AnimationWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (animation === 'none') return <>{children}</>;
+
+    const ZoomComponent = Zoom;
+    return (
+      <ZoomComponent
+        in={!skeleton}
+        timeout={transitionDuration}
+        style={{
+          transitionDelay: skeleton ? `${transitionDuration}ms` : '0ms'
+        }}
+      >
+        <Box>{children}</Box>
+      </ZoomComponent>
+    );
+  };
+
+  // Loading skeleton
+  if (skeleton || loading) {
+    return (
+      <Box
+        sx={{
+          width: avatarSize,
+          height: avatarSize,
+          borderRadius: variant === 'circular' ? '50%' : variant === 'rounded' ? 2 : 0,
+          backgroundColor: theme.palette.action.disabledBackground,
+          animation: 'pulse 2s infinite',
+          ...borderStyle
+        }}
+        className={className}
+        style={style}
+      />
+    );
+n  }
+
+  // File input for uploads
+  const FileInput = () => (
+    <input
+      type="file"
+      accept="image/*"
+      style={{ display: 'none' }}
+      id={`avatar-upload-${user?.id || 'default'}`}
+      onChange={handleFileUpload}
+      disabled={uploadLoading}
+    />
+  );
 
   return (
-    <MuiAvatarGroup
-      max={max}
-      spacing={spacingMap[spacing]}
-      className={className}
-      sx={{
-        '& .MuiAvatar-root': {
-          border: '2px solid white',
-          cursor: onAvatarClick ? 'pointer' : 'default',
-        }
-      }}
-    >
-      {displayAvatars.map((avatar, index) => (
-        <MuiAvatar
-          key={index}
-          src={avatar.src}
-          alt={avatar.alt || avatar.name}
-          variant={variant}
-          onClick={() => onAvatarClick?.(index)}
+    <AnimationWrapper>
+      <TooltipWrapper>
+        <Box
+          className={className}
+          style={style}
           sx={{
-            width: getSize(size),
-            height: getSize(size),
+            display: 'inline-flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0.5,
             position: 'relative'
           }}
         >
-          {avatar.src ? null : getInitials(avatar.name)}
-          {showStatus && avatar.status && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                backgroundColor: getStatusColor(avatar.status),
-                border: '2px solid white',
-                zIndex: 1
-              }}
-            />
-          )}
-        </MuiAvatar>
-      ))}
-      {remainingCount > 0 && (
-        <MuiAvatar
-          sx={{
-            width: getSize(size),
-            height: getSize(size),
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            fontSize: '0.875rem',
-            fontWeight: 600
-          }}
-        >
-          +{remainingCount}
-        </MuiAvatar>
-      )}
-    </MuiAvatarGroup>
-  );
-};
+          {/* Avatar with overlays */}
+          <Box sx={{ position: 'relative' }}>
+            <AvatarContent />
 
-export const AvatarCard: React.FC<AvatarCardProps> = ({
-  avatar,
-  title,
-  subtitle,
-  description,
-  actions,
-  status,
-  role,
-  department,
-  verified = false,
-  rating,
-  showRole = true,
-  showDepartment = true,
-  showVerified = true,
-  showRating = true,
-  className
-}) => {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: 3,
-        border: '1px solid',
-        borderColor: 'divider',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-          transform: 'translateY(-2px)'
-        }
-      }}
-      className={className}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" spacing={3} alignItems="flex-start">
-          <Avatar {...avatar} size="lg" />
-          
-          <Box sx={{ flexGrow: 1 }}>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {title}
-              </Typography>
-              {verified && showVerified && (
-                <Tooltip title="Verified">
-                  <CheckCircle size={16} color="#4caf50" />
-                </Tooltip>
-              )}
-              {status && (
-                <Chip
-                  label={status}
-                  size="small"
+            {/* Edit overlay */}
+            {(editable || uploadable) && (
+              <label htmlFor={`avatar-upload-${user?.id || 'default'}`}>
+                <Box
                   sx={{
-                    background: alpha(getStatusColor(status), 0.1),
-                    color: getStatusColor(status),
-                    fontWeight: 600
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                    borderRadius: '50%',
+                    p: 0.5,
+                    cursor: 'pointer',
+                    opacity: isHovered ? 1 : 0,
+                    transition: `opacity ${transitionDuration}ms ease`,
+                    border: `1px solid ${theme.palette.divider}`
                   }}
-                />
-              )}
-            </Stack>
-
-            {subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {subtitle}
-              </Typography>
-            )}
-
-            <Stack direction="row" spacing={2} sx={{ mb: description ? 2 : 0 }}>
-              {role && showRole && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Shield size={14} color="#666" />
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {role}
-                  </Typography>
+                >
+                  {uploadLoading ? (
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        border: '2px solid currentColor',
+                        borderTopColor: 'transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}
+                    />
+                  ) : (
+                    <Camera size={14} />
+                  )}
                 </Box>
-              )}
-              {department && showDepartment && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Award size={14} color="#666" />
-                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {department}
-                  </Typography>
-                </Box>
-              )}
-            </Stack>
+              </label>
+n            )}
 
-            {description && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {description}
-              </Typography>
+            {/* Download overlay */}
+            {downloadable && (
+              <IconButton
+                size="small"
+                onClick={onImageDownload}
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                  opacity: isHovered ? 1 : 0,
+                  transition: `opacity ${transitionDuration}ms ease`
+                }}
+              >
+                <Download size={14} />
+              </IconButton>
             )}
 
-            {rating && showRating && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={14}
-                    color={i < Math.floor(rating) ? '#ffc107' : '#e0e0e0'}
-                    fill={i < Math.floor(rating) ? '#ffc107' : '#e0e0e0'}
-                  />
-                ))}
-                <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                  {rating}
-                </Typography>
-              </Box>
-            )}
-
-            {actions && (
-              <Box sx={{ mt: 2 }}>
-                {actions}
-              </Box>
+            {/* Delete overlay */}
+            {deletable && (
+              <IconButton
+                size="small"
+                onClick={onImageDelete}
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                  opacity: isHovered ? 1 : 0,
+                  transition: `opacity ${transitionDuration}ms ease`,
+                  color: 'error.main'
+                }}
+              >
+                <Trash2 size={14} />
+              </IconButton>
             )}
           </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-};
 
-export const AvatarStack: React.FC<AvatarStackProps> = ({
-  avatars,
-  direction = 'horizontal',
-  spacing = 2,
-  showNames = false,
-  showStatuses = false,
-  className
-}) => {
-  return (
-    <Stack
-      direction={direction}
-      spacing={spacing}
-      className={className}
-      sx={{
-        alignItems: 'center'
-      }}
-    >
-      {avatars.map((avatar, index) => (
-        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Avatar {...avatar} showStatus={showStatuses} />
-          {showNames && avatar.name && (
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {avatar.name}
-            </Typography>
+          {/* Name and details */}
+          {showDetails && user && (
+            <Box sx={{ textAlign: 'center', mt: 0.5 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: size === 'xs' || size === 'sm' ? '0.75rem' : '0.875rem',
+                  lineHeight: 1.2,
+                  maxWidth: avatarSize * 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {user.name}
+              </Typography>
+              
+              {user.role && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{
+                    fontSize: size === 'xs' || size === 'sm' ? '0.625rem' : '0.75rem',
+                    lineHeight: 1.1
+                  }}
+                >
+                  {user.role}
+                </Typography>
+              )}
+            </Box>
           )}
-        </Box>
-      ))}
-    </Stack>
-  );
-};
 
-// Export default components
-export default {
-  Avatar,
-  AvatarGroup,
-  AvatarCard,
-  AvatarStack
-};
+          {/* Action buttons */}
+          <ActionButtons />
+
+          {/* File input */}
+          {(editable || uploadable) && <FileInput />}
+        </Box>
+      </TooltipWrapper>
+    </AnimationWrapper>
+  );
+}
+
+// Avatar Details Component
+function AvatarDetails({
+  user,
+  status,
+  presence,
+  onStatusClick,
+  actions,
+  showActions
+}: {
+  user: AvatarUser;
+  status?: AvatarStatus;
+  presence?: AvatarPresence;
+  onStatusClick?: () => void;
+  actions?: AvatarAction[];
+  showActions?: boolean;
+}) {
+  const theme = useTheme();
+
+  return (
+    <Box sx={{ p: 1, minWidth: 200 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          {user.name}
+        </Typography>
+        
+        {user.verified && (
+          <CheckCircle size={14} color={theme.palette.success.main} />
+        )}
+        
+        {user.premium && (
+          <Star size={14} color={theme.palette.warning.main} />
+        )}
+      </Box>
+
+      {user.role && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+          {user.role}
+        </Typography>
+      )}
+
+      {user.department && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+          {user.department}
+        </Typography>
+      )}
+
+      {status && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            mb: 0.5,
+            cursor: onStatusClick ? 'pointer' : 'default'
+          }}
+          onClick={onStatusClick}
+        >
+          {statusIcons[status]}
+          <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>
+            {status}
+          </Typography>
+        </Box>
+      )}
+
+      {user.lastActive && (
+        <Typography variant="caption" color="text.secondary">
+          Last active: {user.lastActive}
+        </Typography>
+      )}
+
+      {showActions && actions && actions.length > 0 && (
+        <>\n          <Divider sx={{ my: 1 }} />\n          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>\n            {actions.slice(0, 3).map((action, index) => (\n              <Chip\n                key={index}\n                size="small"\n                label={action.label}\n                onClick={action.onClick}\n                disabled={action.disabled}\n                icon={action.loading ? undefined : action.icon}\n                sx={{ fontSize: '0.75rem' }}\n              />\n            ))}\n          </Box>\n        </>\n      )}\n    </Box>\n  );\n}
+
+export default Avatar;
