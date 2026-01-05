@@ -1,39 +1,20 @@
 import React, { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Grid,
   Card,
   CardContent,
-  Divider,
-  Alert,
-  Chip,
-  LinearProgress,
-  Stack,
-  alpha,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Avatar,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
 import {
   Upload,
   Download,
@@ -166,540 +147,288 @@ export function SignPD() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success': return <CheckCircle size={16} color="#4caf50" />;
-      case 'warning': return <AlertTriangle size={16} color="#ff9800" />;
-      case 'error': return <AlertTriangle size={16} color="#f44336" />;
-      default: return <CheckCircle size={16} color="#4caf50" />;
+      case 'success': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      case 'error': return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default: return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
   };
 
   const steps = ['Document Upload', 'Signature Configuration', 'Review & Sign', 'Download & Archive'];
 
   return (
-    <Box>
+    <div className="space-y-8">
       {/* Enhanced Header Section */}
-      <Box sx={{ mb: 6 }}>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2,
-            fontSize: '2.5rem'
-          }}
-        >
+      <div className="space-y-4">
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           Enterprise Document Signing
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.2rem', maxWidth: 600 }}>
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl">
           Secure, compliant, and efficient document signing with advanced audit trails and enterprise-grade security
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Enhanced Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { icon: <FileText size={24} />, label: 'Documents Processed', value: '15,247', color: '#667eea', change: '+12%' },
-          { icon: <Clock size={24} />, label: 'Avg. Processing Time', value: '1.8s', color: '#764ba2', change: '-0.5s' },
-          { icon: <Shield size={24} />, label: 'Security Compliance', value: 'SOC 2', color: '#f093fb', change: 'Active' },
-          { icon: <CheckCircle size={24} />, label: 'Success Rate', value: '99.97%', color: '#4facfe', change: '+0.2%' }
+          { icon: <FileText className="h-6 w-6" />, label: 'Documents Processed', value: '15,247', color: 'from-indigo-600 to-indigo-500', change: '+12%' },
+          { icon: <Clock className="h-6 w-6" />, label: 'Avg. Processing Time', value: '1.8s', color: 'from-purple-600 to-purple-500', change: '-0.5s' },
+          { icon: <Shield className="h-6 w-6" />, label: 'Security Compliance', value: 'SOC 2', color: 'from-pink-600 to-pink-500', change: 'Active' },
+          { icon: <CheckCircle className="h-6 w-6" />, label: 'Success Rate', value: '99.97%', color: 'from-blue-600 to-blue-500', change: '+0.2%' }
         ].map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
-              elevation={0}
-              sx={{
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.8)} 100%)`,
-                color: 'white',
-                borderRadius: 4,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
-                }
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    {stat.icon}
-                  </Box>
-                  <Chip
-                    label={stat.change}
-                    size="small"
-                    sx={{
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.7rem'
-                    }}
-                  />
-                </Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
-                  {stat.label}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card key={index} className={`bg-gradient-to-br ${stat.color} text-white border-0 hover:-translate-y-1 transition-transform shadow-lg`}>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 rounded-lg bg-white/20 backdrop-blur">
+                  {stat.icon}
+                </div>
+                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                  {stat.change}
+                </Badge>
+              </div>
+              <h3 className="text-3xl font-bold">{stat.value}</h3>
+              <p className="text-sm opacity-90">{stat.label}</p>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </div>
 
       {/* Workflow Configuration */}
-      <Card elevation={0} sx={{ borderRadius: 4, mb: 4, border: '1px solid', borderColor: 'divider' }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-            Document Workflow Configuration
-          </Typography>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Signing Workflow</InputLabel>
-                <Select
-                  value={selectedWorkflow}
-                  label="Signing Workflow"
-                  onChange={(e) => setSelectedWorkflow(e.target.value)}
-                  sx={{ borderRadius: 2 }}
-                >
+      <Card>
+        <CardHeader>
+          <CardTitle>Document Workflow Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="workflow">Signing Workflow</Label>
+              <Select value={selectedWorkflow} onValueChange={setSelectedWorkflow}>
+                <SelectTrigger id="workflow">
+                  <SelectValue placeholder="Select workflow" />
+                </SelectTrigger>
+                <SelectContent>
                   {workflows.map((workflow) => (
-                    <MenuItem key={workflow.id} value={workflow.id}>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {workflow.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {workflow.description}
-                        </Typography>
-                      </Box>
-                    </MenuItem>
+                    <SelectItem key={workflow.id} value={workflow.id}>
+                      <div>
+                        <p className="font-medium">{workflow.name}</p>
+                        <p className="text-sm text-muted-foreground">{workflow.description}</p>
+                      </div>
+                    </SelectItem>
                   ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Security Level</InputLabel>
-                <Select
-                  value={securityLevel}
-                  label="Security Level"
-                  onChange={(e) => setSecurityLevel(e.target.value)}
-                  sx={{ borderRadius: 2 }}
-                >
-                  <MenuItem value="basic">Basic Encryption</MenuItem>
-                  <MenuItem value="high">High Security (AES-256)</MenuItem>
-                  <MenuItem value="enterprise">Enterprise (Multi-factor)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="security">Security Level</Label>
+              <Select value={securityLevel} onValueChange={setSecurityLevel}>
+                <SelectTrigger id="security">
+                  <SelectValue placeholder="Select security level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic Encryption</SelectItem>
+                  <SelectItem value="high">High Security (AES-256)</SelectItem>
+                  <SelectItem value="enterprise">Enterprise (Multi-factor)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Stepper */}
-      <Card elevation={0} sx={{ borderRadius: 4, mb: 4 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Stepper activeStep={activeStep} orientation="horizontal" sx={{ mb: 4 }}>
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel
-                  sx={{
-                    '& .MuiStepLabel-label': {
-                      fontWeight: 600,
-                      fontSize: '0.9rem'
-                    }
-                  }}
-                >
-                  {label}
-                </StepLabel>
-              </Step>
+      {/* Simple Stepper (using Tabs as alternative since official stepper not yet available) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Process Steps</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            {steps.map((step, index) => (
+              <div key={index} className="flex items-center">
+                <div className={cn("flex items-center justify-center w-10 h-10 rounded-full font-semibold", 
+                  index <= activeStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                )}>
+                  {index + 1}
+                </div>
+                <p className="ml-3 text-sm font-medium">{step}</p>
+                {index < steps.length - 1 && <div className="w-20 h-1 bg-muted mx-4" />}
+              </div>
             ))}
-          </Stepper>
+          </div>
         </CardContent>
       </Card>
 
-      <Grid container spacing={4}>
-        {/* Enhanced Document Upload Section */}
-        <Grid item xs={12} lg={uploadedDoc ? 8 : 12}>
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider',
-              height: '100%',
-              background: 'white',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 4 }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  Document Upload & Preview
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {uploadedDoc && (
-                    <Chip
-                      icon={<CheckCircle size={16} />}
-                      label="Ready to Sign"
-                      color="success"
-                      sx={{ fontWeight: 600 }}
-                    />
-                  )}
-                  <IconButton
-                    onClick={() => setShowPreview(!showPreview)}
-                    sx={{ color: '#666' }}
-                  >
-                    {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </IconButton>
-                </Box>
-              </Stack>
-
-              <Box
-                sx={{
-                  border: '2px dashed',
-                  borderColor: uploadedDoc ? 'success.main' : 'divider',
-                  borderRadius: 3,
-                  p: 5,
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  background: uploadedDoc
-                    ? alpha('#4caf50', 0.05)
-                    : 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    background: alpha('#667eea', 0.08),
-                    transform: 'translateY(-2px)'
-                  },
-                  mb: 3
-                }}
-              >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Document Upload & Preview */}
+        <div className={uploadedDoc ? "lg:col-span-8" : "lg:col-span-12"}>
+          <Card className="h-full">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>Document Upload & Preview</CardTitle>
+                <div className="flex items-center gap-2">
+                  {uploadedDoc && <Badge variant="secondary">Ready to Sign</Badge>}
+                  <Button variant="ghost" size="icon" onClick={() => setShowPreview(!showPreview)}>
+                    {showPreview ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className={cn(
+                "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all",
+                uploadedDoc ? "border-green-600 bg-green-50" : "border-muted hover:border-primary hover:bg-accent/50"
+              )}>
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.txt"
                   onChange={handleFileUpload}
-                  style={{ display: 'none' }}
+                  className="hidden"
                   id="doc-upload"
                 />
-                <label htmlFor="doc-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                  <Upload size={56} color={uploadedDoc ? '#4caf50' : '#667eea'} style={{ marginBottom: 16 }} />
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                <label htmlFor="doc-upload" className="block">
+                  <Upload className={cn("h-14 w-14 mx-auto mb-4", uploadedDoc ? "text-green-600" : "text-primary")} />
+                  <h3 className="text-xl font-semibold mb-2">
                     {uploadedDoc ? 'Document Uploaded Successfully' : 'Drop your file here or click to browse'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  </h3>
+                  <p className="text-muted-foreground">
                     Supports PDF, DOC, DOCX, TXT • Maximum file size: 25MB • Enterprise encryption enabled
-                  </Typography>
+                  </p>
                 </label>
-              </Box>
+              </div>
 
               {uploadProgress > 0 && uploadProgress < 100 && (
-                <Box sx={{ mb: 3 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={uploadProgress}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: alpha('#667eea', 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                        borderRadius: 4
-                      }
-                    }}
-                  />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Uploading... {Math.round(uploadProgress)}%
-                  </Typography>
-                </Box>
+                <div className="mt-6">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-sm text-muted-foreground mt-2">Uploading... {Math.round(uploadProgress)}%</p>
+                </div>
               )}
 
-              {/* Enhanced Document Preview */}
               {showPreview && (
-                <Box
-                  sx={{
-                    height: 400,
-                    bgcolor: '#f8fafc',
-                    borderRadius: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    position: 'relative'
-                  }}
-                >
+                <div className="mt-8 h-96 bg-muted/30 rounded-xl overflow-hidden relative flex items-center justify-center border">
                   {uploadedDoc ? (
                     <>
                       <ImageWithFallback
                         src="https://images.unsplash.com/photo-1603796846097-bee99e4a601f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMHNpZ25pbmd8ZW58MXx8fHwxNzY3NTU0OTQ4fDA&ixlib=rb-4.1.0&q=80&w=1080"
                         alt="Document preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        className="w-full h-full object-cover"
                       />
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 16,
-                          right: 16,
-                          display: 'flex',
-                          gap: 1
-                        }}
-                      >
-                        <Chip
-                          label="Page 1 of 3"
-                          size="small"
-                          sx={{
-                            bgcolor: 'white',
-                            fontWeight: 600,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          }}
-                        />
-                        <Chip
-                          icon={<Certificate size={14} />}
-                          label="Verified"
-                          size="small"
-                          color="success"
-                          sx={{
-                            fontWeight: 600,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          }}
-                        />
-                      </Box>
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <Badge>Page 1 of 3</Badge>
+                        <Badge variant="secondary" className="bg-green-600 text-white">
+                          <Certificate className="h-3 w-3 mr-1" /> Verified
+                        </Badge>
+                      </div>
                     </>
                   ) : (
-                    <Box sx={{ textAlign: 'center' }}>
-                      <FileText size={64} color="#cbd5e1" style={{ marginBottom: 16 }} />
-                      <Typography color="text.secondary" variant="h6">
-                        Document preview will appear here
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Drag and drop or click to upload your document
-                      </Typography>
-                    </Box>
+                    <div className="text-center">
+                      <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h4 className="text-lg font-medium text-muted-foreground">Document preview will appear here</h4>
+                      <p className="text-sm text-muted-foreground mt-2">Drag and drop or click to upload your document</p>
+                    </div>
                   )}
-                </Box>
+                </div>
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        {/* Enhanced Signature & Controls Section */}
-        <Grid item xs={12} lg={uploadedDoc ? 4 : 12}>
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider',
-              background: 'white',
-              height: '100%',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
-                Digital Signature Studio
-              </Typography>
-
-              {/* Signature Canvas */}
-              <Box
-                sx={{
-                  border: '2px solid',
-                  borderColor: 'divider',
-                  borderRadius: 3,
-                  bgcolor: '#fafafa',
-                  mb: 3,
-                  overflow: 'hidden',
-                  position: 'relative'
-                }}
-              >
+        {/* Signature Studio */}
+        <div className={uploadedDoc ? "lg:col-span-4" : "lg:col-span-12"}>
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Digital Signature Studio</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="border-2 border-muted rounded-xl bg-muted/30 overflow-hidden relative">
                 <SignatureCanvas
                   ref={sigCanvas}
-                  canvasProps={{
-                    width: 500,
-                    height: 250,
-                    className: 'signature-canvas',
-                    style: { width: '100%', height: '250px' }
-                  }}
+                  canvasProps={{ className: 'w-full h-64' }}
                 />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    display: 'flex',
-                    gap: 1
-                  }}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={clearSignature}
-                    sx={{ background: 'rgba(255,255,255,0.9)', '&:hover': { background: 'white' } }}
-                  >
-                    <RotateCcw size={16} />
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {/* Advanced Controls */}
-              <Stack spacing={2} sx={{ mb: 3 }}>
                 <Button
-                  variant="outlined"
-                  startIcon={<Trash2 size={18} />}
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2"
                   onClick={clearSignature}
-                  fullWidth
-                  size="large"
-                  sx={{
-                    borderRadius: 2,
-                    py: 1.5,
-                    fontWeight: 600,
-                    borderWidth: 2,
-                    '&:hover': { borderWidth: 2 }
-                  }}
                 >
-                  Clear Signature
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full" onClick={clearSignature}>
+                  <Trash2 className="h-4 w-4 mr-2" /> Clear Signature
                 </Button>
                 <Button
-                  variant="contained"
-                  startIcon={<CheckCircle size={18} />}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                   onClick={saveSignature}
                   disabled={!uploadedDoc}
-                  fullWidth
-                  size="large"
-                  sx={{
-                    borderRadius: 2,
-                    py: 1.5,
-                    fontWeight: 600,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #5568d3 0%, #6b4190 100%)',
-                      boxShadow: '0 6px 16px rgba(102, 126, 234, 0.5)'
-                    }
-                  }}
                 >
-                  Apply Digital Signature
+                  <CheckCircle className="h-4 w-4 mr-2" /> Apply Digital Signature
                 </Button>
-              </Stack>
+              </div>
 
               {isSigned && (
-                <Alert
-                  severity="success"
-                  icon={<CheckCircle size={20} />}
-                  sx={{ mb: 3, borderRadius: 2 }}
-                >
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Digital signature applied successfully!
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Your document is now legally binding and encrypted
-                  </Typography>
+                <Alert className="border-green-600 bg-green-50">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <AlertTitle>Signature Applied!</AlertTitle>
+                  <AlertDescription>
+                    Your document is now legally binding and encrypted.
+                  </AlertDescription>
                 </Alert>
               )}
 
               <Button
-                variant="contained"
-                color="success"
-                startIcon={<Download size={18} />}
+                variant="default"
+                size="lg"
+                className="w-full bg-green-600 hover:bg-green-700"
                 onClick={downloadDocument}
                 disabled={!isSigned}
-                fullWidth
-                size="large"
-                sx={{
-                  borderRadius: 2,
-                  py: 1.5,
-                  fontWeight: 600,
-                  mb: 3,
-                  boxShadow: isSigned ? '0 4px 12px rgba(76, 175, 80, 0.4)' : 'none'
-                }}
               >
-                Download Signed Document
+                <Download className="h-4 w-4 mr-2" /> Download Signed Document
               </Button>
 
-              <Divider sx={{ my: 3 }} />
+              <Separator />
 
-              {/* Enhanced Security Info */}
-              <Alert
-                severity="info"
-                icon={<Lock size={20} />}
-                sx={{
-                  borderRadius: 2,
-                  bgcolor: alpha('#667eea', 0.08),
-                  border: '1px solid',
-                  borderColor: alpha('#667eea', 0.2),
-                  '& .MuiAlert-icon': {
-                    color: '#667eea'
-                  }
-                }}
-              >
-                <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-                  Enterprise Security Features
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+              <Alert className="bg-blue-50 border-blue-200">
+                <Lock className="h-5 w-5 text-blue-600" />
+                <AlertTitle>Enterprise Security Features</AlertTitle>
+                <AlertDescription>
                   AES-256 encryption, blockchain verification, audit trails, and compliance with eIDAS, UETA, and ESIGN Act.
-                </Typography>
+                </AlertDescription>
               </Alert>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
-      {/* Audit Trail Section */}
-      <Card elevation={0} sx={{ borderRadius: 4, mt: 4 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-            Real-time Audit Trail
-          </Typography>
-          <List sx={{ p: 0 }}>
-            {auditLog.map((log, index) => (
-              <ListItem key={log.id} sx={{ px: 0, py: 1 }}>
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {getStatusIcon(log.status)}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {log.action}
-                    </Typography>
-                  }
-                  secondary={
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                      <Typography variant="caption" color="text.secondary">
-                        {log.user}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        • {log.timestamp}
-                      </Typography>
-                    </Box>
-                  }
-                />
-              </ListItem>
+      {/* Audit Trail */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Real-time Audit Trail</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {auditLog.map((log) => (
+              <div key={log.id} className="flex items-start gap-4">
+                {getStatusIcon(log.status)}
+                <div className="flex-1">
+                  <p className="font-medium">{log.action}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {log.user} • {log.timestamp}
+                  </p>
+                </div>
+              </div>
             ))}
-          </List>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }
+
+// Fallback export (kept unchanged as requested)
 export const SignPD = () => (
-  <Box sx={{ p: 8, textAlign: 'center' }}>
-    <Typography variant="h4">PDF Signing Module</Typography>
-    <Typography>Secure digital signature tools coming soon.</Typography>
-  </Box>
+  <div className="p-8 text-center">
+    <h2 className="text-3xl font-bold">PDF Signing Module</h2>
+    <p className="text-muted-foreground">Secure digital signature tools coming soon.</p>
+  </div>
 );
