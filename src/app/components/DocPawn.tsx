@@ -70,7 +70,7 @@ import {
   Play,
   Pause
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 interface DocumentTemplate {
   id: number;
