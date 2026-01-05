@@ -12,9 +12,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils"; // ← Critical: for className merging
+import { cn } from "@/lib/utils"; // ← Required for cn() usage
 import {
   Upload,
   Download,
@@ -28,6 +27,7 @@ import {
   EyeOff,
   Certificate,
   RotateCcw,
+  AlertTriangle, // ← Added for warning/error icons
 } from 'lucide-react';
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
@@ -48,7 +48,8 @@ interface AuditLog {
 }
 
 export function SignPD() {
-  const sigCanvas = useRef<any>(null); // ← Safe fix for SignatureCanvas typing issue
+  const sigCanvas = useRef<any>(null); // ← Fixes React 18+ typing issue with SignatureCanvas
+
   const [uploadedDoc, setUploadedDoc] = useState<string | null>(null);
   const [isSigned, setIsSigned] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -143,9 +144,9 @@ export function SignPD() {
       case 'success':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'warning':
-        return <CheckCircle className="h-4 w-4 text-orange-600" />; // fallback icon
+        return <AlertTriangle className="h-4 w-4 text-orange-600" />;
       case 'error':
-        return <CheckCircle className="h-4 w-4 text-red-600" />; // fallback icon
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
       default:
         return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
@@ -239,10 +240,12 @@ export function SignPD() {
           <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
             {steps.map((step, index) => (
               <div key={index} className="flex items-center gap-4">
-                <div className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-semibold",
-                  index === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                )}>
+                <div
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-semibold",
+                    index === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}
+                >
                   {index + 1}
                 </div>
                 <p className="text-sm font-medium hidden sm:block">{step}</p>
@@ -269,10 +272,12 @@ export function SignPD() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className={cn(
-                "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all",
-                uploadedDoc ? "border-green-600 bg-green-50" : "border-muted hover:border-primary hover:bg-accent/50"
-              )}>
+              <div
+                className={cn(
+                  "border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all",
+                  uploadedDoc ? "border-green-600 bg-green-50" : "border-muted hover:border-primary hover:bg-accent/50"
+                )}
+              >
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.txt"
@@ -281,7 +286,9 @@ export function SignPD() {
                   id="doc-upload"
                 />
                 <label htmlFor="doc-upload" className="block">
-                  <Upload className={cn("h-14 w-14 mx-auto mb-4", uploadedDoc ? "text-green-600" : "text-primary")} />
+                  <Upload
+                    className={cn("h-14 w-14 mx-auto mb-4", uploadedDoc ? "text-green-600" : "text-primary")}
+                  />
                   <h3 className="text-xl font-semibold mb-2">
                     {uploadedDoc ? 'Document Uploaded Successfully' : 'Drop your file here or click to browse'}
                   </h3>
