@@ -53,7 +53,7 @@ import {
   AlertTriangle,
   RotateCcw
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 interface DocumentWorkflow {
   id: string;
