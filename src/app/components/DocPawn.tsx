@@ -4,8 +4,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +14,13 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import {
   Search,
   ShoppingCart,
@@ -26,10 +30,8 @@ import {
   Users,
   Award,
   Filter,
-  SortAsc,
   Heart,
   Share2,
-  Bookmark,
   Eye,
   Calendar,
   DollarSign,
@@ -37,17 +39,7 @@ import {
   Zap,
   Shield,
   CheckCircle,
-  Clock,
-  BarChart3,
-  FileText,
-  Image as ImageIcon,
-  Upload,
-  Plus,
-  Pin,
-  PushPin,
-  MoreVertical,
-  Play,
-  Pause,
+  SortAsc,
 } from 'lucide-react';
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
@@ -76,13 +68,6 @@ interface Category {
   name: string;
   count: number;
   icon: React.ReactNode;
-  color: string;
-}
-
-interface SortOption {
-  value: string;
-  label: string;
-  icon: React.ReactNode;
 }
 
 export function DocPawn() {
@@ -91,28 +76,19 @@ export function DocPawn() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('popular');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50]);
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [cart, setCart] = useState<number[]>([]);
 
   const categories: Category[] = [
-    { id: 'All', name: 'All Templates', count: 2450, icon: <FileText size={20} />, color: '#4facfe' },
-    { id: 'Resume', name: 'Resume', count: 420, icon: <Users size={20} />, color: '#00f2fe' },
-    { id: 'Legal', name: 'Legal', count: 380, icon: <Shield size={20} />, color: '#43e97b' },
-    { id: 'Finance', name: 'Finance', count: 290, icon: <DollarSign size={20} />, color: '#f093fb' },
-    { id: 'Business', name: 'Business', count: 560, icon: <TrendingUp size={20} />, color: '#f5576c' },
-    { id: 'Productivity', name: 'Productivity', count: 480, icon: <Zap size={20} />, color: '#764ba2' },
-    { id: 'Marketing', name: 'Marketing', count: 320, icon: <Award size={20} />, color: '#667eea' },
-  ];
-
-  const sortOptions: SortOption[] = [
-    { value: 'popular', label: 'Most Popular', icon: <TrendingUp size={16} /> },
-    { value: 'rating', label: 'Highest Rated', icon: <Star size={16} /> },
-    { value: 'newest', label: 'Newest First', icon: <Calendar size={16} /> },
-    { value: 'price-low', label: 'Price: Low to High', icon: <SortAsc size={16} /> },
-    { value: 'price-high', label: 'Price: High to Low', icon: <SortAsc size={16} /> },
+    { id: 'All', name: 'All Templates', count: 2450, icon: <FileText className="h-5 w-5" /> },
+    { id: 'Resume', name: 'Resume', count: 420, icon: <Users className="h-5 w-5" /> },
+    { id: 'Legal', name: 'Legal', count: 380, icon: <Shield className="h-5 w-5" /> },
+    { id: 'Finance', name: 'Finance', count: 290, icon: <DollarSign className="h-5 w-5" /> },
+    { id: 'Business', name: 'Business', count: 560, icon: <TrendingUp className="h-5 w-5" /> },
+    { id: 'Productivity', name: 'Productivity', count: 480, icon: <Zap className="h-5 w-5" /> },
+    { id: 'Marketing', name: 'Marketing', count: 320, icon: <Award className="h-5 w-5" /> },
   ];
 
   const templates: DocumentTemplate[] = [
@@ -135,7 +111,101 @@ export function DocPawn() {
       preview: true,
       reviews: 127,
     },
-    // … (the other templates remain unchanged – omitted here for brevity)
+    {
+      id: 2,
+      title: 'Corporate Contract Bundle',
+      description: 'Comprehensive legal contract templates for business partnerships, NDAs, and service agreements',
+      price: 29.99,
+      rating: 4.8,
+      downloads: 1892,
+      category: 'Legal',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Mike Chen',
+      sales: 1892,
+      featured: true,
+      tags: ['Legal', 'Business', 'Professional'],
+      createdAt: '2024-01-10',
+      fileSize: '5.8 MB',
+      format: ['DOCX', 'PDF'],
+      preview: true,
+      reviews: 89,
+    },
+    {
+      id: 3,
+      title: 'Financial Dashboard Template',
+      description: 'Professional Excel and Google Sheets templates for financial analysis and reporting',
+      price: 24.99,
+      rating: 4.7,
+      downloads: 4134,
+      category: 'Finance',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Emily Davis',
+      sales: 4134,
+      featured: false,
+      tags: ['Finance', 'Excel', 'Dashboard'],
+      createdAt: '2024-01-08',
+      fileSize: '1.2 MB',
+      format: ['XLSX', 'Google Sheets'],
+      preview: true,
+      reviews: 203,
+    },
+    {
+      id: 4,
+      title: 'Startup Pitch Deck',
+      description: 'Investor-ready pitch deck template with comprehensive slides for startup presentations',
+      price: 34.99,
+      rating: 4.9,
+      downloads: 2678,
+      category: 'Business',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'James Wilson',
+      sales: 2678,
+      featured: true,
+      tags: ['Startup', 'Pitch', 'Investment'],
+      createdAt: '2024-01-12',
+      fileSize: '8.5 MB',
+      format: ['PPTX', 'PDF'],
+      preview: true,
+      reviews: 156,
+    },
+    {
+      id: 5,
+      title: 'Meeting Minutes Template',
+      description: 'Organized meeting minutes template with action items, follow-up sections, and decision tracking',
+      price: 12.99,
+      rating: 4.5,
+      downloads: 2543,
+      category: 'Productivity',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Lisa Anderson',
+      sales: 2543,
+      featured: false,
+      tags: ['Meeting', 'Productivity', 'Organization'],
+      createdAt: '2024-01-05',
+      fileSize: '856 KB',
+      format: ['DOCX', 'PDF'],
+      preview: true,
+      reviews: 98,
+    },
+    {
+      id: 6,
+      title: 'Marketing Campaign Planner',
+      description: 'Comprehensive marketing campaign planning template with budget tracking and ROI analysis',
+      price: 22.99,
+      rating: 4.6,
+      downloads: 1987,
+      category: 'Marketing',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      author: 'Robert Taylor',
+      sales: 1987,
+      featured: false,
+      tags: ['Marketing', 'Campaign', 'ROI'],
+      createdAt: '2024-01-03',
+      fileSize: '3.2 MB',
+      format: ['XLSX', 'PDF'],
+      preview: true,
+      reviews: 76,
+    },
   ];
 
   const filteredTemplates = templates.filter(
@@ -223,7 +293,7 @@ export function DocPawn() {
               <Input
                 placeholder="Search templates by name, category, or tags..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -235,9 +305,21 @@ export function DocPawn() {
               </TabsList>
             </Tabs>
 
-            <Button variant="outline" className="flex items-center gap-2">
-              <SortAsc className="h-4 w-4" /> Sort
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <SortAsc className="h-4 w-4" /> Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuItem>Most Popular</DropdownMenuItem>
+                <DropdownMenuItem>Highest Rated</DropdownMenuItem>
+                <DropdownMenuItem>Newest First</DropdownMenuItem>
+                <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
+                <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
               <Filter className="h-4 w-4 mr-2" /> Filters
@@ -267,7 +349,7 @@ export function DocPawn() {
                 <Label>Price Range</Label>
                 <Select
                   value={`${priceRange[0]}-${priceRange[1]}`}
-                  onValueChange={(v) => {
+                  onValueChange={(v: string) => {
                     const [min, max] = v.split('-').map(Number);
                     setPriceRange([min, max]);
                   }}
@@ -319,7 +401,7 @@ export function DocPawn() {
         </CardContent>
       </Card>
 
-      {/* Templates Grid / List */}
+      {/* Templates Grid */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredTemplates.map((template) => (
@@ -411,9 +493,10 @@ export function DocPawn() {
           ))}
         </div>
       ) : (
+        /* List view – same as before */
         <div className="space-y-4">
           {filteredTemplates.map((template) => (
-            <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={template.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <div className="w-full sm:w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
@@ -423,15 +506,12 @@ export function DocPawn() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="font-bold text-lg truncate">{template.title}</h3>
                       {getStatusBadge(template)}
                     </div>
-
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
-
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                       <div className="flex items-center gap-1">
                         <div className="flex">
@@ -447,19 +527,16 @@ export function DocPawn() {
                         <span className="font-medium">{template.rating}</span>
                         <span className="text-muted-foreground">({template.reviews})</span>
                       </div>
-
                       <span className="text-muted-foreground">•</span>
                       <span className="font-medium">{template.downloads.toLocaleString()} downloads</span>
                       <span className="text-muted-foreground">•</span>
                       <span>{template.fileSize}</span>
                     </div>
                   </div>
-
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                     <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
                       ${template.price}
                     </span>
-
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -485,7 +562,7 @@ export function DocPawn() {
       )}
 
       {/* Detail Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         {selectedDoc && (
           <>
             <DialogHeader className="p-6 pb-2">
@@ -496,7 +573,6 @@ export function DocPawn() {
                     by {selectedDoc.author} • {selectedDoc.createdAt}
                   </p>
                 </div>
-
                 <div className="flex gap-2">
                   <Button
                     variant="ghost"
@@ -514,7 +590,6 @@ export function DocPawn() {
                 </div>
               </div>
             </DialogHeader>
-
             <DialogContent className="p-6 max-w-5xl">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
@@ -525,14 +600,11 @@ export function DocPawn() {
                       className="w-full aspect-video object-cover"
                     />
                   </div>
-
                   <p className="text-base leading-relaxed mb-6">{selectedDoc.description}</p>
-
                   <div className="flex flex-wrap gap-2 mb-6">
                     <Badge>{selectedDoc.category}</Badge>
                     <Badge variant="outline">By {selectedDoc.author}</Badge>
                   </div>
-
                   <div className="flex flex-wrap gap-6">
                     <div className="flex items-center gap-2">
                       <div className="flex">
@@ -547,19 +619,16 @@ export function DocPawn() {
                       </div>
                       <span className="font-medium">{selectedDoc.rating} / 5</span>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <Download className="h-5 w-5" />
                       <span className="font-medium">{selectedDoc.sales.toLocaleString()} sales</span>
                     </div>
-
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5" />
                       <span>{selectedDoc.createdAt}</span>
                     </div>
                   </div>
                 </div>
-
                 <Card>
                   <CardHeader>
                     <CardTitle>Template Details</CardTitle>
@@ -582,7 +651,6 @@ export function DocPawn() {
                         </div>
                       </dl>
                     </div>
-
                     <div>
                       <h4 className="font-medium mb-3">Tags</h4>
                       <div className="flex flex-wrap gap-2">
@@ -593,7 +661,6 @@ export function DocPawn() {
                         ))}
                       </div>
                     </div>
-
                     <div>
                       <h4 className="font-medium mb-2">Price</h4>
                       <p className="text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
@@ -604,7 +671,6 @@ export function DocPawn() {
                 </Card>
               </div>
             </DialogContent>
-
             <DialogFooter className="p-6 pt-2">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Close
