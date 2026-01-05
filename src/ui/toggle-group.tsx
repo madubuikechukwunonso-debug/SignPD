@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -14,9 +13,13 @@ import {
   CardContent,
   Grid,
   IconButton,
+  Button,
   FormControl,
   FormLabel,
-  FormHelperText
+  FormHelperText,
+  TextField,
+  InputAdornment,
+  CircularProgress
 } from '@mui/material';
 import {
   LayoutGrid,
@@ -75,7 +78,7 @@ import {
   ColumnVertical
 } from 'lucide-react';
 
-interface ToggleOption {
+export interface ToggleOption {
   value: string;
   label: string;
   icon?: React.ReactNode;
@@ -89,7 +92,7 @@ interface ToggleOption {
   metadata?: any;
 }
 
-interface ToggleGroupProps {
+export interface ToggleGroupProps {
   options: ToggleOption[];
   value?: string | string[];
   defaultValue?: string | string[];
@@ -168,7 +171,7 @@ interface ToggleGroupAnalytics {
   averageSelectionTime: number;
 }
 
-export function ToggleGroup({
+export const ToggleGroup: React.FC<ToggleGroupProps> = ({
   options,
   value: controlledValue,
   defaultValue,
@@ -222,7 +225,7 @@ export function ToggleGroup({
   recentlyUsed = [],
   maxRecentlyUsed = 5,
   onRecentlyUsedChange
-}: ToggleGroupProps) => {
+}) => {
   const [internalValue, setInternalValue] = useState<string | string[]>(defaultValue || (multiple ? [] : ''));
   const [value, setValue] = useState<string | string[]>(controlledValue !== undefined ? controlledValue : internalValue);
   const [searchQuery, setSearchQuery] = useState('');
@@ -375,7 +378,7 @@ export function ToggleGroup({
           py: 1.5,
           background: active ? getColorGradient(color, active) : 'white',
           color: active ? 'white' : '#666',
-          border: `1px solid ${active ? 'transparent' : alpha('#666', 0.2)}',
+          border: `1px solid ${active ? 'transparent' : alpha('#666', 0.2)}`,
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -394,7 +397,7 @@ export function ToggleGroup({
           minWidth: 40,
           p: 0,
           background: active ? 'currentColor' : alpha('currentColor', 0.3),
-          border: `3px solid ${active ? 'currentColor' : 'transparent'}',
+          border: `3px solid ${active ? 'currentColor' : 'transparent'}`,
           '&:hover': {
             transform: 'scale(1.1)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
@@ -408,7 +411,7 @@ export function ToggleGroup({
           py: 1,
           background: active ? getColorGradient(color, active) : 'white',
           color: active ? 'white' : '#666',
-          border: `2px solid ${active ? 'transparent' : alpha('#666', 0.2)}',
+          border: `2px solid ${active ? 'transparent' : alpha('#666', 0.2)}`,
           '&:hover': {
             background: active ? getColorGradient(color, active) : alpha('#666', 0.05),
             transform: 'translateY(-1px)'
@@ -944,6 +947,6 @@ export function ToggleGroup({
       )}
     </Box>
   );
-});
+};
 
 export default ToggleGroup;
