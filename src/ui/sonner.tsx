@@ -184,6 +184,53 @@ const getPriorityColor = (priority?: string) => {
   }
 };
 
+const renderRichContent = (data: any, type: string) => {
+  switch (type) {
+    case 'document':
+      return (
+        <Card elevation={0} sx={{ p: 2, background: alpha('#4facfe', 0.05), borderRadius: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <FileText size={20} color="#4facfe" />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {data.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {data.size} • {data.type}
+              </Typography>
+            </Box>
+          </Stack>
+        </Card>
+      );
+    
+    case 'security':
+      return (
+        <Card elevation={0} sx={{ p: 2, background: alpha('#43e97b', 0.05), borderRadius: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Shield size={20} color="#43e97b" />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                Security Alert
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {data.message}
+              </Typography>
+            </Box>
+          </Stack>
+        </Card>
+      );
+    
+    default:
+      return (
+        <Card elevation={0} sx={{ p: 2, background: alpha('#666', 0.05), borderRadius: 2 }}>
+          <Typography variant="body2">
+            {JSON.stringify(data, null, 2)}
+          </Typography>
+        </Card>
+      );
+  }
+};
+
 const SonnerToast: React.FC<SonnerToastProps> = ({
   toast,
   onClose,
@@ -219,7 +266,7 @@ const SonnerToast: React.FC<SonnerToastProps> = ({
     }, interval);
 
     return () => clearInterval(timer);
-  }, [toast.duration, toast.persistent, toast.type, isPaused, isPaused]);
+  }, [toast.duration, toast.persistent, toast.type, isPaused]);
 
   const handleAutoClose = () => {
     if (toast.onAutoClose) {
@@ -476,54 +523,7 @@ const SonnerToast: React.FC<SonnerToastProps> = ({
   );
 };
 
-const renderRichContent = (data: any, type: string) => {
-  switch (type) {
-    case 'document':
-      return (
-        <Card elevation={0} sx={{ p: 2, background: alpha('#4facfe', 0.05), borderRadius: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <FileText size={20} color="#4facfe" />
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {data.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {data.size} • {data.type}
-              </Typography>
-            </Box>
-          </Stack>
-        </Card>
-      );
-    
-    case 'security':
-      return (
-        <Card elevation={0} sx={{ p: 2, background: alpha('#43e97b', 0.05), borderRadius: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Shield size={20} color="#43e97b" />
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Security Alert
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {data.message}
-              </Typography>
-            </Box>
-          </Stack>
-        </Card>
-      );
-    
-    default:
-      return (
-        <Card elevation={0} sx={{ p: 2, background: alpha('#666', 0.05), borderRadius: 2 }}>
-          <Typography variant="body2">
-            {JSON.stringify(data, null, 2)}
-          </Typography>
-        </Card>
-      );
-  }
-};
-
-const getSlideDirection = (position: ToastPosition): SlideProps['direction> => {
+const getSlideDirection = (position: ToastPosition): SlideProps['direction'] => {
   if (position.vertical === 'top') return 'down';
   if (position.vertical === 'bottom') return 'up';
   return 'right';
