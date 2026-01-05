@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 import {
   Upload,
   Download,
@@ -26,15 +27,8 @@ import {
   Clock,
   Settings,
   History,
-  BarChart3,
   CheckCircle,
   AlertTriangle,
-  Info,
-  Eye,
-  EyeOff,
-  QrCode,
-  Certificate,
-  Users,
   Database,
   RotateCcw,
 } from 'lucide-react';
@@ -236,7 +230,6 @@ export function DocFun() {
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={() => setShowHistory(!showHistory)}>
                 <History className="h-5 w-5" />
@@ -352,7 +345,7 @@ export function DocFun() {
                       <Label>Output Format</Label>
                       <Select
                         value={batchConfig.outputFormat}
-                        onValueChange={(v) => setBatchConfig((p) => ({ ...p, outputFormat: v }))}
+                        onValueChange={(v: string) => setBatchConfig((p) => ({ ...p, outputFormat: v }))}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -372,7 +365,7 @@ export function DocFun() {
                       <Label>Quality</Label>
                       <Select
                         value={batchConfig.quality}
-                        onValueChange={(v) => setBatchConfig((p) => ({ ...p, quality: v as any }))}
+                        onValueChange={(v: string) => setBatchConfig((p) => ({ ...p, quality: v }))}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -415,8 +408,8 @@ export function DocFun() {
                 <>
                   <Alert className="mt-6 border-green-500 bg-green-50">
                     <CheckCircle className="h-5 w-5 text-green-600" />
+                    <AlertTitle>Conversion completed successfully!</AlertTitle>
                     <AlertDescription>
-                      <strong>Conversion completed successfully!</strong><br />
                       Your document is ready for download.
                     </AlertDescription>
                   </Alert>
