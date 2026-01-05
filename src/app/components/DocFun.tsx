@@ -1,40 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  Button,
-  Grid,
   Card,
   CardContent,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  LinearProgress,
-  Alert,
-  Chip,
-  Stack,
-  alpha,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  TextField,
-  InputAdornment,
-  ToggleButton,
-  ToggleButtonGroup,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stepper,
-  Step,
-  StepLabel,
-  Avatar,
-  Badge,
-  IconButton,
-  Tooltip
-} from '@mui/material';
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Upload,
   Download,
@@ -56,17 +35,10 @@ import {
   QrCode,
   Certificate,
   Users,
-  AlertTriangle as AlertIcon,
-  RotateCcw
+  Database,
+  RotateCcw,
 } from 'lucide-react';
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
-import Tooltip from '@mui/material/Tooltip';
-import Fade from '@mui/material/Fade';
-import Zoom from '@mui/material/Zoom';
-import Grow from '@mui/material/Grow';
-import Slide from '@mui/material/Slide';
-import { TrendingDown, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRef } from 'react';
 
 interface ConversionJob {
   id: string;
@@ -102,36 +74,36 @@ export function DocFun() {
     files: [],
     outputFormat: 'pdf',
     quality: 'high',
-    preserveMetadata: true
+    preserveMetadata: true,
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [previewMode, setPreviewMode] = useState<'single' | 'batch'>('single');
   const [showHistory, setShowHistory] = useState(false);
 
   const formats = [
-    { value: 'pdf', label: 'PDF', icon: <FileText size={18} />, description: 'Portable Document Format' },
-    { value: 'docx', label: 'DOCX', icon: <FileText size={18} />, description: 'Microsoft Word Document' },
-    { value: 'txt', label: 'TXT', icon: <FileText size={18} />, description: 'Plain Text File' },
-    { value: 'jpg', label: 'JPG', icon: <Image size={18} />, description: 'JPEG Image' },
-    { value: 'png', label: 'PNG', icon: <Image size={18} />, description: 'Portable Network Graphics' },
-    { value: 'html', label: 'HTML', icon: <File size={18} />, description: 'Web Page Format' },
-    { value: 'xlsx', label: 'XLSX', icon: <FileText size={18} />, description: 'Excel Spreadsheet' },
-    { value: 'pptx', label: 'PPTX', icon: <FileText size={18} />, description: 'PowerPoint Presentation' }
+    { value: 'pdf', label: 'PDF', icon: <FileText className="h-4 w-4" />, description: 'Portable Document Format' },
+    { value: 'docx', label: 'DOCX', icon: <FileText className="h-4 w-4" />, description: 'Microsoft Word Document' },
+    { value: 'txt', label: 'TXT', icon: <FileText className="h-4 w-4" />, description: 'Plain Text File' },
+    { value: 'jpg', label: 'JPG', icon: <Image className="h-4 w-4" />, description: 'JPEG Image' },
+    { value: 'png', label: 'PNG', icon: <Image className="h-4 w-4" />, description: 'Portable Network Graphics' },
+    { value: 'html', label: 'HTML', icon: <File className="h-4 w-4" />, description: 'Web Page Format' },
+    { value: 'xlsx', label: 'XLSX', icon: <FileText className="h-4 w-4" />, description: 'Excel Spreadsheet' },
+    { value: 'pptx', label: 'PPTX', icon: <FileText className="h-4 w-4" />, description: 'PowerPoint Presentation' },
   ];
 
   const conversionHistory = [
     { id: '1', fileName: 'contract.pdf', from: 'PDF', to: 'DOCX', time: '2 min ago', size: '2.4 MB', status: 'completed' },
     { id: '2', fileName: 'report.docx', from: 'DOCX', to: 'PDF', time: '15 min ago', size: '1.8 MB', status: 'completed' },
-    { id: '3', fileName: 'image.jpg', from: 'JPG', to: 'PNG', time: '1 hour ago', size: '3.2 MB', status: 'completed' }
+    { id: '3', fileName: 'image.jpg', from: 'JPG', to: 'PNG', time: '1 hour ago', size: '3.2 MB', status: 'completed' },
   ];
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       if (batchConfig.enabled) {
-        setBatchConfig(prev => ({
+        setBatchConfig((prev) => ({
           ...prev,
-          files: Array.from(files)
+          files: Array.from(files),
         }));
       } else {
         setSelectedFile(files[0]);
@@ -145,7 +117,6 @@ export function DocFun() {
     setConversionComplete(false);
     setProgress(0);
 
-    // Create new job
     const newJob: ConversionJob = {
       id: Date.now().toString(),
       fileName: selectedFile?.name || 'Unknown',
@@ -155,20 +126,18 @@ export function DocFun() {
       progress: 0,
       startTime: new Date(),
       fileSize: selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(1)} MB` : 'Unknown',
-      quality: 'high'
+      quality: 'high',
     };
 
-    setActiveJobs(prev => [...prev, newJob]);
+    setActiveJobs((prev) => [...prev, newJob]);
 
-    // Simulate conversion process
     const interval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         const newProgress = prev + Math.random() * 15;
-        
-        // Update job progress
-        setActiveJobs(jobs => 
-          jobs.map(job => 
-            job.id === newJob.id 
+
+        setActiveJobs((jobs) =>
+          jobs.map((job) =>
+            job.id === newJob.id
               ? { ...job, progress: Math.min(newProgress, 100) }
               : job
           )
@@ -178,21 +147,15 @@ export function DocFun() {
           clearInterval(interval);
           setConverting(false);
           setConversionComplete(true);
-          
-          // Update job status
-          setActiveJobs(jobs => 
-            jobs.map(job => 
-              job.id === newJob.id 
-                ? { 
-                    ...job, 
-                    status: 'completed',
-                    progress: 100,
-                    endTime: new Date()
-                  }
+
+          setActiveJobs((jobs) =>
+            jobs.map((job) =>
+              job.id === newJob.id
+                ? { ...job, status: 'completed', progress: 100, endTime: new Date() }
                 : job
             )
           );
-          
+
           return 100;
         }
         return newProgress;
@@ -205,612 +168,346 @@ export function DocFun() {
   };
 
   const handleBatchConvert = () => {
-    // Simulate batch conversion
     alert(`Converting ${batchConfig.files.length} files to ${batchConfig.outputFormat}`);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#4caf50';
-      case 'processing': return '#2196f3';
-      case 'failed': return '#f44336';
-      default: return '#9e9e9e';
+      case 'completed': return 'bg-green-500';
+      case 'processing': return 'bg-blue-500';
+      case 'failed': return 'bg-red-500';
+      default: return 'bg-gray-400';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle size={16} />;
-      case 'processing': return <RefreshCw size={16} />;
-      case 'failed': return <AlertTriangle size={16} />;
-      default: return <Clock size={16} />;
+      case 'completed': return <CheckCircle className="h-4 w-4 text-white" />;
+      case 'processing': return <RefreshCw className="h-4 w-4 text-white animate-spin" />;
+      case 'failed': return <AlertTriangle className="h-4 w-4 text-white" />;
+      default: return <Clock className="h-4 w-4 text-white" />;
     }
   };
 
   return (
-    <Box>
-      {/* Enhanced Header */}
-      <Box sx={{ mb: 6 }}>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2,
-            fontSize: '2.5rem'
-          }}
-        >
+    <div className="space-y-10 p-4 md:p-8">
+      {/* Header */}
+      <div className="space-y-4">
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">
           Enterprise Document Converter
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.2rem', maxWidth: 600 }}>
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl">
           Advanced multi-format document conversion with batch processing, quality optimization, and enterprise-grade performance
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      {/* Enhanced Performance Metrics */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { icon: <Zap size={24} />, label: 'Conversions Today', value: '3,247', color: '#f093fb', change: '+18%' },
-          { icon: <TrendingUp size={24} />, label: 'Success Rate', value: '99.97%', color: '#f5576c', change: '+0.3%' },
-          { icon: <Clock size={24} />, label: 'Avg. Processing Time', value: '1.2s', color: '#4facfe', change: '-0.8s' },
-          { icon: <Database size={24} />, label: 'Storage Saved', value: '2.4TB', color: '#43e97b', change: '+15%' }
-        ].map((stat, index) => (
-          <Grid item xs={12} md={3} key={index}>
-            <Card
-              elevation={0}
-              sx={{
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.8)} 100%)`,
-                color: 'white',
-                borderRadius: 4,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
-                }
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    {stat.icon}
-                  </Box>
-                  <Chip
-                    label={stat.change}
-                    size="small"
-                    sx={{
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.7rem'
-                    }}
-                  />
-                </Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
-                  {stat.label}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          { icon: <Zap className="h-6 w-6" />, label: 'Conversions Today', value: '3,247', change: '+18%', gradient: 'from-pink-500 to-pink-400' },
+          { icon: <TrendingUp className="h-6 w-6" />, label: 'Success Rate', value: '99.97%', change: '+0.3%', gradient: 'from-red-500 to-red-400' },
+          { icon: <Clock className="h-6 w-6" />, label: 'Avg. Processing Time', value: '1.2s', change: '-0.8s', gradient: 'from-blue-500 to-blue-400' },
+          { icon: <Database className="h-6 w-6" />, label: 'Storage Saved', value: '2.4TB', change: '+15%', gradient: 'from-green-500 to-green-400' },
+        ].map((stat, i) => (
+          <Card key={i} className={`bg-gradient-to-br ${stat.gradient} text-white border-0 hover:-translate-y-1 transition-all shadow-lg`}>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 rounded-lg bg-white/20 backdrop-blur">{stat.icon}</div>
+                <Badge variant="secondary" className="bg-white/20 border-0">{stat.change}</Badge>
+              </div>
+              <h3 className="text-3xl font-bold">{stat.value}</h3>
+              <p className="text-sm opacity-90">{stat.label}</p>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </div>
 
       {/* Mode Toggle */}
-      <Card elevation={0} sx={{ borderRadius: 4, mb: 4 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-            <ToggleButtonGroup
-              value={previewMode}
-              exclusive
-              onChange={(e, value) => value && setPreviewMode(value)}
-              sx={{
-                '& .MuiToggleButton-root': {
-                  borderRadius: 2,
-                  border: 'none',
-                  background: '#f8fafc',
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                    color: 'white',
-                    boxShadow: '0 4px 12px rgba(240, 147, 251, 0.4)'
-                  },
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #e082ea 0%, #e4465b 100%)'
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="single">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FileText size={18} />
-                  Single File
-                </Box>
-              </ToggleButton>
-              <ToggleButton value="batch">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Database size={18} />
-                  Batch Processing
-                </Box>
-              </ToggleButton>
-            </ToggleButtonGroup>
-            
-            <Stack direction="row" spacing={1}>
-              <IconButton
-                onClick={() => setShowHistory(!showHistory)}
-                sx={{ color: '#666' }}
-              >
-                <History size={20} />
-              </IconButton>
-              <IconButton
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                sx={{ color: '#666' }}
-              >
-                <Settings size={20} />
-              </IconButton>
-            </Stack>
-          </Stack>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as 'single' | 'batch')}>
+              <TabsList>
+                <TabsTrigger value="single" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" /> Single File
+                </TabsTrigger>
+                <TabsTrigger value="batch" className="flex items-center gap-2">
+                  <Database className="h-4 w-4" /> Batch Processing
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="flex gap-2">
+              <Button variant="ghost" size="icon" onClick={() => setShowHistory(!showHistory)}>
+                <History className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setShowAdvanced(!showAdvanced)}>
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Grid container spacing={4}>
-        {/* Enhanced Main Converter */}
-        <Grid item xs={12} lg={8}>
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider',
-              background: 'white',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)'
-              }
-            }}
-          >
-            <CardContent sx={{ p: 4 }}>
-              {/* Upload Section */}
-              <Box
-                sx={{
-                  border: '2px dashed',
-                  borderColor: selectedFile ? 'success.main' : 'divider',
-                  borderRadius: 3,
-                  p: 5,
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  background: selectedFile
-                    ? alpha('#4caf50', 0.05)
-                    : 'linear-gradient(135deg, rgba(240, 147, 251, 0.05) 0%, rgba(245, 87, 108, 0.05) 100%)',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    background: alpha('#f093fb', 0.08),
-                    transform: 'translateY(-2px)'
-                  },
-                  mb: 4
-                }}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main Converter */}
+        <div className="lg:col-span-8">
+          <Card className="h-full">
+            <CardContent className="p-8">
+              {/* Upload Area */}
+              <div
+                className={`
+                  border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all
+                  ${selectedFile || batchConfig.files.length > 0 ? 'border-green-500 bg-green-50' : 'border-muted hover:border-primary hover:bg-accent/50'}
+                `}
               >
                 <input
                   type="file"
                   onChange={handleFileUpload}
-                  style={{ display: 'none' }}
+                  className="hidden"
                   id="file-upload"
                   multiple={batchConfig.enabled}
                   accept=".pdf,.docx,.txt,.jpg,.png,.html,.xlsx,.pptx"
                 />
-                <label htmlFor="file-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                  <Upload size={56} color={selectedFile ? '#4caf50' : '#f093fb'} style={{ marginBottom: 16 }} />
-                  <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-                    {selectedFile ? `Selected: ${selectedFile.name}` : 
-                     batchConfig.enabled ? 'Drop multiple files here or click to browse' : 
-                     'Drop your file here or click to browse'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {batchConfig.enabled ? 
-                      'Supports all formats • Batch processing enabled' : 
-                      'Supports: PDF, DOCX, TXT, JPG, PNG, HTML, XLSX, PPTX • Maximum 100MB'
-                    }
-                  </Typography>
+                <label htmlFor="file-upload" className="block">
+                  <Upload
+                    className={`h-14 w-14 mx-auto mb-4 ${selectedFile || batchConfig.files.length > 0 ? 'text-green-600' : 'text-pink-500'}`}
+                  />
+                  <h3 className="text-xl font-semibold mb-2">
+                    {selectedFile
+                      ? `Selected: ${selectedFile.name}`
+                      : batchConfig.enabled
+                      ? 'Drop multiple files here or click to browse'
+                      : 'Drop your file here or click to browse'}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {batchConfig.enabled
+                      ? 'Supports all formats • Batch processing enabled'
+                      : 'Supports: PDF, DOCX, TXT, JPG, PNG, HTML, XLSX, PPTX • Maximum 100MB'}
+                  </p>
                 </label>
-              </Box>
+              </div>
 
-              {/* Format Selection */}
+              {/* Format Selection (Single Mode) */}
               {!batchConfig.enabled && (
-                <Grid container spacing={3} sx={{ mb: 4 }} alignItems="center">
-                  <Grid item xs={12} sm={5}>
-                    <FormControl fullWidth>
-                      <InputLabel>Convert From</InputLabel>
-                      <Select
-                        value={fromFormat}
-                        label="Convert From"
-                        onChange={(e) => setFromFormat(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderWidth: 2
-                          }
-                        }}
-                      >
-                        {formats.map((format) => (
-                          <MenuItem key={format.value} value={format.value}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {format.icon}
-                              <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                  {format.label}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {format.description}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </MenuItem>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center my-8">
+                  <div>
+                    <Label>Convert From</Label>
+                    <Select value={fromFormat} onValueChange={setFromFormat}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {formats.map((f) => (
+                          <SelectItem key={f.value} value={f.value}>
+                            <div className="flex items-center gap-2">
+                              {f.icon}
+                              <div>
+                                <p className="font-medium">{f.label}</p>
+                                <p className="text-xs text-muted-foreground">{f.description}</p>
+                              </div>
+                            </div>
+                          </SelectItem>
                         ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                  <Grid item xs={12} sm={2} sx={{ textAlign: 'center' }}>
-                    <Box
-                      sx={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mx: 'auto',
-                        boxShadow: '0 4px 12px rgba(240, 147, 251, 0.4)'
-                      }}
-                    >
-                      <RefreshCw size={28} color="white" />
-                    </Box>
-                  </Grid>
+                  <div className="flex justify-center">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center shadow-lg">
+                      <RefreshCw className="h-7 w-7 text-white" />
+                    </div>
+                  </div>
 
-                  <Grid item xs={12} sm={5}>
-                    <FormControl fullWidth>
-                      <InputLabel>Convert To</InputLabel>
-                      <Select
-                        value={toFormat}
-                        label="Convert To"
-                        onChange={(e) => setToFormat(e.target.value)}
-                        sx={{
-                          borderRadius: 2,
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderWidth: 2
-                          }
-                        }}
-                      >
-                        {formats.map((format) => (
-                          <MenuItem key={format.value} value={format.value}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              {format.icon}
-                              <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                  {format.label}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {format.description}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </MenuItem>
+                  <div>
+                    <Label>Convert To</Label>
+                    <Select value={toFormat} onValueChange={setToFormat}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {formats.map((f) => (
+                          <SelectItem key={f.value} value={f.value}>
+                            <div className="flex items-center gap-2">
+                              {f.icon}
+                              <div>
+                                <p className="font-medium">{f.label}</p>
+                                <p className="text-xs text-muted-foreground">{f.description}</p>
+                              </div>
+                            </div>
+                          </SelectItem>
                         ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               )}
 
               {/* Batch Configuration */}
               {batchConfig.enabled && (
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
-                    Batch Processing Configuration
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Output Format</InputLabel>
-                        <Select
-                          value={batchConfig.outputFormat}
-                          label="Output Format"
-                          onChange={(e) => setBatchConfig(prev => ({ ...prev, outputFormat: e.target.value }))}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          {formats.map((format) => (
-                            <MenuItem key={format.value} value={format.value}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {format.icon}
-                                {format.label}
-                              </Box>
-                            </MenuItem>
+                <div className="my-8 space-y-6">
+                  <h3 className="text-lg font-semibold">Batch Processing Configuration</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <Label>Output Format</Label>
+                      <Select
+                        value={batchConfig.outputFormat}
+                        onValueChange={(v) => setBatchConfig((p) => ({ ...p, outputFormat: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formats.map((f) => (
+                            <SelectItem key={f.value} value={f.value}>
+                              <div className="flex items-center gap-2">
+                                {f.icon} {f.label}
+                              </div>
+                            </SelectItem>
                           ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Quality</InputLabel>
-                        <Select
-                          value={batchConfig.quality}
-                          label="Quality"
-                          onChange={(e) => setBatchConfig(prev => ({ ...prev, quality: e.target.value }))}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          <MenuItem value="low">Low (Fast)</MenuItem>
-                          <MenuItem value="medium">Medium (Balanced)</MenuItem>
-                          <MenuItem value="high">High (Best Quality)</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </Box>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Quality</Label>
+                      <Select
+                        value={batchConfig.quality}
+                        onValueChange={(v) => setBatchConfig((p) => ({ ...p, quality: v as any }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low (Fast)</SelectItem>
+                          <SelectItem value="medium">Medium (Balanced)</SelectItem>
+                          <SelectItem value="high">High (Best Quality)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Convert Button */}
               <Button
-                variant="contained"
-                size="large"
-                fullWidth
+                size="lg"
+                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600"
                 onClick={batchConfig.enabled ? handleBatchConvert : handleConvert}
-                disabled={(!selectedFile && !batchConfig.files.length) || converting}
-                startIcon={<RefreshCw size={20} />}
-                sx={{
-                  borderRadius: 2,
-                  py: 2,
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  boxShadow: '0 4px 12px rgba(240, 147, 251, 0.4)',
-                  mb: 3,
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #e082ea 0%, #e4465b 100%)',
-                    boxShadow: '0 6px 16px rgba(240, 147, 251, 0.5)'
-                  }
-                }}
+                disabled={(!selectedFile && batchConfig.files.length === 0) || converting}
               >
+                <RefreshCw className="h-5 w-5 mr-2" />
                 {converting ? 'Converting...' : batchConfig.enabled ? 'Start Batch Conversion' : 'Start Conversion'}
               </Button>
 
+              {/* Progress */}
               {converting && (
-                <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Processing your document...
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      {Math.round(progress)}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: alpha('#f093fb', 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        background: 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)',
-                        borderRadius: 4
-                      }
-                    }}
-                  />
-                </Box>
+                <div className="mt-6">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Processing your document...</span>
+                    <span className="text-sm font-medium">{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
               )}
 
+              {/* Success */}
               {conversionComplete && (
                 <>
-                  <Alert
-                    severity="success"
-                    sx={{ mb: 3, borderRadius: 2 }}
-                    icon={<Download size={20} />}
-                  >
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      Conversion completed successfully!
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Your document is ready for download
-                    </Typography>
+                  <Alert className="mt-6 border-green-500 bg-green-50">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <AlertDescription>
+                      <strong>Conversion completed successfully!</strong><br />
+                      Your document is ready for download.
+                    </AlertDescription>
                   </Alert>
                   <Button
-                    variant="contained"
-                    color="success"
-                    startIcon={<Download size={18} />}
+                    size="lg"
+                    className="w-full mt-4 bg-green-600 hover:bg-green-700"
                     onClick={handleDownload}
-                    disabled={!conversionComplete}
-                    fullWidth
-                    size="large"
-                    sx={{
-                      borderRadius: 2,
-                      py: 2,
-                      fontWeight: 600,
-                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)'
-                    }}
                   >
+                    <Download className="h-5 w-5 mr-2" />
                     Download Converted File
                   </Button>
                 </>
               )}
             </CardContent>
           </Card>
-        </Grid>
+        </div>
 
-        {/* Enhanced Sidebar */}
-        <Grid item xs={12} lg={4}>
-          <Stack spacing={3}>
-            {/* Active Jobs */}
-            <Card
-              elevation={0}
-              sx={{
-                borderRadius: 4,
-                border: '1px solid',
-                borderColor: 'divider'
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                  Active Conversions
-                </Typography>
-                <List sx={{ p: 0 }}>
-                  {activeJobs.map((job) => (
-                    <ListItem key={job.id} sx={{ px: 0, py: 1 }}>
-                      <ListItemIcon sx={{ minWidth: 40 }}>
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 1,
-                            background: getStatusColor(job.status),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
+        {/* Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Active Jobs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Conversions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-64">
+                {activeJobs.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">No active conversions</p>
+                ) : (
+                  <div className="space-y-4">
+                    {activeJobs.map((job) => (
+                      <div key={job.id} className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg ${getStatusColor(job.status)} flex items-center justify-center`}>
                           {getStatusIcon(job.status)}
-                        </Box>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {job.fileName}
-                          </Typography>
-                        }
-                        secondary={
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">
-                              {job.fromFormat} → {job.toFormat}
-                            </Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              value={job.progress}
-                              sx={{
-                                height: 4,
-                                borderRadius: 2,
-                                mt: 0.5,
-                                '& .MuiLinearProgress-bar': {
-                                  background: getStatusColor(job.status)
-                                }
-                              }}
-                            />
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                  {activeJobs.length === 0 && (
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
-                      No active conversions
-                    </Typography>
-                  )}
-                </List>
-              </CardContent>
-            </Card>
-
-            {/* Conversion History */}
-            {showHistory && (
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 4,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                    Recent Conversions
-                  </Typography>
-                  <List sx={{ p: 0 }}>
-                    {conversionHistory.map((item, index) => (
-                      <ListItem
-                        key={item.id}
-                        sx={{
-                          px: 0,
-                          borderBottom: index < conversionHistory.length - 1 ? '1px solid' : 'none',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 40 }}>
-                          <Box
-                            sx={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: 1,
-                              background: '#4caf50',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          >
-                            <CheckCircle size={16} color="white" />
-                          </Box>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {item.from} → {item.to}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="caption" color="text.secondary">
-                              {item.time} • {item.size}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm truncate">{job.fileName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {job.fromFormat} → {job.toFormat}
+                          </p>
+                          <Progress value={job.progress} className="h-1 mt-1" />
+                        </div>
+                      </div>
                     ))}
-                  </List>
-                </CardContent>
-              </Card>
-            )}
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
-            {/* Popular Formats */}
-            <Card
-              elevation={0}
-              sx={{
-                borderRadius: 4,
-                border: '1px solid',
-                borderColor: 'divider'
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-                  Popular Conversions
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {['PDF → DOCX', 'DOCX → PDF', 'JPG → PDF', 'PDF → JPG', 'HTML → PDF', 'PNG → PDF', 'XLSX → PDF', 'PPTX → PDF'].map((format) => (
-                    <Chip
-                      key={format}
-                      label={format}
-                      sx={{
-                        fontWeight: 600,
-                        background: alpha('#f093fb', 0.1),
-                        color: '#f5576c',
-                        '&:hover': {
-                          background: alpha('#f093fb', 0.2)
-                        }
-                      }}
-                    />
+          {/* History */}
+          {showHistory && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Conversions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {conversionHistory.map((item) => (
+                    <div key={item.id} className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
+                        <CheckCircle className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{item.from} → {item.to}</p>
+                        <p className="text-xs text-muted-foreground">{item.time} • {item.size}</p>
+                      </div>
+                    </div>
                   ))}
-                </Box>
+                </div>
               </CardContent>
             </Card>
-          </Stack>
-        </Grid>
-      </Grid>
-    </Box>
+          )}
+
+          {/* Popular Conversions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Popular Conversions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {['PDF → DOCX', 'DOCX → PDF', 'JPG → PDF', 'PDF → JPG', 'HTML → PDF', 'PNG → PDF', 'XLSX → PDF', 'PPTX → PDF'].map((fmt) => (
+                  <Badge key={fmt} variant="secondary" className="bg-pink-500/10 text-pink-600">
+                    {fmt}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
