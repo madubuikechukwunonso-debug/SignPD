@@ -146,7 +146,7 @@ export function DocPawn() {
       rating: 4.9,
       downloads: 3247,
       category: 'Resume',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'Sarah Johnson',
       sales: 3247,
       featured: true,
@@ -165,7 +165,7 @@ export function DocPawn() {
       rating: 4.8,
       downloads: 1892,
       category: 'Legal',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'Mike Chen',
       sales: 1892,
       featured: true,
@@ -184,7 +184,7 @@ export function DocPawn() {
       rating: 4.7,
       downloads: 4134,
       category: 'Finance',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'Emily Davis',
       sales: 4134,
       featured: false,
@@ -203,7 +203,7 @@ export function DocPawn() {
       rating: 4.9,
       downloads: 2678,
       category: 'Business',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'James Wilson',
       sales: 2678,
       featured: true,
@@ -222,7 +222,7 @@ export function DocPawn() {
       rating: 4.5,
       downloads: 2543,
       category: 'Productivity',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'Lisa Anderson',
       sales: 2543,
       featured: false,
@@ -241,7 +241,7 @@ export function DocPawn() {
       rating: 4.6,
       downloads: 1987,
       category: 'Marketing',
-      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080',
+      image: 'https://images.unsplash.com/photo-1677693972403-db681288b5da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwbWFya2V0cGxhY2V8ZW58MXx8fHwxNzY3NTE1NDQ3fDA&ixlib=rb-4.1.0&q=80&w=1080 ',
       author: 'Robert Taylor',
       sales: 1987,
       featured: false,
@@ -985,7 +985,7 @@ export function DocPawn() {
                       </Typography>
                     </Box>
                   </Stack>
-                </Box>
+                </Grid>
                 
                 <Grid item xs={12} md={5}>
                   <Card elevation={0} sx={{ borderRadius: 3, background: '#f8fafc' }}>
