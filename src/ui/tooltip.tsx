@@ -19,11 +19,7 @@ import {
   Slide,
   Grow,
   Collapse,
-  FadeProps,
-  ZoomProps,
-  SlideProps,
-  GrowProps,
-  CollapseProps
+  Button
 } from '@mui/material';
 import {
   Info,
@@ -612,7 +608,7 @@ interface TooltipProps {
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
   minWidth?: number;
   variant?: 'default' | 'rich' | 'card' | 'menu' | 'analytics' | 'chart' | 'comparison' | 'tutorial' | 'onboarding';
-  color?: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'default';
+  color?: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'default' | 'light';
   size?: 'small' | 'medium' | 'large';
   icon?: React.ReactNode;
   actions?: Array<{
@@ -695,33 +691,7 @@ interface RichTooltipContent {
   };
 }
 
-const getAnimationComponent = (
-  animation: string,
-  duration: number,
-  direction: string
-): React.ElementType => {
-  const animationProps = {
-    timeout: duration,
-    direction: direction as any
-  };
-
-  switch (animation) {
-    case 'fade':
-      return (props: FadeProps) => <Fade {...props} {...animationProps} />;
-    case 'zoom':
-      return (props: ZoomProps) => <Zoom {...props} {...animationProps} />;
-    case 'slide':
-      return (props: SlideProps) => <Slide {...props} {...animationProps} />;
-    case 'grow':
-      return (props: GrowProps) => <Grow {...props} {...animationProps} />;
-    case 'collapse':
-      return (props: CollapseProps) => <Collapse {...props} {...animationProps} />;
-    default:
-      return (props: any) => <div {...props} />;
-  }
-};
-
-const getColorStyles = (color: string, variant: string) => {
+const getColorStyles = (color: string = 'default', variant: string = 'default') => {
   const isRich = variant === 'rich' || variant === 'card' || variant === 'analytics' || variant === 'chart' || variant === 'comparison';
   
   switch (color) {
@@ -761,11 +731,17 @@ const getColorStyles = (color: string, variant: string) => {
         text: 'white',
         border: '#4facfe'
       };
+    case 'light':
+      return {
+        background: 'white',
+        text: '#1a1a1a',
+        border: '#e0e0e0'
+      };
     default:
       return {
-        background: isRich ? '#1a1a1a' : 'white',
-        text: isRich ? 'white' : '#1a1a1a',
-        border: 'rgba(0,0,0,0.1)'
+        background: isRich ? '#1a1a1a' : 'rgba(0, 0, 0, 0.85)',
+        text: 'white',
+        border: '#333333'
       };
   }
 };
@@ -1169,28 +1145,7 @@ const renderTutorialTooltip = (data: any, variantStyles: any) => {
     </Card>
   );
 };
-const getColorStyles = (color: string = 'default', variant: string = 'default') => {
-  const styles = {
-    default: { background: 'rgba(0, 0, 0, 0.85)', text: '#ffffff', border: '#333333' },
-    light: { background: 'rgba(255, 255, 255, 0.95)', text: '#000000', border: '#e0e0e0' },
-    primary: { background: '#667eea', text: '#ffffff', border: '#667eea' },
-    error: { background: '#f44336', text: '#ffffff', border: '#f44336' },
-    success: { background: '#4caf50', text: '#ffffff', border: '#4caf50' },
-  };
-  return styles[color as keyof typeof styles] || styles.default;
-};
 
-const getAnimationComponent = (animation: string, duration: number, direction: string) => {
-  const props = { timeout: duration };
-  switch (animation) {
-    case 'fade': return Fade;
-    case 'zoom': return Zoom;
-    case 'grow': return Grow;
-    case 'slide':
-      return (props: any) => <Slide direction={direction as any} {...props} {...props} />;
-    default: return Fade;
-  }
-};
 export function Tooltip({
   title,
   children,
@@ -1237,13 +1192,12 @@ export function Tooltip({
   components,
   slots,
   slotProps
-}: TooltipProps) => {
+}: TooltipProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen || false);
   const [isVisible, setIsVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const variantStyles = getColorStyles(color, variant);
-  const AnimationComponent = getAnimationComponent(animation, animationDuration, animationDirection);
 
   // Handle rich content for advanced variants
   const renderContent = () => {
@@ -1464,8 +1418,6 @@ export function Tooltip({
     onClose?.();
   };
 
-  const TransitionComponent = animation !== 'none' ? AnimationComponent : undefined;
-
   return (
     <MuiTooltip
       title={renderContent()}
@@ -1487,10 +1439,7 @@ export function Tooltip({
       interactive={interactive || actions.length > 0 || variant !== 'default'}
       maxWidth={maxWidth}
       components={components}
-      slots={{
-        ...slots,
-        transition: TransitionComponent
-      }}
+      slots={slots}
       slotProps={{
         ...slotProps,
         tooltip: {
