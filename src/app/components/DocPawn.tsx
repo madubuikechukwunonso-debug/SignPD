@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -21,19 +21,21 @@ import {
   AvatarGroup,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
-  ListItemAvatar,
   IconButton,
   Menu,
   MenuItem,
   Badge,
   ToggleButton,
   ToggleButtonGroup,
-  LinearProgress,
-  Tooltip,
   FormControl,
   InputLabel,
-  Select
+  Select,
+  LinearProgress,
+  Tooltip,
+  Fab,
+  Divider
 } from '@mui/material';
 import {
   Search,
@@ -57,9 +59,18 @@ import {
   Shield,
   CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  FileText,
+  Image as ImageIcon,
+  Upload,
+  Plus,
+  Pin,
+  PushPin,
+  MoreVertical,
+  Play,
+  Pause
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 interface DocumentTemplate {
   id: number;
@@ -827,8 +838,8 @@ export function DocPawn() {
                       {template.description}
                     </Typography>
                     
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Stack direction="row" spacing={3} alignItems="center">
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Rating value={template.rating} precision={0.1} readOnly size="small" />
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {template.rating}
@@ -950,15 +961,8 @@ export function DocPawn() {
                   </Typography>
                   
                   <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-                    <Chip
-                      label={selectedDoc.category}
-                      sx={{ fontWeight: 600 }}
-                    />
-                    <Chip
-                      label={`By ${selectedDoc.author}`}
-                      variant="outlined"
-                      sx={{ fontWeight: 600 }}
-                    />
+                    <Chip label={selectedDoc.category} sx={{ fontWeight: 600 }} />
+                    <Chip label={`By ${selectedDoc.author}`} variant="outlined" sx={{ fontWeight: 600 }} />
                   </Stack>
                   
                   <Stack direction="row" spacing={3} sx={{ mb: 3 }}>
@@ -981,12 +985,12 @@ export function DocPawn() {
                       </Typography>
                     </Box>
                   </Stack>
-                </Grid>
+                </Box>
                 
                 <Grid item xs={12} md={5}>
                   <Card elevation={0} sx={{ borderRadius: 3, background: '#f8fafc' }}>
                     <CardContent sx={{ p: 3 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
                         Template Details
                       </Typography>
                       
