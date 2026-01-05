@@ -60,6 +60,13 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
+import Tooltip from '@mui/material/Tooltip';
+import Fade from '@mui/material/Fade';
+import Zoom from '@mui/material/Zoom';
+import Grow from '@mui/material/Grow';
+import Slide from '@mui/material/Slide';
+import { TrendingDown, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRef } from 'react';
 
 interface ConversionJob {
   id: string;
