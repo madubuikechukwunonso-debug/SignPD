@@ -1,246 +1,31 @@
 {
   "compilerOptions": {
-    /* Language and Environment */
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "allowJs": true,
-    "checkJs": false,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "noEmitOnError": true,
-
-    /* Strict Type Checking */
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": false,
-
-    /* Module Resolution */
-    "rootDir": "./",
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"],
-      "@/components/*": ["src/components/*"],
-      "@/pages/*": ["src/pages/*"],
-      "@/hooks/*": ["src/hooks/*"],
-      "@/utils/*": ["src/utils/*"],
-      "@/services/*": ["src/services/*"],
-      "@/types/*": ["src/types/*"],
-      "@/styles/*": ["src/styles/*"],
-      "@/assets/*": ["src/assets/*"],
-      "@/constants/*": ["src/constants/*"],
-      "@/contexts/*": ["src/contexts/*"],
-      "@/store/*": ["src/store/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/config/*": ["src/config/*"],
-      "@/api/*": ["src/api/*"],
-      "@/middleware/*": ["src/middleware/*"],
-      "@/validators/*": ["src/validators/*"],
-      "@/schemas/*": ["src/schemas/*"],
-      "@/animations/*": ["src/animations/*"],
-      "@/hooks/useAuth": ["src/hooks/useAuth.ts"],
-      "@/hooks/useDocument": ["src/hooks/useDocument.ts"],
-      "@/hooks/useConversion": ["src/hooks/useConversion.ts"],
-      "@/hooks/useTeam": ["src/hooks/useTeam.ts"],
-      "@/hooks/useAnalytics": ["src/hooks/useAnalytics.ts"],
-      "@/services/auth": ["src/services/auth.ts"],
-      "@/services/api": ["src/services/api.ts"],
-      "@/services/storage": ["src/services/storage.ts"],
-      "@/services/analytics": ["src/services/analytics.ts"],
-      "@/utils/helpers": ["src/utils/helpers.ts"],
-      "@/utils/validation": ["src/utils/validation.ts"],
-      "@/utils/encryption": ["src/utils/encryption.ts"],
-      "@/utils/formatters": ["src/utils/formatters.ts"],
-      "@/types/auth": ["src/types/auth.ts"],
-      "@/types/document": ["src/types/document.ts"],
-      "@/types/conversion": ["src/types/conversion.ts"],
-      "@/types/team": ["src/types/team.ts"],
-      "@/types/analytics": ["src/types/analytics.ts"]
-    },
-
-    /* Source Maps */
-    "sourceMap": true,
-    "inlineSourceMap": false,
-    "inlineSources": false,
-    "declarationMap": true,
-    "sourceRoot": "",
-
-    /* Experimental Options */
-    "experimentalDecorators": false,
-    "emitDecoratorMetadata": false,
+    "target": "ES2020",
     "useDefineForClassFields": true,
-
-    /* Advanced */
-    "removeComments": false,
-    "preserveConstEnums": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "composite": true,
-    "disableSourceOfProjectReferenceRedirect": false,
-    "disableSolutionSearching": false,
-    "disableReferencedProjectLoad": false
-  },
-
-  /* Include patterns */
-  "include": [
-    "vite.config.ts",
-    "vite.config.mts",
-    "vite.config.cts",
-    "vitest.config.ts",
-    "vitest.config.mts",
-    "vitest.config.cts",
-    "cypress.config.ts",
-    "cypress.config.mts",
-    "cypress.config.cts",
-    "nightwatch.conf.js",
-    "nightwatch.conf.cjs",
-    "nightwatch.conf.ts",
-    "nightwatch.conf.cts",
-    "playwright.config.ts",
-    "playwright.config.mts",
-    "playwright.config.cts",
-    "tailwind.config.js",
-    "tailwind.config.cjs",
-    "tailwind.config.mjs",
-    "tailwind.config.ts",
-    "tailwind.config.cts",
-    "postcss.config.js",
-    "postcss.config.cjs",
-    "postcss.config.mjs",
-    "postcss.config.ts",
-    "postcss.config.cts",
-    "eslint.config.js",
-    "eslint.config.cjs",
-    "eslint.config.mjs",
-    "eslint.config.ts",
-    "eslint.config.cts",
-    ".eslintrc.js",
-    ".eslintrc.cjs",
-    ".eslintrc.mjs",
-    ".eslintrc.ts",
-    ".eslintrc.cts",
-    ".eslintrc.json",
-    "prettier.config.js",
-    "prettier.config.cjs",
-    "prettier.config.mjs",
-    "prettier.config.ts",
-    "prettier.config.cts",
-    ".prettierrc.js",
-    ".prettierrc.cjs",
-    ".prettierrc.mjs",
-    ".prettierrc.ts",
-    ".prettierrc.cts",
-    ".prettierrc.json",
-    "scripts/**/*",
-    "build/**/*",
-    "config/**/*",
-    "tools/**/*",
-    "*.d.ts",
-    "types/**/*",
-    "node_modules/@types/**/*"
-  ],
-
-  /* Exclude patterns */
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage",
-    ".tmp",
-    "tmp",
-    "temp",
-    ".cache",
-    "cache",
-    "*.js",
-    "*.mjs",
-    "*.cjs",
-    "*.jsx",
-    "src/**/*.js",
-    "src/**/*.mjs",
-    "src/**/*.cjs",
-    "src/**/*.jsx",
-    "public",
-    "assets",
-    "tests/**/*.js",
-    "tests/**/*.mjs",
-    "tests/**/*.cjs",
-    "tests/**/*.jsx",
-    "cypress/**/*",
-    "e2e/**/*",
-    "playwright/**/*",
-    ".git",
-    ".vscode",
-    ".idea",
-    "*.log",
-    "*.tmp",
-    "*.temp"
-  ],
-
-  /* References to other projects */
-  "references": [
-    {
-      "path": "./tsconfig.json"
-    }
-  ],
-
-  /* Documentation */
-  "tsdoc": {
-    "extends": ["@microsoft/tsdoc/config/strict"],
-    "excludePatterns": [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/build/**"
-    ]
-  },
-
-  /* Build options specific to Node.js build tools */
-  "buildOptions": {
-    "target": "node18",
-    "module": "esnext",
-    "lib": ["es2022"],
-    "outDir": "./dist",
-    "rootDir": "./",
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true,
-    "incremental": true,
-    "removeComments": false,
-    "preserveConstEnums": true,
-    "strict": true,
-    "esModuleInterop": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
-    "noEmitOnError": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Strictness */
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "useDefineForClassFields": true
-  }
+
+    /* Paths (keep your @/* alias) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": []
 }
