@@ -697,3 +697,9 @@ export function SignPD() {
     </Box>
   );
 }
+export const SignPD = () => (
+  <Box sx={{ p: 8, textAlign: 'center' }}>
+    <Typography variant="h4">PDF Signing Module</Typography>
+    <Typography>Secure digital signature tools coming soon.</Typography>
+  </Box>
+);
