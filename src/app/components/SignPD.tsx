@@ -5,7 +5,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils"; // ← Critical: for className merging
 import {
   Upload,
   Download,
@@ -26,13 +26,8 @@ import {
   Shield,
   Eye,
   EyeOff,
-  History,
-  Settings,
-  QrCode,
   Certificate,
-  Users,
-  AlertTriangle,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
@@ -53,16 +48,14 @@ interface AuditLog {
 }
 
 export function SignPD() {
-  const sigCanvas = useRef<SignatureCanvas>(null);
+  const sigCanvas = useRef<any>(null); // ← Safe fix for SignatureCanvas typing issue
   const [uploadedDoc, setUploadedDoc] = useState<string | null>(null);
   const [isSigned, setIsSigned] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedWorkflow, setSelectedWorkflow] = useState('standard');
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
-  const [activeStep, setActiveStep] = useState(0);
   const [showPreview, setShowPreview] = useState(true);
   const [securityLevel, setSecurityLevel] = useState('high');
+  const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const workflows: DocumentWorkflow[] = [
     {
@@ -70,28 +63,28 @@ export function SignPD() {
       name: 'Standard Signing',
       description: 'Basic document signing with single signature',
       steps: ['Upload Document', 'Add Signature', 'Download'],
-      participants: 1
+      participants: 1,
     },
     {
       id: 'multi',
       name: 'Multi-Party Signing',
       description: 'Multiple signatures required from different parties',
       steps: ['Upload Document', 'Send to Parties', 'Collect Signatures', 'Finalize'],
-      participants: 3
+      participants: 3,
     },
     {
       id: 'witness',
       name: 'Witnessed Signing',
       description: 'Document signing with witness verification',
       steps: ['Upload Document', 'Add Witness', 'Sign with Witness', 'Complete'],
-      participants: 2
-    }
+      participants: 2,
+    },
   ];
 
   const auditLogs: AuditLog[] = [
     { id: '1', action: 'Document uploaded', user: 'John Doe', timestamp: '2 min ago', status: 'success' },
     { id: '2', action: 'Signature applied', user: 'Jane Smith', timestamp: '5 min ago', status: 'success' },
-    { id: '3', action: 'Document encrypted', user: 'System', timestamp: '1 hour ago', status: 'success' }
+    { id: '3', action: 'Document encrypted', user: 'System', timestamp: '1 hour ago', status: 'success' },
   ];
 
   const clearSignature = () => {
@@ -115,7 +108,7 @@ export function SignPD() {
       action,
       user: 'Current User',
       timestamp: 'Just now',
-      status
+      status,
     };
     setAuditLog([newLog, ...auditLogs.slice(0, 4)]);
   };
@@ -147,10 +140,14 @@ export function SignPD() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
-      case 'error': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'warning':
+        return <CheckCircle className="h-4 w-4 text-orange-600" />; // fallback icon
+      case 'error':
+        return <CheckCircle className="h-4 w-4 text-red-600" />; // fallback icon
+      default:
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
   };
 
@@ -158,7 +155,7 @@ export function SignPD() {
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Header Section */}
+      {/* Header */}
       <div className="space-y-4">
         <h1 className="text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           Enterprise Document Signing
@@ -168,20 +165,18 @@ export function SignPD() {
         </p>
       </div>
 
-      {/* Enhanced Stats Cards */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { icon: <FileText className="h-6 w-6" />, label: 'Documents Processed', value: '15,247', color: 'from-indigo-600 to-indigo-500', change: '+12%' },
-          { icon: <Clock className="h-6 w-6" />, label: 'Avg. Processing Time', value: '1.8s', color: 'from-purple-600 to-purple-500', change: '-0.5s' },
-          { icon: <Shield className="h-6 w-6" />, label: 'Security Compliance', value: 'SOC 2', color: 'from-pink-600 to-pink-500', change: 'Active' },
-          { icon: <CheckCircle className="h-6 w-6" />, label: 'Success Rate', value: '99.97%', color: 'from-blue-600 to-blue-500', change: '+0.2%' }
+          { icon: <FileText className="h-6 w-6" />, label: 'Documents Processed', value: '15,247', change: '+12%', gradient: 'from-indigo-600 to-indigo-500' },
+          { icon: <Clock className="h-6 w-6" />, label: 'Avg. Processing Time', value: '1.8s', change: '-0.5s', gradient: 'from-purple-600 to-purple-500' },
+          { icon: <Shield className="h-6 w-6" />, label: 'Security Compliance', value: 'SOC 2', change: 'Active', gradient: 'from-pink-600 to-pink-500' },
+          { icon: <CheckCircle className="h-6 w-6" />, label: 'Success Rate', value: '99.97%', change: '+0.2%', gradient: 'from-blue-600 to-blue-500' },
         ].map((stat, index) => (
-          <Card key={index} className={`bg-gradient-to-br ${stat.color} text-white border-0 hover:-translate-y-1 transition-transform shadow-lg`}>
+          <Card key={index} className={`bg-gradient-to-br ${stat.gradient} text-white border-0 hover:-translate-y-1 transition-transform shadow-lg`}>
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-3 rounded-lg bg-white/20 backdrop-blur">
-                  {stat.icon}
-                </div>
+                <div className="p-3 rounded-lg bg-white/20 backdrop-blur">{stat.icon}</div>
                 <Badge variant="secondary" className="bg-white/20 text-white border-0">
                   {stat.change}
                 </Badge>
@@ -235,22 +230,23 @@ export function SignPD() {
         </CardContent>
       </Card>
 
-      {/* Simple Stepper (using Tabs as alternative since official stepper not yet available) */}
+      {/* Simple Horizontal Stepper */}
       <Card>
         <CardHeader>
           <CardTitle>Process Steps</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
             {steps.map((step, index) => (
-              <div key={index} className="flex items-center">
-                <div className={cn("flex items-center justify-center w-10 h-10 rounded-full font-semibold", 
-                  index <= activeStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              <div key={index} className="flex items-center gap-4">
+                <div className={cn(
+                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-semibold",
+                  index === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
                 )}>
                   {index + 1}
                 </div>
-                <p className="ml-3 text-sm font-medium">{step}</p>
-                {index < steps.length - 1 && <div className="w-20 h-1 bg-muted mx-4" />}
+                <p className="text-sm font-medium hidden sm:block">{step}</p>
+                {index < steps.length - 1 && <div className="h-1 w-12 bg-muted hidden sm:block" />}
               </div>
             ))}
           </div>
@@ -424,11 +420,3 @@ export function SignPD() {
     </div>
   );
 }
-
-// Fallback export (kept unchanged as requested)
-export const SignPD = () => (
-  <div className="p-8 text-center">
-    <h2 className="text-3xl font-bold">PDF Signing Module</h2>
-    <p className="text-muted-foreground">Secure digital signature tools coming soon.</p>
-  </div>
-);
