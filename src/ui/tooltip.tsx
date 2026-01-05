@@ -1169,7 +1169,28 @@ const renderTutorialTooltip = (data: any, variantStyles: any) => {
     </Card>
   );
 };
+const getColorStyles = (color: string = 'default', variant: string = 'default') => {
+  const styles = {
+    default: { background: 'rgba(0, 0, 0, 0.85)', text: '#ffffff', border: '#333333' },
+    light: { background: 'rgba(255, 255, 255, 0.95)', text: '#000000', border: '#e0e0e0' },
+    primary: { background: '#667eea', text: '#ffffff', border: '#667eea' },
+    error: { background: '#f44336', text: '#ffffff', border: '#f44336' },
+    success: { background: '#4caf50', text: '#ffffff', border: '#4caf50' },
+  };
+  return styles[color as keyof typeof styles] || styles.default;
+};
 
+const getAnimationComponent = (animation: string, duration: number, direction: string) => {
+  const props = { timeout: duration };
+  switch (animation) {
+    case 'fade': return Fade;
+    case 'zoom': return Zoom;
+    case 'grow': return Grow;
+    case 'slide':
+      return (props: any) => <Slide direction={direction as any} {...props} {...props} />;
+    default: return Fade;
+  }
+};
 export function Tooltip({
   title,
   children,
