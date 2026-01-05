@@ -1,40 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Typography,
-  Grid,
   Card,
   CardContent,
-  Avatar,
-  TextField,
-  Button,
-  Paper,
-  Divider,
-  Badge,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  IconButton,
-  Stack,
-  Chip,
-  alpha,
-  InputAdornment,
-  ToggleButton,
-  ToggleButtonGroup,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  LinearProgress,
-  Tooltip,
-  Fab
-} from '@mui/material';
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
 import {
   Send,
   Paperclip,
@@ -225,51 +204,15 @@ export function DockChat() {
   ];
 
   const teams: Team[] = [
-    {
-      id: 1,
-      name: 'Design Team',
-      members: 8,
-      avatar: 'https://i.pravatar.cc/150?img=11',
-      lastActivity: '2 min ago'
-    },
-    {
-      id: 2,
-      name: 'Legal Department',
-      members: 5,
-      avatar: 'https://i.pravatar.cc/150?img=12',
-      lastActivity: '15 min ago'
-    },
-    {
-      id: 3,
-      name: 'Finance Team',
-      members: 12,
-      avatar: 'https://i.pravatar.cc/150?img=13',
-      lastActivity: '1 hour ago'
-    }
+    { id: 1, name: 'Design Team', members: 8, avatar: 'https://i.pravatar.cc/150?img=11', lastActivity: '2 min ago' },
+    { id: 2, name: 'Legal Department', members: 5, avatar: 'https://i.pravatar.cc/150?img=12', lastActivity: '15 min ago' },
+    { id: 3, name: 'Finance Team', members: 12, avatar: 'https://i.pravatar.cc/150?img=13', lastActivity: '1 hour ago' }
   ];
 
   const activities: ActivityItem[] = [
-    {
-      id: '1',
-      user: 'Sarah Johnson',
-      action: 'shared a document template',
-      timestamp: '2 min ago',
-      type: 'document'
-    },
-    {
-      id: '2',
-      user: 'Mike Chen',
-      action: 'completed contract review',
-      timestamp: '5 min ago',
-      type: 'file'
-    },
-    {
-      id: '3',
-      user: 'Emily Davis',
-      action: 'started a video call',
-      timestamp: '12 min ago',
-      type: 'meeting'
-    }
+    { id: '1', user: 'Sarah Johnson', action: 'shared a document template', timestamp: '2 min ago', type: 'document' },
+    { id: '2', user: 'Mike Chen', action: 'completed contract review', timestamp: '5 min ago', type: 'file' },
+    { id: '3', user: 'Emily Davis', action: 'started a video call', timestamp: '12 min ago', type: 'meeting' }
   ];
 
   const filteredUsers = users.filter(user =>
@@ -289,13 +232,10 @@ export function DockChat() {
       };
       setMessages([...messages, newMessage]);
       setMessageText('');
-      
-      // Simulate typing indicator
+
       setTimeout(() => {
         setTypingUsers([selectedUser?.name || 'Other']);
-        setTimeout(() => {
-          setTypingUsers([]);
-        }, 2000);
+        setTimeout(() => setTypingUsers([]), 2000);
       }, 1000);
     }
   };
@@ -304,22 +244,18 @@ export function DockChat() {
     setSelectedUser(user);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: 'online' | 'offline' | 'away' | 'busy') => {
     switch (status) {
-      case 'online': return '#44b700';
-      case 'away': return '#ffa726';
-      case 'busy': return '#f44336';
-      default: return '#bdbdbd';
+      case 'online': return 'bg-green-500';
+      case 'away': return 'bg-orange-500';
+      case 'busy': return 'bg-red-500';
+      default: return 'bg-gray-400';
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'online': return <Box sx={{ width: 12, height: 12, borderRadius: '50%', background: '#44b700' }} />;
-      case 'away': return <Clock size={12} color="#ffa726" />;
-      case 'busy': return <Box sx={{ width: 12, height: 12, borderRadius: '50%', background: '#f44336' }} />;
-      default: return <Box sx={{ width: 12, height: 12, borderRadius: '50%', background: '#bdbdbd' }} />;
-    }
+  const getStatusDot = (status: string) => {
+    const color = getStatusColor(status as any);
+    return <div className={`w-3 h-3 rounded-full ${color} ring-2 ring-white`} />;
   };
 
   const scrollToBottom = () => {
@@ -346,37 +282,24 @@ export function DockChat() {
     }
   };
 
-  const toggleVideoCall = () => {
-    setIsVideoCall(!isVideoCall);
-  };
-
-  const toggleScreenShare = () => {
-    setIsScreenSharing(!isScreenSharing);
-  };
-
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const toggleVideoCall = () => setIsVideoCall(!isVideoCall);
+  const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
 
   const handleReaction = (messageId: number, emoji: string) => {
     setMessages(messages.map(msg => {
       if (msg.id === messageId) {
-        const existingReaction = msg.reactions?.find(r => r.emoji === emoji);
-        if (existingReaction) {
+        const existing = msg.reactions?.find(r => r.emoji === emoji);
+        if (existing) {
           return {
             ...msg,
-            reactions: msg.reactions?.map(r => 
-              r.emoji === emoji 
+            reactions: msg.reactions?.map(r =>
+              r.emoji === emoji
                 ? { ...r, users: r.users.includes('You') ? r.users.filter(u => u !== 'You') : [...r.users, 'You'] }
                 : r
             )
           };
         } else {
-          return {
-            ...msg,
-            reactions: [...(msg.reactions || []), { emoji, users: ['You'] }]
-          };
+          return { ...msg, reactions: [...(msg.reactions || []), { emoji, users: ['You'] }] };
         }
       }
       return msg;
@@ -384,783 +307,331 @@ export function DockChat() {
   };
 
   return (
-    <Box>
-      {/* Enhanced Header */}
-      <Box sx={{ mb: 6 }}>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            mb: 2,
-            fontSize: '2.5rem'
-          }}
-        >
+    <div className="space-y-8 p-4 md:p-8">
+      {/* Header */}
+      <div className="space-y-4">
+        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-green-500 to-teal-400 bg-clip-text text-transparent">
           Enterprise Team Collaboration
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.2rem', maxWidth: 600 }}>
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl">
           Connect, collaborate, and share documents with your team in real-time with enterprise-grade security
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      {/* Enhanced Activity Stats */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { icon: <Users size={24} />, label: 'Active Users', value: '247', color: '#43e97b', change: '+12 online' },
-          { icon: <MessageCircle size={24} />, label: 'Messages Today', value: '1,823', color: '#38f9d7', change: '+245 from yesterday' },
-          { icon: <Activity size={24} />, label: 'Avg. Response Time', value: '< 2m', color: '#4facfe', change: '98% SLA met' },
-          { icon: <Video size={24} />, label: 'Active Calls', value: '18', color: '#f093fb', change: '6 screen sharing' }
-        ].map((stat, index) => (
-          <Grid item xs={12} md={3} key={index}>
-            <Card
-              elevation={0}
-              sx={{
-                background: `linear-gradient(135deg, ${stat.color} 0%, ${alpha(stat.color, 0.8)} 100%)`,
-                color: 'white',
-                borderRadius: 4,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
-                }
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    {stat.icon}
-                  </Box>
-                  <Chip
-                    label={stat.change}
-                    size="small"
-                    sx={{
-                      bgcolor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.7rem'
-                    }}
-                  />
-                </Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.8rem' }}>
-                  {stat.label}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          { icon: <Users className="h-6 w-6" />, label: 'Active Users', value: '247', change: '+12 online', gradient: 'from-green-500 to-green-400' },
+          { icon: <MessageCircle className="h-6 w-6" />, label: 'Messages Today', value: '1,823', change: '+245 from yesterday', gradient: 'from-teal-500 to-teal-400' },
+          { icon: <Activity className="h-6 w-6" />, label: 'Avg. Response Time', value: '< 2m', change: '98% SLA met', gradient: 'from-blue-500 to-blue-400' },
+          { icon: <Video className="h-6 w-6" />, label: 'Active Calls', value: '18', change: '6 screen sharing', gradient: 'from-purple-500 to-purple-400' }
+        ].map((stat, i) => (
+          <Card key={i} className={`bg-gradient-to-br ${stat.gradient} text-white border-0 hover:-translate-y-1 transition-all shadow-lg`}>
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 rounded-lg bg-white/20 backdrop-blur">{stat.icon}</div>
+                <Badge variant="secondary" className="bg-white/20 border-0">{stat.change}</Badge>
+              </div>
+              <h3 className="text-3xl font-bold">{stat.value}</h3>
+              <p className="text-sm opacity-90">{stat.label}</p>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </div>
 
-      {/* Enhanced Navigation */}
-      <Card elevation={0} sx={{ borderRadius: 4, mb: 4 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-            <ToggleButtonGroup
-              value={viewMode}
-              exclusive
-              onChange={(e, value) => value && setViewMode(value)}
-              sx={{
-                '& .MuiToggleButton-root': {
-                  borderRadius: 3,
-                  px: 3,
-                  py: 1.5,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  border: 'none',
-                  background: '#f8fafc',
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                    color: 'white',
-                    boxShadow: '0 4px 12px rgba(67, 233, 123, 0.4)'
-                  },
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #32d86b 0%, #27e8c6 100%)'
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="chats">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <MessageCircle size={18} />
-                  Direct Messages
-                </Box>
-              </ToggleButton>
-              <ToggleButton value="teams">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Users size={18} />
-                  Teams & Channels
-                </Box>
-              </ToggleButton>
-              <ToggleButton value="activity">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Activity size={18} />
-                  Activity Feed
-                </Box>
-              </ToggleButton>
-            </ToggleButtonGroup>
+      {/* Navigation Tabs */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="w-full sm:w-auto">
+              <TabsList className="grid w-full grid-cols-3 sm:w-auto">
+                <TabsTrigger value="chats" className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" /> Direct Messages
+                </TabsTrigger>
+                <TabsTrigger value="teams" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" /> Teams & Channels
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" /> Activity Feed
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-            <Stack direction="row" spacing={1}>
-              <TextField
-                placeholder="Search conversations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search size={18} />
-                    </InputAdornment>
-                  )
-                }}
-                size="small"
-                sx={{
-                  width: 300,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
-                    background: '#f8fafc'
-                  }
-                }}
-              />
-              <IconButton
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                sx={{ color: '#666' }}
-              >
-                <Settings size={20} />
-              </IconButton>
-            </Stack>
-          </Stack>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setShowAdvanced(!showAdvanced)}>
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Grid container spacing={3} sx={{ height: 'calc(100vh - 500px)', minHeight: 600 }}>
-        {/* Enhanced Users/Teams/Activity List */}
-        <Grid item xs={12} md={4}>
-          <Card
-            elevation={0}
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
-            {/* List Header */}
-            <Box sx={{ 
-              p: 3, 
-              background: 'linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%)',
-              borderBottom: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="h6" sx={{ color: '#1a1a1a', fontWeight: 700, mb: 2 }}>
-                {viewMode === 'chats' ? 'Conversations' : 
-                 viewMode === 'teams' ? 'Teams & Channels' : 'Recent Activity'}
-              </Typography>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[600px]">
+        {/* Sidebar */}
+        <div className="lg:col-span-4">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="bg-gradient-to-r from-green-500/10 to-teal-400/10">
+              <CardTitle>
+                {viewMode === 'chats' ? 'Conversations' : viewMode === 'teams' ? 'Teams & Channels' : 'Recent Activity'}
+              </CardTitle>
               {viewMode === 'chats' && (
-                <Stack direction="row" spacing={1}>
-                  <Chip
-                    label="Pinned"
-                    size="small"
-                    icon={<PushPin size={14} />}
-                    sx={{ fontWeight: 600 }}
-                  />
-                  <Chip
-                    label="Recent"
-                    size="small"
-                    sx={{ fontWeight: 600 }}
-                  />
-                </Stack>
+                <div className="flex gap-2 mt-3">
+                  <Badge variant="secondary"><PushPin className="h-3 w-3 mr-1" />Pinned</Badge>
+                  <Badge variant="secondary">Recent</Badge>
+                </div>
               )}
-            </Box>
-
-            <List sx={{ flexGrow: 1, overflow: 'auto', p: 0 }}>
+            </CardHeader>
+            <ScrollArea className="flex-1">
               {viewMode === 'chats' && filteredUsers.map((user) => (
-                <React.Fragment key={user.id}>
-                  <ListItem
-                    button
+                <div key={user.id}>
+                  <button
                     onClick={() => handleUserClick(user)}
-                    selected={selectedUser?.id === user.id}
-                    sx={{
-                      py: 2,
-                      px: 3,
-                      transition: 'all 0.2s ease',
-                      '&.Mui-selected': {
-                        bgcolor: alpha('#43e97b', 0.1),
-                        borderLeft: '4px solid #43e97b',
-                      },
-                      '&:hover': {
-                        bgcolor: alpha('#43e97b', 0.05),
-                      }
-                    }}
+                    className={`w-full text-left p-4 hover:bg-accent transition-colors ${selectedUser?.id === user.id ? 'bg-accent border-l-4 border-green-500' : ''}`}
                   >
-                    <ListItemAvatar>
-                      <Badge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        badgeContent={getStatusIcon(user.status)}
-                      >
-                        <Avatar
-                          src={user.avatar}
-                          alt={user.name}
-                          sx={{ width: 48, height: 48 }}
-                        />
-                      </Badge>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                            {user.name}
-                          </Typography>
-                          {user.isPinned && (
-                            <PushPin size={14} color="#43e97b" />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5 }}>
-                            {user.lastMessage}
-                          </Typography>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <Typography variant="caption" color="text.secondary">
-                              {user.timestamp}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              • {user.role}
-                            </Typography>
-                          </Stack>
-                        </Box>
-                      }
-                    />
-                    {user.unread > 0 && (
-                      <Badge
-                        badgeContent={user.unread}
-                        color="error"
-                        sx={{
-                          '& .MuiBadge-badge': {
-                            background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                            color: 'white',
-                            fontWeight: 700
-                          }
-                        }}
-                      />
-                    )}
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <Avatar>
+                          <AvatarImage src={user.avatar} />
+                          <AvatarFallback>{user.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute bottom-0 right-0">{getStatusDot(user.status)}</div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <p className="font-semibold truncate">{user.name}</p>
+                          {user.isPinned && <PushPin className="h-4 w-4 text-green-500" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">{user.lastMessage}</p>
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-xs text-muted-foreground">{user.timestamp} • {user.role}</p>
+                        </div>
+                      </div>
+                      {user.unread > 0 && (
+                        <Badge className="bg-gradient-to-r from-green-500 to-teal-400 text-white">
+                          {user.unread}
+                        </Badge>
+                      )}
+                    </div>
+                  </button>
+                  <Separator />
+                </div>
               ))}
 
               {viewMode === 'teams' && teams.map((team) => (
-                <React.Fragment key={team.id}>
-                  <ListItem
-                    button
-                    sx={{
-                      py: 2,
-                      px: 3,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        bgcolor: alpha('#43e97b', 0.05),
-                      }
-                    }}
-                  >
-                    <ListItemAvatar>
-                      <Avatar
-                        src={team.avatar}
-                        alt={team.name}
-                        sx={{ width: 48, height: 48 }}
-                      />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                          {team.name}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {team.members} members
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Last active: {team.lastActivity}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                    <Users size={20} color="#666" />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
+                <div key={team.id}>
+                  <button className="w-full text-left p-4 hover:bg-accent transition-colors flex items-center gap-4">
+                    <Avatar>
+                      <AvatarImage src={team.avatar} />
+                      <AvatarFallback>{team.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{team.name}</p>
+                      <p className="text-sm text-muted-foreground">{team.members} members • Last active: {team.lastActivity}</p>
+                    </div>
+                    <Users className="h-5 w-5 text-muted-foreground ml-auto" />
+                  </button>
+                  <Separator />
+                </div>
               ))}
 
               {viewMode === 'activity' && activities.map((activity) => (
-                <React.Fragment key={activity.id}>
-                  <ListItem
-                    sx={{
-                      py: 2,
-                      px: 3,
-                    }}
-                  >
-                    <ListItemAvatar>
-                      <Avatar
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          background: activity.type === 'document' ? '#4facfe' :
-                                    activity.type === 'file' ? '#43e97b' :
-                                    activity.type === 'meeting' ? '#f093fb' : '#f5576c'
-                        }}
-                      >
-                        {activity.type === 'document' && <FileText size={18} />}
-                        {activity.type === 'file' && <Upload size={18} />}
-                        {activity.type === 'meeting' && <Video size={18} />}
-                        {activity.type === 'message' && <MessageCircle size={18} />}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {activity.user} {activity.action}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="caption" color="text.secondary">
-                          {activity.timestamp}
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                  <Divider />
-                </React.Fragment>
+                <div key={activity.id}>
+                  <div className="p-4 flex items-center gap-4">
+                    <Avatar className={activity.type === 'document' ? 'bg-blue-500' : activity.type === 'file' ? 'bg-green-500' : activity.type === 'meeting' ? 'bg-purple-500' : 'bg-red-500'}>
+                      {activity.type === 'document' && <FileText className="h-5 w-5 text-white" />}
+                      {activity.type === 'file' && <Upload className="h-5 w-5 text-white" />}
+                      {activity.type === 'meeting' && <Video className="h-5 w-5 text-white" />}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{activity.user} {activity.action}</p>
+                      <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
+                    </div>
+                  </div>
+                  <Separator />
+                </div>
               ))}
-            </List>
+            </ScrollArea>
           </Card>
-        </Grid>
+        </div>
 
-        {/* Enhanced Chat Area */}
-        <Grid item xs={12} md={8}>
-          <Card
-            elevation={0}
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              borderRadius: 4,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
+        {/* Chat Area */}
+        <div className="lg:col-span-8">
+          <Card className="h-full flex flex-col">
             {selectedUser ? (
               <>
-                {/* Enhanced Chat Header */}
-                <Box
-                  sx={{
-                    p: 3,
-                    background: 'linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%)',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Badge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      badgeContent={getStatusIcon(selectedUser.status)}
-                    >
-                      <Avatar
-                        src={selectedUser.avatar}
-                        alt={selectedUser.name}
-                        sx={{ width: 48, height: 48 }}
-                      />
-                    </Badge>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        {selectedUser.name}
-                      </Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography variant="caption" sx={{ color: getStatusColor(selectedUser.status), fontWeight: 600 }}>
+                {/* Chat Header */}
+                <div className="p-4 bg-gradient-to-r from-green-500/10 to-teal-400/10 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Avatar>
+                        <AvatarImage src={selectedUser.avatar} />
+                        <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute bottom-0 right-0">{getStatusDot(selectedUser.status)}</div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold">{selectedUser.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className={`font-medium ${getStatusColor(selectedUser.status).replace('bg-', 'text-')}`}>
                           {selectedUser.status}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          • {selectedUser.role}
-                        </Typography>
-                      </Stack>
-                    </Box>
-                  </Box>
-                  
-                  <Stack direction="row" spacing={1}>
-                    <IconButton
-                      onClick={toggleVideoCall}
-                      sx={{
-                        background: isVideoCall ? '#f44336' : alpha('#43e97b', 0.1),
-                        color: isVideoCall ? 'white' : '#43e97b',
-                        '&:hover': {
-                          background: isVideoCall ? '#d32f2f' : alpha('#43e97b', 0.2)
-                        }
-                      }}
-                    >
-                      {isVideoCall ? <PhoneOff size={20} /> : <Phone size={20} />}
-                    </IconButton>
-                    
-                    <IconButton
-                      onClick={toggleScreenShare}
-                      sx={{
-                        background: isScreenSharing ? '#ff9800' : alpha('#43e97b', 0.1),
-                        color: isScreenSharing ? 'white' : '#43e97b',
-                        '&:hover': {
-                          background: isScreenSharing ? '#f57c00' : alpha('#43e97b', 0.2)
-                        }
-                      }}
-                    >
-                      {isScreenSharing ? <StopScreenShare size={20} /> : <ScreenShare size={20} />}
-                    </IconButton>
-                    
-                    <IconButton
-                      sx={{
-                        background: alpha('#43e97b', 0.1),
-                        '&:hover': { background: alpha('#43e97b', 0.2) }
-                      }}
-                    >
-                      <Video size={20} />
-                    </IconButton>
-                    
-                    <IconButton
-                      sx={{
-                        background: alpha('#43e97b', 0.1),
-                        '&:hover': { background: alpha('#43e97b', 0.2) }
-                      }}
-                    >
-                      <MoreVertical size={20} />
-                    </IconButton>
-                  </Stack>
-                </Box>
+                        </span>
+                        <span>• {selectedUser.role}</span>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Video Call Interface */}
+                  <div className="flex items-center gap-2">
+                    <Button variant={isVideoCall ? "destructive" : "secondary"} size="icon" onClick={toggleVideoCall}>
+                      {isVideoCall ? <PhoneOff className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
+                    </Button>
+                    <Button variant={isScreenSharing ? "default" : "secondary"} size="icon" onClick={toggleScreenShare}>
+                      {isScreenSharing ? <StopScreenShare className="h-5 w-5" /> : <ScreenShare className="h-5 w-5" />}
+                    </Button>
+                    <Button variant="secondary" size="icon"><Video className="h-5 w-5" /></Button>
+                    <Button variant="ghost" size="icon"><MoreVertical className="h-5 w-5" /></Button>
+                  </div>
+                </div>
+
+                {/* Video Call Bar */}
                 {isVideoCall && (
-                  <Box sx={{ 
-                    p: 3, 
-                    background: '#1a1a1a',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2
-                  }}>
-                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                      Video Call Active
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton sx={{ color: 'white', background: 'rgba(255,255,255,0.2)' }}>
-                        <Mic size={20} />
-                      </IconButton>
-                      <IconButton sx={{ color: 'white', background: 'rgba(255,255,255,0.2)' }}>
-                        <Camera size={20} />
-                      </IconButton>
-                      <IconButton 
-                        onClick={toggleVideoCall}
-                        sx={{ color: 'white', background: '#f44336' }}
-                      >
-                        <PhoneOff size={20} />
-                      </IconButton>
-                    </Box>
-                  </Box>
+                  <div className="p-4 bg-black flex items-center justify-center gap-4">
+                    <p className="text-white font-medium">Video Call Active</p>
+                    <div className="flex gap-2">
+                      <Button size="icon" variant="secondary"><Mic className="h-5 w-5" /></Button>
+                      <Button size="icon" variant="secondary"><Camera className="h-5 w-5" /></Button>
+                      <Button size="icon" variant="destructive" onClick={toggleVideoCall}><PhoneOff className="h-5 w-5" /></Button>
+                    </div>
+                  </div>
                 )}
 
-                {/* Enhanced Messages */}
-                <Box sx={{ flexGrow: 1, overflow: 'auto', p: 3, background: '#fafafa' }}>
-                  {messages.map((message) => (
-                    <Box
-                      key={message.id}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: message.sender === 'me' ? 'flex-end' : 'flex-start',
-                        mb: 2
-                      }}
-                    >
-                      {message.type === 'system' ? (
-                        <Box sx={{ width: '100%', textAlign: 'center', mb: 2 }}>
-                          <Chip
-                            label={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Info size={14} />
-                                <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                  {message.text}
-                                </Typography>
-                              </Box>
-                            }
-                            size="small"
-                            sx={{
-                              background: alpha('#43e97b', 0.1),
-                              color: '#43e97b'
-                            }}
-                          />
-                        </Box>
-                      ) : (
-                        <Paper
-                          sx={{
-                            p: 2,
-                            maxWidth: '70%',
-                            background: message.sender === 'me'
-                              ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-                              : 'white',
-                            color: message.sender === 'me' ? 'white' : 'text.primary',
-                            borderRadius: 3,
-                            boxShadow: message.sender === 'me'
-                              ? '0 4px 12px rgba(67, 233, 123, 0.3)'
-                              : '0 2px 8px rgba(0,0,0,0.1)',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                              boxShadow: message.sender === 'me'
-                                ? '0 6px 16px rgba(67, 233, 123, 0.4)'
-                                : '0 4px 12px rgba(0,0,0,0.15)'
-                            }
-                          }}
-                        >
-                          {message.type === 'file' && (
-                            <Card
-                              elevation={0}
-                              sx={{
-                                mb: 1,
-                                p: 1.5,
-                                background: alpha(message.sender === 'me' ? 'white' : '#43e97b', 0.1),
-                                borderRadius: 2
-                              }}
-                            >
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <FileText size={16} />
-                                <Box>
-                                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                    {message.fileName}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                    {message.fileSize}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Card>
-                          )}
-                          
-                          <Typography variant="body1" sx={{ mb: 0.5 }}>
-                            {message.text}
-                          </Typography>
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-6 bg-muted/30">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div key={message.id} className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                        {message.type === 'system' ? (
+                          <div className="w-full text-center my-4">
+                            <Badge variant="secondary" className="bg-green-500/10 text-green-600">
+                              <Info className="h-3 w-3 mr-1" /> {message.text}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <div className={`max-w-[70%] rounded-2xl p-4 shadow-md ${message.sender === 'me' ? 'bg-gradient-to-r from-green-500 to-teal-400 text-white' : 'bg-white'}`}>
+                            {message.type === 'file' && (
+                              <div className="mb-3 p-3 bg-white/20 rounded-lg flex items-center gap-3">
+                                <FileText className="h-5 w-5" />
+                                <div>
+                                  <p className="text-sm font-medium">{message.fileName}</p>
+                                  <p className="text-xs opacity-80">{message.fileSize}</p>
+                                </div>
+                              </div>
+                            )}
+                            <p className="text-sm">{message.text}</p>
 
-                          {/* Message Reactions */}
-                          {message.reactions && message.reactions.length > 0 && (
-                            <Stack direction="row" spacing={0.5} sx={{ mt: 1 }}>
-                              {message.reactions.map((reaction, index) => (
-                                <Tooltip key={index} title={`${reaction.users.join(', ')} reacted with ${reaction.emoji}`}>
-                                  <Chip
-                                    label={`${reaction.emoji} ${reaction.users.length}`}
-                                    size="small"
-                                    onClick={() => handleReaction(message.id, reaction.emoji)}
-                                    sx={{
-                                      background: reaction.users.includes('You') 
-                                        ? alpha('#43e97b', 0.2) 
-                                        : alpha('#000', 0.05),
-                                      color: reaction.users.includes('You') ? '#43e97b' : 'text.secondary',
-                                      fontSize: '0.7rem',
-                                      height: 20,
-                                      '&:hover': {
-                                        background: reaction.users.includes('You') 
-                                          ? alpha('#43e97b', 0.3) 
-                                          : alpha('#000', 0.1)
-                                      }
-                                    }}
-                                  />
-                                </Tooltip>
-                              ))}
-                            </Stack>
-                          )}
-                          
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              display: 'block',
-                              textAlign: 'right',
-                              opacity: message.sender === 'me' ? 0.8 : 0.6
-                            }}
-                          >
-                            {message.timestamp}
-                          </Typography>
-                        </Paper>
-                      )}
-                    </Box>
-                  ))}
-                  
-                  {/* Typing Indicator */}
-                  {typingUsers.length > 0 && (
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-                      <Paper
-                        sx={{
-                          p: 2,
-                          background: 'white',
-                          borderRadius: 3,
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <Typography variant="body2" color="text.secondary">
-                          {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
-                        </Typography>
-                      </Paper>
-                    </Box>
-                  )}
-                  
-                  <div ref={messagesEndRef} />
-                </Box>
+                            {message.reactions && message.reactions.length > 0 && (
+                              <div className="flex gap-1 mt-2 flex-wrap">
+                                {message.reactions.map((r, i) => (
+                                  <TooltipProvider key={i}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Badge
+                                          variant="secondary"
+                                          className={`cursor-pointer ${r.users.includes('You') ? 'bg-green-500/20' : ''}`}
+                                          onClick={() => handleReaction(message.id, r.emoji)}
+                                        >
+                                          {r.emoji} {r.users.length}
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>{r.users.join(', ')} reacted with {r.emoji}</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ))}
+                              </div>
+                            )}
 
-                {/* Enhanced Message Input */}
-                <Box
-                  sx={{
-                    p: 3,
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    background: 'white'
-                  }}
-                >
-                  <Stack direction="row" spacing={1.5} alignItems="flex-end">
-                    <input
-                      type="file"
-                      onChange={handleFileUpload}
-                      style={{ display: 'none' }}
-                      id="file-attachment"
-                      accept=".pdf,.doc,.docx,.jpg,.png,.txt"
-                    />
-                    
-                    <IconButton
-                      component="label"
-                      htmlFor="file-attachment"
-                      sx={{
-                        background: alpha('#43e97b', 0.1),
-                        '&:hover': { background: alpha('#43e97b', 0.2) }
-                      }}
-                    >
-                      <Paperclip size={20} />
-                    </IconButton>
-                    
-                    <IconButton
-                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      sx={{
-                        background: alpha('#43e97b', 0.1),
-                        '&:hover': { background: alpha('#43e97b', 0.2) }
-                      }}
-                    >
-                      <Smile size={20} />
-                    </IconButton>
-                    
-                    <TextField
-                      fullWidth
+                            <p className="text-xs mt-2 text-right opacity-70">{message.timestamp}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {typingUsers.length > 0 && (
+                      <div className="flex justify-start">
+                        <div className="bg-white rounded-2xl p-4 shadow-md">
+                          <p className="text-sm text-muted-foreground">
+                            {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+
+                {/* Input Area */}
+                <div className="p-4 border-t">
+                  <div className="flex items-end gap-3">
+                    <input type="file" onChange={handleFileUpload} className="hidden" id="file-attachment" accept=".pdf,.doc,.docx,.jpg,.png,.txt" />
+                    <Button asChild variant="ghost" size="icon">
+                      <label htmlFor="file-attachment" className="cursor-pointer">
+                        <Paperclip className="h-5 w-5" />
+                      </label>
+                    </Button>
+
+                    <Button variant="ghost" size="icon" onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+                      <Smile className="h-5 w-5" />
+                    </Button>
+
+                    <Input
                       placeholder="Type a message..."
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
                           handleSendMessage();
                         }
                       }}
-                      multiline
-                      maxRows={4}
-                      size="small"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 3,
-                          background: alpha('#43e97b', 0.05)
-                        }
-                      }}
+                      className="flex-1"
                     />
-                    
+
                     <Button
-                      variant="contained"
                       onClick={handleSendMessage}
                       disabled={!messageText.trim()}
-                      endIcon={<Send size={18} />}
-                      sx={{
-                        borderRadius: 3,
-                        px: 3,
-                        py: 1.5,
-                        fontWeight: 600,
-                        background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                        boxShadow: '0 4px 12px rgba(67, 233, 123, 0.4)',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #32d86b 0%, #27e8c6 100%)'
-                        },
-                        '&:disabled': {
-                          background: '#e0e0e0',
-                          boxShadow: 'none'
-                        }
-                      }}
+                      className="bg-gradient-to-r from-green-500 to-teal-400 hover:from-green-600 hover:to-teal-500"
                     >
-                      Send
+                      <Send className="h-4 w-4 mr-2" /> Send
                     </Button>
-                  </Stack>
-                </Box>
+                  </div>
+                </div>
               </>
             ) : (
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                height: '100%',
-                background: 'linear-gradient(135deg, rgba(67, 233, 123, 0.05) 0%, rgba(56, 249, 215, 0.05) 100%)'
-              }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Box
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mx: 'auto',
-                      mb: 3,
-                      boxShadow: '0 8px 24px rgba(67, 233, 123, 0.3)'
-                    }}
-                  >
-                    <MessageCircle size={56} color="white" />
-                  </Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                    Select a Conversation
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Choose a contact or team to start collaborating
-                  </Typography>
-                  
-                  <Button
-                    variant="contained"
-                    startIcon={<Plus size={18} />}
-                    sx={{
-                      mt: 3,
-                      borderRadius: 3,
-                      fontWeight: 600,
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                      boxShadow: '0 4px 12px rgba(67, 233, 123, 0.4)'
-                    }}
-                  >
-                    Start New Conversation
+              <div className="flex-1 flex items-center justify-center bg-gradient-to-r from-green-500/5 to-teal-400/5">
+                <div className="text-center">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-r from-green-500 to-teal-400 flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                    <MessageCircle className="h-16 w-16 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Select a Conversation</h3>
+                  <p className="text-muted-foreground mb-6">Choose a contact or team to start collaborating</p>
+                  <Button className="bg-gradient-to-r from-green-500 to-teal-400 hover:from-green-600 hover:to-teal-500">
+                    <Plus className="h-4 w-4 mr-2" /> Start New Conversation
                   </Button>
-                </Box>
-              </Box>
+                </div>
+              </div>
             )}
           </Card>
-        </Grid>
-      </Grid>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
