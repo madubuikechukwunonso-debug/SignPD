@@ -59,7 +59,7 @@ import {
   AlertTriangle as AlertIcon,
   RotateCcw
 } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 interface ConversionJob {
   id: string;
