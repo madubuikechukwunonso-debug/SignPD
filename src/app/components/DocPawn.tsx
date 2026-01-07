@@ -1,19 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   TextInput,
   Badge,
-  Avatar,
   Tabs,
   Button,
   Group,
   Stack,
   Text,
-  Divider,
   Modal,
-  Select,
   Menu,
   SimpleGrid,
   Box,
@@ -23,18 +20,11 @@ import {
   Search,
   ShoppingCart,
   Star,
-  Download,
   TrendingUp,
   Users,
   Award,
-  Filter,
   Heart,
-  Share2,
   Eye,
-  Calendar,
-  DollarSign,
-  Zap,
-  Shield,
   SortAsc,
 } from "lucide-react";
 
@@ -61,10 +51,9 @@ export function DocPawn() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<DocumentTemplate | null>(null);
   const [opened, setOpened] = useState(false);
-  const [category, setCategory] = useState("All");
-  const [viewMode, setViewMode] = useState<string>("grid");
+  const [category] = useState("All");
+  const [viewMode, setViewMode] = useState<string | null>("grid");
   const [wishlist, setWishlist] = useState<number[]>([]);
-  const [cart, setCart] = useState<number[]>([]);
 
   const templates: DocumentTemplate[] = [
     {
@@ -95,14 +84,12 @@ export function DocPawn() {
   );
 
   const toggleWishlist = (id: number) =>
-    setWishlist((w) => (w.includes(id) ? w.filter((x) => x !== id) : [...w, id]));
-
-  const toggleCart = (id: number) =>
-    setCart((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]));
+    setWishlist((w) =>
+      w.includes(id) ? w.filter((x) => x !== id) : [...w, id]
+    );
 
   return (
     <Stack gap="xl">
-      {/* Header */}
       <Stack gap={4}>
         <Text size="xl" fw={800}>
           Enterprise Template Marketplace
@@ -112,7 +99,6 @@ export function DocPawn() {
         </Text>
       </Stack>
 
-      {/* Stats */}
       <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }}>
         {[
           { label: "Products", value: "2,450+", icon: <ShoppingCart /> },
@@ -134,7 +120,6 @@ export function DocPawn() {
         ))}
       </SimpleGrid>
 
-      {/* Controls */}
       <Card withBorder>
         <Group wrap="wrap" justify="space-between">
           <TextInput
@@ -167,7 +152,6 @@ export function DocPawn() {
         </Group>
       </Card>
 
-      {/* Grid */}
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
         {filtered.map((t) => (
           <Card key={t.id} withBorder>
@@ -224,13 +208,16 @@ export function DocPawn() {
         ))}
       </SimpleGrid>
 
-      {/* Modal */}
-      <Modal opened={opened} onClose={() => setOpened(false)} size="lg" title={selectedDoc?.title}>
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        size="lg"
+        title={selectedDoc?.title}
+      >
         {selectedDoc && (
           <Stack>
             <Image src={selectedDoc.image} />
             <Text>{selectedDoc.description}</Text>
-            <Divider />
             <Text fw={700}>${selectedDoc.price}</Text>
             <Button leftSection={<ShoppingCart size={16} />}>
               Purchase
