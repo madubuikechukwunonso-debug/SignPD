@@ -1,5 +1,9 @@
-import React, { useRef, useState } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
+"use client";
+
+import React, { useRef, useState } from "react";
+import SignatureCanvas from "react-signature-canvas";
+import type { SignatureCanvasProps } from "react-signature-canvas";
+
 import {
   Card,
   Text,
@@ -15,7 +19,8 @@ import {
   Box,
   ThemeIcon,
   Paper,
-} from '@mantine/core';
+} from "@mantine/core";
+
 import {
   Upload,
   Download,
@@ -29,8 +34,13 @@ import {
   EyeOff,
   RotateCcw,
   AlertTriangle,
-} from 'lucide-react';
-import { ImageWithFallback } from '../../figma/ImageWithFallback';
+} from "lucide-react";
+
+import { ImageWithFallback } from "../../figma/ImageWithFallback";
+
+/* ------------------------------------------------------------------ */
+/* Types */
+/* ------------------------------------------------------------------ */
 
 interface DocumentWorkflow {
   id: string;
@@ -43,8 +53,19 @@ interface AuditLog {
   action: string;
   user: string;
   timestamp: string;
-  status: 'success' | 'warning' | 'error';
+  status: "success" | "warning" | "error";
 }
+
+/* ------------------------------------------------------------------ */
+/* Fix: react-signature-canvas JSX typing */
+/* ------------------------------------------------------------------ */
+
+const SignaturePad =
+  SignatureCanvas as unknown as React.FC<SignatureCanvasProps>;
+
+/* ------------------------------------------------------------------ */
+/* Component */
+/* ------------------------------------------------------------------ */
 
 export function SignPD() {
   const sigCanvas = useRef<SignatureCanvas | null>(null);
@@ -52,24 +73,38 @@ export function SignPD() {
   const [uploadedDoc, setUploadedDoc] = useState<string | null>(null);
   const [isSigned, setIsSigned] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>('standard');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(
+    "standard"
+  );
   const [showPreview, setShowPreview] = useState(true);
-  const [securityLevel, setSecurityLevel] = useState<string | null>('high');
+  const [securityLevel, setSecurityLevel] = useState<string | null>("high");
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const workflows: DocumentWorkflow[] = [
-    { id: 'standard', name: 'Standard Signing', description: 'Single signer workflow' },
-    { id: 'multi', name: 'Multi-Party Signing', description: 'Multiple signers' },
-    { id: 'witness', name: 'Witnessed Signing', description: 'Witness verification required' },
+    {
+      id: "standard",
+      name: "Standard Signing",
+      description: "Single signer workflow",
+    },
+    {
+      id: "multi",
+      name: "Multi-Party Signing",
+      description: "Multiple signers",
+    },
+    {
+      id: "witness",
+      name: "Witnessed Signing",
+      description: "Witness verification required",
+    },
   ];
 
-  const addAuditLog = (action: string, status: AuditLog['status']) => {
+  const addAuditLog = (action: string, status: AuditLog["status"]) => {
     setAuditLog((prev) => [
       {
         id: Date.now().toString(),
         action,
-        user: 'Current User',
-        timestamp: 'Just now',
+        user: "Current User",
+        timestamp: "Just now",
         status,
       },
       ...prev.slice(0, 4),
@@ -79,38 +114,43 @@ export function SignPD() {
   const clearSignature = () => {
     sigCanvas.current?.clear();
     setIsSigned(false);
-    addAuditLog('Signature cleared', 'warning');
+    addAuditLog("Signature cleared", "warning");
   };
 
   const saveSignature = () => {
-    if (sigCanvas.current) {
-      console.log(sigCanvas.current.toDataURL());
-      setIsSigned(true);
-      addAuditLog('Signature applied successfully', 'success');
-    }
+    if (!sigCanvas.current) return;
+    console.log(sigCanvas.current.toDataURL());
+    setIsSigned(true);
+    addAuditLog("Signature applied successfully", "success");
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
+
     reader.onprogress = (e) => {
       if (e.lengthComputable) {
         setUploadProgress((e.loaded / e.total) * 100);
       }
     };
+
     reader.onload = (e) => {
       setUploadedDoc(e.target?.result as string);
       setUploadProgress(100);
-      addAuditLog('Document uploaded successfully', 'success');
+      addAuditLog("Document uploaded successfully", "success");
     };
+
     reader.readAsDataURL(file);
   };
 
-  const statusIcon = (status: AuditLog['status']) => {
-    if (status === 'success') return <CheckCircle size={18} color="green" />;
-    if (status === 'warning') return <AlertTriangle size={18} color="orange" />;
+  const statusIcon = (status: AuditLog["status"]) => {
+    if (status === "success") return <CheckCircle size={18} color="green" />;
+    if (status === "warning")
+      return <AlertTriangle size={18} color="orange" />;
     return <AlertTriangle size={18} color="red" />;
   };
 
@@ -120,17 +160,18 @@ export function SignPD() {
       <Stack gap="xs">
         <Title order={1}>Enterprise Document Signing</Title>
         <Text c="dimmed" maw={600}>
-          Secure, compliant, and efficient document signing with enterprise-grade audit trails.
+          Secure, compliant, and efficient document signing with
+          enterprise-grade audit trails.
         </Text>
       </Stack>
 
       {/* Stats */}
       <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }}>
         {[
-          { icon: FileText, label: 'Documents', value: '15,247' },
-          { icon: Clock, label: 'Avg Time', value: '1.8s' },
-          { icon: Shield, label: 'Compliance', value: 'SOC 2' },
-          { icon: CheckCircle, label: 'Success Rate', value: '99.97%' },
+          { icon: FileText, label: "Documents", value: "15,247" },
+          { icon: Clock, label: "Avg Time", value: "1.8s" },
+          { icon: Shield, label: "Compliance", value: "SOC 2" },
+          { icon: CheckCircle, label: "Success Rate", value: "99.97%" },
         ].map((s) => (
           <Card key={s.label} shadow="md">
             <Group>
@@ -158,7 +199,7 @@ export function SignPD() {
           <Select
             label="Signing Workflow"
             value={selectedWorkflow}
-            onChange={setSelectedWorkflow}
+            onChange={(value) => setSelectedWorkflow(value)}
             data={workflows.map((w) => ({
               value: w.id,
               label: `${w.name} – ${w.description}`,
@@ -168,11 +209,11 @@ export function SignPD() {
           <Select
             label="Security Level"
             value={securityLevel}
-            onChange={setSecurityLevel}
+            onChange={(value) => setSecurityLevel(value)}
             data={[
-              { value: 'basic', label: 'Basic Encryption' },
-              { value: 'high', label: 'AES-256 Encryption' },
-              { value: 'enterprise', label: 'Enterprise MFA' },
+              { value: "basic", label: "Basic Encryption" },
+              { value: "high", label: "AES-256 Encryption" },
+              { value: "enterprise", label: "Enterprise MFA" },
             ]}
           />
         </SimpleGrid>
@@ -183,7 +224,10 @@ export function SignPD() {
         <Card>
           <Group justify="space-between">
             <Title order={4}>Upload & Preview</Title>
-            <Button variant="subtle" onClick={() => setShowPreview((p) => !p)}>
+            <Button
+              variant="subtle"
+              onClick={() => setShowPreview((p) => !p)}
+            >
               {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
             </Button>
           </Group>
@@ -193,7 +237,7 @@ export function SignPD() {
             mt="md"
             p="xl"
             ta="center"
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
             component="label"
           >
             <input type="file" hidden onChange={handleFileUpload} />
@@ -223,10 +267,13 @@ export function SignPD() {
           <Title order={4}>Signature Studio</Title>
 
           <Box mt="md" pos="relative">
-            <SignatureCanvas
+            <SignaturePad
               ref={sigCanvas}
-              canvasProps={{ className: 'w-full h-56 border rounded' }}
+              canvasProps={{
+                className: "w-full h-56 border rounded",
+              }}
             />
+
             <Button
               variant="light"
               size="xs"
