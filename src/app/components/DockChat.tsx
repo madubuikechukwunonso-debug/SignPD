@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   Button,
@@ -9,7 +9,6 @@ import {
   Badge,
   Tabs,
   ScrollArea,
-  Tooltip,
   Divider,
   Group,
   Stack,
@@ -28,12 +27,6 @@ import {
   MessageCircle,
   Activity,
   Settings,
-  PhoneOff,
-  ScreenShare,
-  StopScreenShare,
-  PushPin,
-  Info,
-  FileText,
 } from "lucide-react";
 
 interface User {
@@ -55,16 +48,13 @@ interface Message {
   text: string;
   timestamp: string;
   type: "text" | "file" | "system";
-  fileName?: string;
-  fileSize?: string;
-  reactions?: { emoji: string; users: string[] }[];
 }
 
 export function DockChat() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [messageText, setMessageText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<string>("chats");
+  const [viewMode, setViewMode] = useState<string | null>("chats");
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -238,12 +228,8 @@ export function DockChat() {
                 <TextInput
                   placeholder="Type a message…"
                   value={messageText}
-                  onChange={(e) =>
-                    setMessageText(e.currentTarget.value)
-                  }
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && handleSendMessage()
-                  }
+                  onChange={(e) => setMessageText(e.currentTarget.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                   style={{ flex: 1 }}
                 />
                 <Button onClick={handleSendMessage} leftSection={<Send size={16} />}>
