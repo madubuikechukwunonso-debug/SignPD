@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   Button,
@@ -8,8 +8,6 @@ import {
   Select,
   Progress,
   Alert,
-  Badge,
-  Divider,
   Tabs,
   ScrollArea,
   Text,
@@ -17,43 +15,31 @@ import {
   Stack,
   SimpleGrid,
   Box,
+  Grid,
 } from "@mantine/core";
 import {
-  Upload,
-  Download,
-  RefreshCw,
-  FileText,
-  Image,
-  File,
-  Zap,
-  TrendingUp,
-  Clock,
-  Settings,
-  History,
-  CheckCircle,
-  AlertTriangle,
-  Database,
-} from "lucide-react";
+  IconRefresh,
+  IconFileText,
+  IconBolt,
+  IconTrendingUp,
+  IconClock,
+  IconSettings,
+  IconHistory,
+  IconCheck,
+  IconAlertTriangle,
+  IconDatabase,
+} from "@tabler/icons-react";
 
 interface ConversionJob {
   id: string;
   fileName: string;
   fromFormat: string;
   toFormat: string;
-  status: "pending" | "processing" | "completed" | "failed";
+  status: "processing" | "completed";
   progress: number;
   startTime: Date;
-  endTime?: Date;
   fileSize: string;
   quality: string;
-}
-
-interface BatchConfig {
-  enabled: boolean;
-  files: File[];
-  outputFormat: string;
-  quality: string;
-  preserveMetadata: boolean;
 }
 
 export function DocFun() {
@@ -64,13 +50,6 @@ export function DocFun() {
   const [conversionComplete, setConversionComplete] = useState(false);
   const [progress, setProgress] = useState(0);
   const [activeJobs, setActiveJobs] = useState<ConversionJob[]>([]);
-  const [batchConfig, setBatchConfig] = useState<BatchConfig>({
-    enabled: false,
-    files: [],
-    outputFormat: "pdf",
-    quality: "high",
-    preserveMetadata: true,
-  });
   const [previewMode, setPreviewMode] = useState<"single" | "batch">("single");
   const [showHistory, setShowHistory] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -86,14 +65,9 @@ export function DocFun() {
     { value: "pptx", label: "PPTX" },
   ];
 
-  const handleFileUpload = (file: File | null) => {
-    if (!file) return;
-    setSelectedFile(file);
-    setConversionComplete(false);
-  };
-
   const handleConvert = () => {
     if (!selectedFile) return;
+
     setConverting(true);
     setProgress(0);
 
@@ -113,12 +87,13 @@ export function DocFun() {
 
     const interval = setInterval(() => {
       setProgress((p) => {
-        const next = Math.min(p + Math.random() * 15, 100);
+        const next = Math.min(p + Math.random() * 20, 100);
         setActiveJobs((jobs) =>
           jobs.map((j) =>
             j.id === job.id ? { ...j, progress: next } : j
           )
         );
+
         if (next === 100) {
           clearInterval(interval);
           setConverting(false);
@@ -131,18 +106,17 @@ export function DocFun() {
             )
           );
         }
+
         return next;
       });
     }, 300);
   };
 
-  const statusIcon = (s: string) =>
-    s === "completed" ? (
-      <CheckCircle size={18} />
-    ) : s === "processing" ? (
-      <RefreshCw size={18} />
+  const statusIcon = (status: string) =>
+    status === "completed" ? (
+      <IconCheck size={18} color="green" />
     ) : (
-      <AlertTriangle size={18} />
+      <IconRefresh size={18} />
     );
 
   return (
@@ -160,10 +134,10 @@ export function DocFun() {
       {/* Stats */}
       <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }}>
         {[
-          { label: "Conversions Today", value: "3,247", icon: <Zap /> },
-          { label: "Success Rate", value: "99.97%", icon: <TrendingUp /> },
-          { label: "Avg Time", value: "1.2s", icon: <Clock /> },
-          { label: "Storage Saved", value: "2.4TB", icon: <Database /> },
+          { label: "Conversions Today", value: "3,247", icon: <IconBolt /> },
+          { label: "Success Rate", value: "99.97%", icon: <IconTrendingUp /> },
+          { label: "Avg Time", value: "1.2s", icon: <IconClock /> },
+          { label: "Storage Saved", value: "2.4TB", icon: <IconDatabase /> },
         ].map((s) => (
           <Card key={s.label} withBorder>
             <Group justify="space-between">
@@ -184,34 +158,35 @@ export function DocFun() {
         <Group justify="space-between">
           <Tabs value={previewMode} onChange={(v) => setPreviewMode(v as any)}>
             <Tabs.List>
-              <Tabs.Tab value="single" leftSection={<FileText size={14} />}>
+              <Tabs.Tab value="single" leftSection={<IconFileText size={14} />}>
                 Single
               </Tabs.Tab>
-              <Tabs.Tab value="batch" leftSection={<Database size={14} />}>
+              <Tabs.Tab value="batch" leftSection={<IconDatabase size={14} />}>
                 Batch
               </Tabs.Tab>
             </Tabs.List>
           </Tabs>
+
           <Group>
             <Button variant="subtle" onClick={() => setShowHistory(!showHistory)}>
-              <History size={16} />
+              <IconHistory size={16} />
             </Button>
             <Button variant="subtle" onClick={() => setShowAdvanced(!showAdvanced)}>
-              <Settings size={16} />
+              <IconSettings size={16} />
             </Button>
           </Group>
         </Group>
       </Card>
 
-      <SimpleGrid cols={{ base: 1, lg: 12 }}>
+      <Grid>
         {/* Main */}
-        <Box span={8}>
+        <Grid.Col span={8}>
           <Card withBorder p="lg">
             <Stack gap="md">
               <TextInput
                 type="file"
                 onChange={(e) =>
-                  handleFileUpload(e.currentTarget.files?.[0] || null)
+                  setSelectedFile(e.currentTarget.files?.[0] || null)
                 }
               />
 
@@ -220,14 +195,14 @@ export function DocFun() {
                   label="From"
                   data={formats}
                   value={fromFormat}
-                  onChange={setFromFormat}
+                  onChange={(v) => setFromFormat(v || "pdf")}
                 />
                 <Box />
                 <Select
                   label="To"
                   data={formats}
                   value={toFormat}
-                  onChange={setToFormat}
+                  onChange={(v) => setToFormat(v || "docx")}
                 />
               </SimpleGrid>
 
@@ -235,7 +210,7 @@ export function DocFun() {
                 size="lg"
                 onClick={handleConvert}
                 disabled={!selectedFile || converting}
-                leftSection={<RefreshCw size={18} />}
+                leftSection={<IconRefresh size={18} />}
               >
                 {converting ? "Converting..." : "Start Conversion"}
               </Button>
@@ -243,16 +218,16 @@ export function DocFun() {
               {converting && <Progress value={progress} />}
 
               {conversionComplete && (
-                <Alert icon={<CheckCircle />} color="green">
+                <Alert icon={<IconCheck />} color="green">
                   Conversion completed successfully
                 </Alert>
               )}
             </Stack>
           </Card>
-        </Box>
+        </Grid.Col>
 
         {/* Sidebar */}
-        <Box span={4}>
+        <Grid.Col span={4}>
           <Card withBorder>
             <Text fw={600} mb="sm">
               Active Jobs
@@ -276,8 +251,8 @@ export function DocFun() {
               </Stack>
             </ScrollArea>
           </Card>
-        </Box>
-      </SimpleGrid>
+        </Grid.Col>
+      </Grid>
     </Stack>
   );
 }
