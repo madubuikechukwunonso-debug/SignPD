@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   AppShell,
   Tabs,
@@ -11,7 +11,7 @@ import {
   Indicator,
   Box,
   Container,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconFilePencil,
   IconRefresh,
@@ -21,21 +21,18 @@ import {
   IconSettings,
   IconUser,
   IconPlus,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
-import { SignPD } from './components/SignPD';
-import { DocFun } from './components/DocFun';
-import { DocPawn } from './components/DocPawn';
-import { DockChat } from './components/DockChat';
+import { SignPD } from "./components/SignPD";
+import { DocFun } from "./components/DocFun";
+import { DocPawn } from "./components/DocPawn";
+import { DockChat } from "./components/DockChat";
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<string>('sign');
+  const [currentTab, setCurrentTab] = useState<string>("sign");
 
   return (
-    <AppShell
-      padding="md"
-      header={{ height: 96 }}
-    >
+    <AppShell padding="md" header={{ height: 96 }}>
       {/* Header */}
       <AppShell.Header>
         <Container size="xl" h="100%">
@@ -47,10 +44,10 @@ export default function App() {
                 h={44}
                 style={{
                   borderRadius: 12,
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <IconFilePencil color="white" size={22} />
@@ -66,10 +63,7 @@ export default function App() {
 
             {/* Actions */}
             <Group>
-              <Button
-                leftSection={<IconPlus size={16} />}
-                variant="outline"
-              >
+              <Button leftSection={<IconPlus size={16} />} variant="outline">
                 New Document
               </Button>
 
@@ -84,8 +78,8 @@ export default function App() {
                   <Avatar
                     radius="xl"
                     style={{
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                      cursor: 'pointer',
+                      background: "linear-gradient(135deg, #667eea, #764ba2)",
+                      cursor: "pointer",
                     }}
                   >
                     <IconUser size={18} />
@@ -111,7 +105,12 @@ export default function App() {
       {/* Main */}
       <AppShell.Main>
         <Container size="xl">
-          <Tabs value={currentTab} onChange={setCurrentTab}>
+          <Tabs
+            value={currentTab}
+            onChange={(value) => {
+              if (value) setCurrentTab(value);
+            }}
+          >
             <Tabs.List>
               <Tabs.Tab
                 value="sign"
