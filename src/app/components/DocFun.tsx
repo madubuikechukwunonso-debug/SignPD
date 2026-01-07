@@ -26,7 +26,6 @@ import {
   IconSettings,
   IconHistory,
   IconCheck,
-  IconAlertTriangle,
   IconDatabase,
 } from "@tabler/icons-react";
 
