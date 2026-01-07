@@ -7,7 +7,6 @@ import {
   Button,
   Select,
   Progress,
-  Badge,
   Alert,
   Divider,
   Group,
@@ -28,7 +27,6 @@ import {
   Shield,
   Eye,
   EyeOff,
-  Certificate,
   RotateCcw,
   AlertTriangle,
 } from 'lucide-react';
