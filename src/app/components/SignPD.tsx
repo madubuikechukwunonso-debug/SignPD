@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import * as SignatureCanvas from "react-signature-canvas";
 import {
   Card,
   Text,
@@ -29,10 +29,13 @@ import {
   Shield,
   Eye,
   EyeOff,
-  RotateCcw,
   AlertTriangle,
 } from "lucide-react";
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
+
+/* ------------------------------------------------------------------ */
+/* Types */
+/* ------------------------------------------------------------------ */
 
 interface DocumentWorkflow {
   id: string;
@@ -48,22 +51,49 @@ interface AuditLog {
   status: "success" | "warning" | "error";
 }
 
+/* ------------------------------------------------------------------ */
+/* react-signature-canvas FIX
+   The library is NOT properly typed for JSX + strict TS.
+   This cast makes it a valid React component.
+*/
+/* ------------------------------------------------------------------ */
+
+const SignaturePad =
+  SignatureCanvas as unknown as React.FC<
+    SignatureCanvas.SignatureCanvasProps
+  >;
+
+/* ------------------------------------------------------------------ */
+/* Component */
+/* ------------------------------------------------------------------ */
+
 export function SignPD() {
-  // IMPORTANT: useRef<any> + callback ref (library typing bug)
-  const sigCanvasRef = useRef<any>(null);
+  const sigCanvasRef = useRef<SignatureCanvas.default | null>(null);
 
   const [uploadedDoc, setUploadedDoc] = useState<string | null>(null);
   const [isSigned, setIsSigned] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedWorkflow, setSelectedWorkflow] = useState<string>("standard");
+  const [selectedWorkflow, setSelectedWorkflow] = useState("standard");
   const [showPreview, setShowPreview] = useState(true);
-  const [securityLevel, setSecurityLevel] = useState<string>("high");
+  const [securityLevel, setSecurityLevel] = useState("high");
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const workflows: DocumentWorkflow[] = [
-    { id: "standard", name: "Standard Signing", description: "Single signer workflow" },
-    { id: "multi", name: "Multi-Party Signing", description: "Multiple signers" },
-    { id: "witness", name: "Witnessed Signing", description: "Witness verification required" },
+    {
+      id: "standard",
+      name: "Standard Signing",
+      description: "Single signer workflow",
+    },
+    {
+      id: "multi",
+      name: "Multi-Party Signing",
+      description: "Multiple signers",
+    },
+    {
+      id: "witness",
+      name: "Witnessed Signing",
+      description: "Witness verification required",
+    },
   ];
 
   const addAuditLog = (action: string, status: AuditLog["status"]) => {
@@ -86,11 +116,10 @@ export function SignPD() {
   };
 
   const saveSignature = () => {
-    if (sigCanvasRef.current) {
-      sigCanvasRef.current.toDataURL();
-      setIsSigned(true);
-      addAuditLog("Signature applied successfully", "success");
-    }
+    if (!sigCanvasRef.current) return;
+    sigCanvasRef.current.toDataURL();
+    setIsSigned(true);
+    addAuditLog("Signature applied successfully", "success");
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,9 +238,9 @@ export function SignPD() {
           <Title order={4}>Signature Studio</Title>
 
           <Box mt="md">
-            <SignatureCanvas
+            <SignaturePad
               canvasProps={{ className: "w-full h-56 border rounded" }}
-              ref={(instance) => {
+              ref={(instance: SignatureCanvas.default | null) => {
                 sigCanvasRef.current = instance;
               }}
             />
