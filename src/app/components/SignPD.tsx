@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useRef, useState, forwardRef } from "react";
-import SignaturePad from "./SignaturePad";
+import { useRef, useState } from "react";
+import SignaturePad, {
+  SignaturePadHandle,
+} from "./SignaturePad";
+
 import {
   Card,
   Text,
@@ -18,6 +21,7 @@ import {
   ThemeIcon,
   Paper,
 } from "@mantine/core";
+
 import {
   Upload,
   Download,
@@ -31,23 +35,11 @@ import {
   EyeOff,
   AlertTriangle,
 } from "lucide-react";
+
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 /* ------------------------------------------------------------------ */
-/* FIX: react-signature-canvas has broken ref typings                  */
-/* ------------------------------------------------------------------ */
-
-type SignaturePadHandle = SignatureCanvas;
-type SignaturePadProps = React.ComponentProps<typeof SignatureCanvas>;
-
-const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
-  (props, ref) => {
-    return <SignatureCanvas {...props} ref={ref as any} />;
-  }
-);
-
-SignaturePad.displayName = "SignaturePad";
-
+/* Types                                                              */
 /* ------------------------------------------------------------------ */
 
 interface DocumentWorkflow {
@@ -64,6 +56,10 @@ interface AuditLog {
   status: "success" | "warning" | "error";
 }
 
+/* ------------------------------------------------------------------ */
+/* Component                                                          */
+/* ------------------------------------------------------------------ */
+
 export function SignPD() {
   const sigCanvasRef = useRef<SignaturePadHandle | null>(null);
 
@@ -76,10 +72,26 @@ export function SignPD() {
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const workflows: DocumentWorkflow[] = [
-    { id: "standard", name: "Standard Signing", description: "Single signer workflow" },
-    { id: "multi", name: "Multi-Party Signing", description: "Multiple signers" },
-    { id: "witness", name: "Witnessed Signing", description: "Witness verification required" },
+    {
+      id: "standard",
+      name: "Standard Signing",
+      description: "Single signer workflow",
+    },
+    {
+      id: "multi",
+      name: "Multi-Party Signing",
+      description: "Multiple signers",
+    },
+    {
+      id: "witness",
+      name: "Witnessed Signing",
+      description: "Witness verification required",
+    },
   ];
+
+  /* ------------------------------------------------------------------ */
+  /* Helpers                                                            */
+  /* ------------------------------------------------------------------ */
 
   const addAuditLog = (action: string, status: AuditLog["status"]) => {
     setAuditLog((prev) => [
@@ -102,7 +114,8 @@ export function SignPD() {
 
   const saveSignature = () => {
     if (!sigCanvasRef.current) return;
-    sigCanvasRef.current.toDataURL();
+
+    sigCanvasRef.current.toDataURL(); // usable for upload later
     setIsSigned(true);
     addAuditLog("Signature applied successfully", "success");
   };
@@ -112,16 +125,19 @@ export function SignPD() {
     if (!file) return;
 
     const reader = new FileReader();
+
     reader.onprogress = (e) => {
       if (e.lengthComputable) {
         setUploadProgress((e.loaded / e.total) * 100);
       }
     };
+
     reader.onload = (e) => {
       setUploadedDoc(e.target?.result as string);
       setUploadProgress(100);
       addAuditLog("Document uploaded successfully", "success");
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -130,6 +146,10 @@ export function SignPD() {
     if (status === "warning") return <AlertTriangle size={18} color="orange" />;
     return <AlertTriangle size={18} color="red" />;
   };
+
+  /* ------------------------------------------------------------------ */
+  /* Render                                                             */
+  /* ------------------------------------------------------------------ */
 
   return (
     <Stack gap="xl">
@@ -225,7 +245,9 @@ export function SignPD() {
           <Box mt="md">
             <SignaturePad
               ref={sigCanvasRef}
-              canvasProps={{ className: "w-full h-56 border rounded" }}
+              canvasProps={{
+                className: "w-full h-56 border rounded bg-white",
+              }}
             />
           </Box>
 
