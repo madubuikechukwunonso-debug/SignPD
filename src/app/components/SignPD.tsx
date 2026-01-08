@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, forwardRef } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import SignaturePad from "./SignaturePad";
 import {
   Card,
   Text,
