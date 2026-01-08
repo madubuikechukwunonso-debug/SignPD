@@ -1,12 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // For static deployment
-  basePath: '/SignPD', // Your repo name
+  output: 'export',
+  basePath: '/SignPD',
   assetPrefix: '/SignPD/',
+  distDir: 'out',
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
   },
-  trailingSlash: true, // Fix routing issues
+  trailingSlash: true,
+  // Fix for Mantine + Next.js
+  modularizeImports: {
+    '@mantine/core': {
+      transform: '@mantine/core/{{member}}',
+    },
+    '@mantine/hooks': {
+      transform: '@mantine/hooks/{{member}}',
+    },
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig
