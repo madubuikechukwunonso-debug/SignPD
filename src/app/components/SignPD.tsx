@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useRef, useState, forwardRef } from "react";
-import SignaturePad from "./SignaturePad";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import {
   Card,
   Text,
@@ -34,20 +39,91 @@ import {
 import { ImageWithFallback } from "../../figma/ImageWithFallback";
 
 /* ------------------------------------------------------------------ */
-/* FIX: react-signature-canvas has broken ref typings                  */
+/* Native Signature Pad (NO third-party library)                       */
 /* ------------------------------------------------------------------ */
 
-type SignaturePadHandle = SignatureCanvas;
-type SignaturePadProps = React.ComponentProps<typeof SignatureCanvas>;
+export interface SignaturePadHandle {
+  clear: () => void;
+  toDataURL: () => string;
+}
 
-const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
-  (props, ref) => {
-    return <SignatureCanvas {...props} ref={ref as any} />;
-  }
-);
+const SignaturePad = forwardRef<SignaturePadHandle>((_, ref) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawing = useRef(false);
+
+  useImperativeHandle(ref, () => ({
+    clear() {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    },
+    toDataURL() {
+      return canvasRef.current?.toDataURL() ?? "";
+    },
+  }));
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+  }, []);
+
+  const getPosition = (e: PointerEvent) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+  };
+
+  const startDraw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    drawing.current = true;
+    const { x, y } = getPosition(e.nativeEvent);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawing.current) return;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    const { x, y } = getPosition(e.nativeEvent);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDraw = () => {
+    drawing.current = false;
+  };
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={600}
+      height={220}
+      className="w-full h-56 border rounded bg-white"
+      onPointerDown={startDraw}
+      onPointerMove={draw}
+      onPointerUp={stopDraw}
+      onPointerLeave={stopDraw}
+    />
+  );
+});
 
 SignaturePad.displayName = "SignaturePad";
 
+/* ------------------------------------------------------------------ */
+/* Types                                                              */
 /* ------------------------------------------------------------------ */
 
 interface DocumentWorkflow {
@@ -64,6 +140,10 @@ interface AuditLog {
   status: "success" | "warning" | "error";
 }
 
+/* ------------------------------------------------------------------ */
+/* Component                                                          */
+/* ------------------------------------------------------------------ */
+
 export function SignPD() {
   const sigCanvasRef = useRef<SignaturePadHandle | null>(null);
 
@@ -76,9 +156,9 @@ export function SignPD() {
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const workflows: DocumentWorkflow[] = [
-    { id: "standard", name: "Standard Signing", description: "Single signer workflow" },
+    { id: "standard", name: "Standard Signing", description: "Single signer" },
     { id: "multi", name: "Multi-Party Signing", description: "Multiple signers" },
-    { id: "witness", name: "Witnessed Signing", description: "Witness verification required" },
+    { id: "witness", name: "Witnessed Signing", description: "Witness required" },
   ];
 
   const addAuditLog = (action: string, status: AuditLog["status"]) => {
@@ -101,8 +181,8 @@ export function SignPD() {
   };
 
   const saveSignature = () => {
-    if (!sigCanvasRef.current) return;
-    sigCanvasRef.current.toDataURL();
+    const data = sigCanvasRef.current?.toDataURL();
+    if (!data) return;
     setIsSigned(true);
     addAuditLog("Signature applied successfully", "success");
   };
@@ -135,9 +215,7 @@ export function SignPD() {
     <Stack gap="xl">
       <Stack gap="xs">
         <Title order={1}>Enterprise Document Signing</Title>
-        <Text c="dimmed">
-          Secure, compliant, and efficient document signing with audit trails.
-        </Text>
+        <Text c="dimmed">Secure, compliant document signing</Text>
       </Stack>
 
       <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }}>
@@ -163,41 +241,9 @@ export function SignPD() {
         ))}
       </SimpleGrid>
 
-      <Card>
-        <Title order={4}>Workflow Configuration</Title>
-
-        <SimpleGrid cols={{ base: 1, md: 2 }} mt="md">
-          <Select
-            label="Signing Workflow"
-            value={selectedWorkflow}
-            onChange={(v) => v && setSelectedWorkflow(v)}
-            data={workflows.map((w) => ({
-              value: w.id,
-              label: `${w.name} – ${w.description}`,
-            }))}
-          />
-
-          <Select
-            label="Security Level"
-            value={securityLevel}
-            onChange={(v) => v && setSecurityLevel(v)}
-            data={[
-              { value: "basic", label: "Basic Encryption" },
-              { value: "high", label: "AES-256 Encryption" },
-              { value: "enterprise", label: "Enterprise MFA" },
-            ]}
-          />
-        </SimpleGrid>
-      </Card>
-
       <SimpleGrid cols={{ base: 1, lg: 2 }}>
         <Card>
-          <Group justify="space-between">
-            <Title order={4}>Upload & Preview</Title>
-            <Button variant="subtle" onClick={() => setShowPreview((p) => !p)}>
-              {showPreview ? <EyeOff size={18} /> : <Eye size={18} />}
-            </Button>
-          </Group>
+          <Title order={4}>Upload & Preview</Title>
 
           <Paper component="label" withBorder p="xl" mt="md" ta="center">
             <input hidden type="file" onChange={handleFileUpload} />
@@ -223,10 +269,7 @@ export function SignPD() {
           <Title order={4}>Signature Studio</Title>
 
           <Box mt="md">
-            <SignaturePad
-              ref={sigCanvasRef}
-              canvasProps={{ className: "w-full h-56 border rounded" }}
-            />
+            <SignaturePad ref={sigCanvasRef} />
           </Box>
 
           <Stack mt="md">
