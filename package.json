@@ -7,9 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext ts,tsx --report-unused-directives --max-warnings 0"
+    "lint": "next lint"
   },
   "dependencies": {
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+
     "@mantine/core": "^7.15.0",
     "@mantine/hooks": "^7.15.0",
     "@mantine/form": "^7.15.0",
@@ -21,14 +25,13 @@
     "date-fns": "^3.6.0",
     "lodash-es": "^4.17.21",
 
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "react-hook-form": "^7.55.0",
 
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
 
     "react-signature-canvas": "^1.1.0-alpha.2",
+
     "react-responsive-masonry": "^2.7.1",
     "react-resizable-panels": "^2.1.7",
     "react-slick": "^0.31.0",
@@ -37,33 +40,16 @@
     "embla-carousel-react": "^8.6.0"
   },
   "devDependencies": {
+    "typescript": "^5.4.0",
+
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.7.0",
 
-    "eslint": "^8.45.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.5",
 
     "tailwindcss": "^4.1.12",
     "postcss": "^8.4.38",
-    "autoprefixer": "^10.4.19",
-
-    "typescript": "^5.0.2",
-    "vite": "^6.3.5",
-
-    "cssnano": "^6.1.2",
-    "postcss-preset-env": "^9.6.0",
-    "postcss-import": "^16.1.0",
-    "postcss-nested": "^6.2.0",
-    "postcss-custom-media": "^10.0.8",
-    "postcss-custom-properties": "^13.3.12",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-normalize": "^10.0.1",
-    "postcss-discard-comments": "^6.0.2",
-    "postcss-merge-rules": "^6.1.1",
-    "postcss-sort-media-queries": "^5.2.0"
+    "autoprefixer": "^10.4.19"
   }
 }
