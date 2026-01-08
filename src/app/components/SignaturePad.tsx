@@ -1,24 +1,28 @@
 "use client";
 
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 import SignatureCanvas from "react-signature-canvas";
 
 /**
- * Typed wrapper for react-signature-canvas.
- *
- * WHY THIS EXISTS:
- * - react-signature-canvas ships broken TypeScript typings
- * - It is not recognized as a valid JSX component
- * - ref and canvasProps break TS builds
- *
- * This wrapper normalizes the component so:
- * - JSX works
- * - refs work
- * - strict TS builds pass
+ * react-signature-canvas has incorrect TypeScript typings.
+ * This wrapper fixes JSX + ref support safely.
  */
-const SignaturePad = forwardRef<any, any>((props, ref) => {
-  return <SignatureCanvas ref={ref} {...props} />;
-});
+
+export type SignaturePadHandle = SignatureCanvas;
+export type SignaturePadProps = {
+  canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
+};
+
+const SignaturePad = forwardRef<SignaturePadHandle, SignaturePadProps>(
+  ({ canvasProps }, ref) => {
+    return (
+      <SignatureCanvas
+        ref={ref as unknown as React.Ref<SignatureCanvas>}
+        canvasProps={canvasProps}
+      />
+    );
+  }
+);
 
 SignaturePad.displayName = "SignaturePad";
 
