@@ -24,7 +24,7 @@ export async function buildFinalPdf(
     if (!p.pdfBytes) continue;
     const src = await pdfLib.PDFDocument.load(p.pdfBytes);
     const [copied] = await merged.copyPages(src, [0]);
-    if (p.rotation) copied.setRotation(p.rotation);
+    if (p.rotation) copied.setRotation(pdfLib.degrees(p.rotation)); // ✅ fixed
     merged.addPage(copied);
   }
 
