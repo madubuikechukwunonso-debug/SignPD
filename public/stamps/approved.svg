@@ -1,0 +1,8 @@
+<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- green background -->
+  <rect width="120" height="40" rx="4" fill="#34D399"/>
+  <!-- white tick -->
+  <path d="M25 20 l7 7 l15 -15" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- text -->
+  <text x="52" y="25" font-size="16" fill="white" font-family="Arial, sans-serif" font-weight="bold">APPROVED</text>
+</svg>
