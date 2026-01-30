@@ -1,8 +1,8 @@
-"use client";
+import { Metadata } from "next";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "SignPD",
   description: "Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.",
 };
