@@ -26,7 +26,9 @@ export async function embedText(
       x: t.x,
       y: t.y,
       size: t.size,
-      color: t.color ? hexToRgb(t.color, 1) : pdfLib.rgb(0, 0, 0),
+      color: t.color
+        ? pdfLib.rgb(...hexToRgb(t.color, 1))
+        : pdfLib.rgb(0, 0, 0),
     });
   }
 }
@@ -37,7 +39,6 @@ export async function embedHighlights(
 ) {
   for (const h of highs) {
     const page = pdf.getPages()[h.page];
-    const { rgb } = pdfLib;
     const xs = h.quads.filter((_, i) => i % 2 === 0);
     const ys = h.quads.filter((_, i) => i % 2 === 1);
     const x = Math.min(...xs);
@@ -49,7 +50,7 @@ export async function embedHighlights(
       y,
       width,
       height,
-      color: rgb(...hexToRgb(h.color, 0.3)),
+      color: pdfLib.rgb(...hexToRgb(h.color, 0.3)),
       borderWidth: 0,
     });
   }
@@ -61,8 +62,7 @@ export async function embedDrawings(
 ) {
   for (const d of drawings) {
     const pg = pdf.getPages()[d.page];
-    const { rgb } = pdfLib;
-    const col = rgb(...hexToRgb(d.color, 1));
+    const col = pdfLib.rgb(...hexToRgb(d.color, 1));
 
     if (d.tool === "rectangle" && d.bounds) {
       pg.drawRectangle({
@@ -87,7 +87,6 @@ export async function embedDrawings(
         color: col,
       });
     } else if (d.points && d.points.length > 1) {
-      // free-hand path
       const path = d.points.map((p) => `${p.x} ${p.y}`).join(" L ");
       pg.drawSvgPath(`M ${path}`, { borderColor: col, borderWidth: d.width });
     }
@@ -102,9 +101,9 @@ export async function embedStamps(
     const page = pdf.getPages()[s.page];
     const imgBytes = await fetch(`/stamps/${s.type.toLowerCase()}.svg`)
       .then((r) => r.arrayBuffer())
-      .catch(() => new Uint8Array()); // fallback empty
+      .catch(() => new Uint8Array());
     if (!imgBytes.byteLength) continue;
-    const img = await pdf.embedPng(imgBytes); // SVGs converted to PNG in public
+    const img = await pdf.embedPng(imgBytes);
     page.drawImage(img, { x: s.x, y: s.y, width: s.width, height: s.height });
   }
 }
@@ -115,14 +114,11 @@ export async function embedImages(
 ) {
   for (const img of images) {
     const page = pdf.getPages()[img.page];
-    // embedKey would be the ref-key from pdf-lib embed; simplified here
-    // const embedded = await pdf.embedPng/ embedJpg( ...img.embedKey ...)
-    // page.drawImage(embedded, {x: img.x, y: img.y, width: img.width, height: img.height});
+    // embedKey usage omitted for brevity
   }
 }
 
 /* ---------- helpers ---------- */
-
 function hexToRgb(hex: string, alpha: number): [number, number, number, number] {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
