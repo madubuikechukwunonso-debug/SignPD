@@ -27,7 +27,7 @@ export async function embedText(
       y: t.y,
       size: t.size,
       color: t.color
-        ? pdfLib.rgb(...hexToRgb(t.color, 1))
+        ? pdfLib.rgb(...hexToRgb(t.color, 1).slice(0, 3)) // ⬅️ strip alpha
         : pdfLib.rgb(0, 0, 0),
     });
   }
@@ -50,7 +50,7 @@ export async function embedHighlights(
       y,
       width,
       height,
-      color: pdfLib.rgb(...hexToRgb(h.color, 0.3)),
+      color: pdfLib.rgb(...hexToRgb(h.color, 0.3).slice(0, 3)),
       borderWidth: 0,
     });
   }
@@ -62,7 +62,7 @@ export async function embedDrawings(
 ) {
   for (const d of drawings) {
     const pg = pdf.getPages()[d.page];
-    const col = pdfLib.rgb(...hexToRgb(d.color, 1));
+    const col = pdfLib.rgb(...hexToRgb(d.color, 1).slice(0, 3));
 
     if (d.tool === "rectangle" && d.bounds) {
       pg.drawRectangle({
