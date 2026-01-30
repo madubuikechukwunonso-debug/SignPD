@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    appDir: true, // App Router
-  },
+  swcMinify: true,
+
   // allow SVG imports for stamp icons
   webpack(config) {
     config.module.rules.push({
@@ -13,8 +12,6 @@ const nextConfig = {
     });
     return config;
   },
-  // optional: faster builds
-  swcMinify: true,
 };
 
 export default nextConfig;
