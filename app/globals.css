@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* basic dark-mode-ish reset */
+html,
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* react-pdf page layer cosmetics */
+.react-pdf__Page {
+  @apply shadow-lg rounded-xl overflow-hidden;
+}
+
+.react-pdf__Page__canvas {
+  @apply mx-auto;
+}
+
+/* utility for glass-morphism cards */
+.glass {
+  @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl;
+}
+
+/* custom scrollbar for thumbnail strip */
+.thumb-strip::-webkit-scrollbar {
+  height: 6px;
+}
+.thumb-strip::-webkit-scrollbar-thumb {
+  @apply bg-indigo-300 rounded-full;
+}
