@@ -37,19 +37,17 @@ export default function DrawingLayer({ page }: { page: number }) {
   const stop = () => {
     if (!drawing) return;
     setDrawing(false);
-    const canvas = canvasRef.current!;
-    const dataUrl = canvas.toDataURL("image/png");
-    // store as free-hand path for simplicity
+
     addDrawing({
       page: page - 1,
       tool: "pen",
       color: tool.color,
       width: tool.width,
-      points: [], // real app would parse actual path
-      dataUrl,
+      points: [], // stub – replace with real path parsing if needed
     });
-    const ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const ctx = canvasRef.current!.getContext("2d")!;
+    ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
   };
 
   return (
