@@ -27,10 +27,7 @@ export async function embedText(
       y: t.y,
       size: t.size,
       color: t.color
-        ? (() => {                           // ✅ de-structure once
-            const [r, g, b] = hexToRgb(t.color, 1).slice(0, 3);
-            return pdfLib.rgb(r, g, b);
-          })()
+        ? (() => { const [r, g, b] = hexToRgb(t.color, 1).slice(0, 3); return pdfLib.rgb(r, g, b); })()
         : pdfLib.rgb(0, 0, 0),
     });
   }
@@ -53,7 +50,7 @@ export async function embedHighlights(
       y,
       width,
       height,
-      color: pdfLib.rgb(...hexToRgb(h.color, 0.3).slice(0, 3)),
+      color: (() => { const [r, g, b] = hexToRgb(h.color, 0.3).slice(0, 3); return pdfLib.rgb(r, g, b); })(),
       borderWidth: 0,
     });
   }
