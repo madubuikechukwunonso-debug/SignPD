@@ -27,7 +27,10 @@ export async function embedText(
       y: t.y,
       size: t.size,
       color: t.color
-        ? pdfLib.rgb(...hexToRgb(t.color, 1).slice(0, 3)) // ⬅️ strip alpha
+        ? (() => {                           // ✅ de-structure once
+            const [r, g, b] = hexToRgb(t.color, 1).slice(0, 3);
+            return pdfLib.rgb(r, g, b);
+          })()
         : pdfLib.rgb(0, 0, 0),
     });
   }
