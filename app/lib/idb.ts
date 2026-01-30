@@ -63,3 +63,6 @@ export async function getImages()                   { return (await get("images"
 /* ---------- page management ---------- */
 export async function savePages(p: any[])           { await put("pages", p); }
 export async function getPages()                    { return (await get("pages")) ?? []; }
+
+/* re-export helpers so hooks can import exact names */
+export { put as saveSignature, get as getSignature };
