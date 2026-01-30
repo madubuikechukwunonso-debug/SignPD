@@ -21,7 +21,8 @@ export default function DownloadBtn() {
 
   const download = async () => {
     const bytes = await buildFinalPdf(pages, sigs, texts, highlights, drawings, stamps, images);
-    const blob = new Blob([bytes], { type: "application/pdf" });
+    // fix: wrap bytes so Blob constructor is happy
+    const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
