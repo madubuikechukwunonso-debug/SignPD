@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getSignatures, saveSignature } from "@/app/lib/idb";
+import { saveSignatures, getSignatures } from "@/app/lib/idb";
 
 export type Sig = {
   dataUrl: string;
@@ -20,13 +20,13 @@ export function useSignatures() {
   const addSig = (s: Sig) => {
     const next = [...sigs, s];
     setSigs(next);
-    saveSignature(next);
+    saveSignatures(next); // ✅ uses the correct wrapper
   };
 
   const deleteSig = (id: string) => {
-    const next = sigs.filter((_, i) => i !== parseInt(id)); // simple index id
+    const next = sigs.filter((_, i) => i !== parseInt(id));
     setSigs(next);
-    saveSignature(next);
+    saveSignatures(next);
   };
 
   return { sigs, addSig, deleteSig };
