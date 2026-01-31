@@ -1,4 +1,3 @@
-"use client";
 import { useEffect } from "react";
 import { savePdfToIdb } from "@/app/lib/idb";
 import * as pdfLib from "pdf-lib";
