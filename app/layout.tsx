@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import Providers from "@/app/components/Providers";
 
 export const metadata: Metadata = {
   title: "SignPD",
@@ -11,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
