@@ -21,12 +21,13 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // BEST & RELIABLE FIX: Local self-hosted worker (no CDN/MIME/CORS issues)
+  // USING THE REQUESTED CDNJS VERSION (2.6.347 legacy worker)
+  // This is a stable legacy version that many projects use successfully.
+  // It serves the worker with the correct MIME type (application/javascript) and avoids modern ESM/CORS issues.
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
   }, []);
 
-  // Early return with nice loading spinner
   if (!pdfFile || !pdfBytes) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-950 dark:via-slate-900 dark:to-black">
@@ -102,7 +103,7 @@ export default function EditPage() {
         </div>
       </header>
 
-      {/* Tools Toolbar */}
+      {/* Tools Toolbar - Amber-themed placeholders */}
       <div className="bg-amber-100/80 dark:bg-gray-800 border-b border-amber-200 dark:border-gray-700 p-5 flex gap-5 overflow-x-auto shadow-md">
         <button className="px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-500 transition font-medium whitespace-nowrap shadow-lg">
           ✒️ Add Signature
@@ -178,7 +179,7 @@ export default function EditPage() {
         </div>
       </div>
 
-      {/* Decorative blobs */}
+      {/* Decorative blobs (matching landing page) */}
       <div className="fixed top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-20 animate-pulse pointer-events-none" />
       <div className="fixed bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-20 animate-pulse pointer-events-none" />
       <div className="hidden dark:block fixed top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-10 pointer-events-none" />
