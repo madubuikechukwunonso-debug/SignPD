@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* basic dark-mode-ish reset */
-html,
-body {
-  @apply bg-gray-50 text-gray-900;
-}
-
 /* react-pdf page layer cosmetics */
 .react-pdf__Page {
   @apply shadow-lg rounded-xl overflow-hidden;
@@ -17,9 +11,11 @@ body {
   @apply mx-auto;
 }
 
-/* utility for glass-morphism cards */
+/* theme-aware glassmorphism utility */
 .glass {
-  @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl;
+  @apply bg-white/70 backdrop-blur-md border border-gray-300/50 
+         dark:bg-white/10 dark:backdrop-blur-xl dark:border-white/20 
+         rounded-3xl shadow-2xl;
 }
 
 /* custom scrollbar for thumbnail strip */
@@ -27,5 +23,5 @@ body {
   height: 6px;
 }
 .thumb-strip::-webkit-scrollbar-thumb {
-  @apply bg-indigo-300 rounded-full;
+  @apply bg-indigo-300 rounded-full dark:bg-indigo-600;
 }
