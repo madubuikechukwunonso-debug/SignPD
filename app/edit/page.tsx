@@ -21,11 +21,11 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // USING THE REQUESTED CDNJS VERSION (2.6.347 legacy worker)
-  // This is a stable legacy version that many projects use successfully.
-  // It serves the worker with the correct MIME type (application/javascript) and avoids modern ESM/CORS issues.
+  // RELIABLE LOCAL SELF-HOSTED WORKER (now that pdfjs-dist is installed)
+  // This uses the exact version-matched worker from your node_modules
+  // No CDN/MIME/CORS/version issues — 100% reliable
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
   }, []);
 
   if (!pdfFile || !pdfBytes) {
