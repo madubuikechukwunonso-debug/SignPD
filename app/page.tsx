@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { usePDF } from './context/PDFContext';
+import { usePDF } from './context/PDFContext';  // Use to watch loaded state
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { usePdf } from "./hooks/usePdf";
@@ -10,16 +10,24 @@ import ThemeToggle from "./components/ThemeToggle";
 export default function Home() {
   const router = useRouter();
   const { loadPdf } = usePdf();
+  const { pdfBytes } = usePDF();  // Watch for loaded PDF bytes
   const [drag, setDrag] = useState(false);
   const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
 
+  // NEW: Navigate to /edit only AFTER the PDF is fully loaded into context
+  useEffect(() => {
+    if (pdfBytes) {
+      router.push("/edit");
+    }
+  }, [pdfBytes, router]);
+
   const handleFile = async (file: File) => {
     if (file.type !== "application/pdf") return;
     await loadPdf({ target: { files: [file] } } as any);
-    router.push("/edit");
+    // REMOVED: router.push("/edit") — now handled by useEffect above
   };
 
   const onDrop = useCallback(
@@ -78,7 +86,7 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        {/* Glass card - content only (no button inside) */}
+        {/* Glass card - content only */}
         <div className="relative w-full p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
           {/* Responsive logo */}
           <motion.div
@@ -105,7 +113,6 @@ export default function Home() {
                 PD
               </motion.span>
             </motion.h1>
-
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "70%" }}
@@ -149,7 +156,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Beautiful gradient button - now OUTSIDE the glass card for zero interference */}
+        {/* Gradient button outside glass card */}
         <motion.button
           type="button"
           initial={{ y: 40, opacity: 0 }}
@@ -169,7 +176,6 @@ export default function Home() {
       <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
-
       <div className="hidden dark:block absolute top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-15" />
       <div className="hidden dark:block absolute bottom-20 right-20 w-80 h-80 bg-orange-900 rounded-full filter blur-3xl opacity-10" />
     </main>
