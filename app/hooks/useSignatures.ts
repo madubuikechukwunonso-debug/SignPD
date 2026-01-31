@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 import { saveSignatures, getSignatures } from "@/app/lib/idb";
 
