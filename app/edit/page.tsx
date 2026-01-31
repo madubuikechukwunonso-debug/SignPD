@@ -21,9 +21,9 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // SWITCHED TO RELIABLE CDN (cdnjs) - version-matched, correct MIME type, no CORS issues
+  // SWITCHED TO RELIABLE jsDelivr CDN - version-matched, correct MIME type, no CORS/404 issues
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
   }, []);
 
   // Early return with nice loading spinner (instead of plain "Redirecting...")
