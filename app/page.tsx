@@ -31,17 +31,17 @@ export default function Home() {
     []
   );
 
-  const handleButtonClick = () => {
+  const openFilePicker = () => {
     fileInputRef.current?.click();
   };
 
   if (!mounted) return null;
 
   const mainClasses = `
-    min-h-screen flex items-center justify-center px-6 transition-all duration-500
-    bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50
-    dark:bg-gradient-to-br dark:from-purple-900 dark:via-indigo-900 dark:to-black
-    ${drag ? "bg-indigo-100 dark:bg-indigo-950" : ""}
+    min-h-screen flex items-center justify-center px-6 transition-all duration-700
+    bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50
+    dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-black
+    ${drag ? "bg-amber-100 dark:bg-gray-800" : ""}
   `.trim().replace(/\s+/g, " ");
 
   return (
@@ -54,7 +54,7 @@ export default function Home() {
       onDragLeave={() => setDrag(false)}
       onDrop={onDrop}
     >
-      {/* Hidden file input - triggered programmatically */}
+      {/* Hidden file input - placed outside motion tree to avoid any interference */}
       <input
         ref={fileInputRef}
         type="file"
@@ -67,32 +67,58 @@ export default function Home() {
       />
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 120 }}
-        className="relative w-full max-w-2xl"
+        transition={{ type: "spring", stiffness: 100 }}
+        className="relative w-full max-w-3xl"
       >
         {/* Theme Toggle */}
-        <div className="absolute -top-16 right-0 z-10">
+        <div className="absolute -top-20 right-0 z-50">
           <ThemeToggle />
         </div>
 
-        {/* Card with integrated glass effect */}
-        <div className="relative p-12 text-center text-gray-800 dark:text-white glass">
-          <motion.h1
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-6xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400"
+        {/* Card with glass + hover lift */}
+        <div className="relative p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
+          {/* Enhanced animated logo */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
           >
-            SignPD
-          </motion.h1>
+            <motion.h1 className="text-7xl md:text-8xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300">
+              {"SignPD".split("").map((char, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ opacity: 0, y: 80, rotateX: 90 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.3 + index * 0.08,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="inline-block"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </motion.h1>
+
+            {/* Animated underline */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 1.2, duration: 1, ease: "easeOut" }}
+              className="h-3 mx-auto mt-6 max-w-md bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 rounded-full opacity-80"
+              style={{ transformOrigin: "left" }}
+            />
+          </motion.div>
 
           <motion.p
-            initial={{ y: -20, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-600 dark:text-white/80 mb-10 max-w-lg mx-auto"
+            transition={{ delay: 0.5 }}
+            className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed"
           >
             Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
           </motion.p>
@@ -100,49 +126,51 @@ export default function Home() {
           <AnimatePresence>
             {drag && (
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 border-4 border-dashed border-indigo-500 rounded-3xl flex items-center justify-center pointer-events-none z-10"
+                className="absolute inset-0 border-4 border-dashed border-amber-500 dark:border-amber-600 rounded-3xl flex items-center justify-center pointer-events-none z-10 backdrop-blur-sm"
               >
-                <span className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400">
+                <span className="text-4xl font-bold text-amber-600 dark:text-amber-400">
                   Drop to start editing
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Fixed button - full area clickable via ref */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
+          {/* Fully clickable button using ref + programmatic click */}
+          <motion.button
+            type="button"
+            initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            onClick={handleButtonClick}
-            className="inline-block px-10 py-5 bg-indigo-600 rounded-full text-xl font-semibold cursor-pointer hover:bg-indigo-700 transition shadow-xl text-white select-none"
-            role="button"
+            transition={{ delay: 0.7 }}
+            onClick={openFilePicker}
+            className="relative z-50 inline-block px-12 py-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-2xl font-bold cursor-pointer hover:from-amber-700 hover:to-orange-700 hover:scale-105 transition-all shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800"
             aria-label="Choose PDF file"
           >
             Choose PDF
-          </motion.div>
+          </motion.button>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="mt-8 text-md text-gray-500 dark:text-white/60"
+            transition={{ delay: 0.9 }}
+            className="mt-10 text-lg text-gray-600 dark:text-gray-400"
           >
             or drag & drop your file anywhere
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Light mode decorative blobs */}
-      <div className="absolute top-10 left-10 w-72 h-72 bg-purple-300 rounded-full filter blur-3xl opacity-40 animate-pulse" />
-      <div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-300 rounded-full filter blur-3xl opacity-40 animate-pulse" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-300 rounded-full filter blur-3xl opacity-30" />
+      {/* Subtle decorative blobs — amber/yellow theme, very low opacity for advanced depth */}
+      {/* Light mode */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
+      <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
 
-      {/* Dark mode decorative blobs */}
-      <div className="hidden dark:block absolute top-10 left-10 w-72 h-72 bg-purple-500 rounded-full filter blur-3xl opacity-20" />
-      <div className="hidden dark:block absolute bottom-10 right-10 w-96 h-96 bg-indigo-500 rounded-full filter blur-3xl opacity-20" />
+      {/* Dark mode — deeper, lower opacity */}
+      <div className="hidden dark:block absolute top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-15" />
+      <div className="hidden dark:block absolute bottom-20 right-20 w-80 h-80 bg-orange-900 rounded-full filter blur-3xl opacity-10" />
     </main>
   );
 }
