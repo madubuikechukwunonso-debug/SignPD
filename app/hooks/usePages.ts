@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import * as pdfLib from "pdf-lib";
 import { getPages, savePages } from "@/app/lib/idb";
