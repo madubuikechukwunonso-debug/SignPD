@@ -28,6 +28,7 @@ export default function Home() {
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -54,7 +55,7 @@ export default function Home() {
       onDragLeave={() => setDrag(false)}
       onDrop={onDrop}
     >
-      {/* Hidden file input - placed outside motion tree to avoid any interference */}
+      {/* Hidden native file input — placed at root level, completely outside any motion/animated elements */}
       <input
         ref={fileInputRef}
         type="file"
@@ -138,15 +139,19 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Fully clickable button using ref + programmatic click */}
+          {/* NEW BUTTON APPROACH: Standard <motion.button> with programmatic trigger */}
+          {/* This is the most reliable cross-platform (PC + mobile) method */}
+          {/* Larger tap area, high z-index, no label/input nesting issues */}
           <motion.button
             type="button"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             transition={{ delay: 0.7 }}
             onClick={openFilePicker}
-            className="relative z-50 inline-block px-12 py-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-2xl font-bold cursor-pointer hover:from-amber-700 hover:to-orange-700 hover:scale-105 transition-all shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800"
-            aria-label="Choose PDF file"
+            className="relative z-50 inline-block px-16 py-8 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-3xl font-bold cursor-pointer shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64"
+            aria-label="Choose PDF file to edit"
           >
             Choose PDF
           </motion.button>
@@ -162,13 +167,12 @@ export default function Home() {
         </div>
       </motion.div>
 
-      {/* Subtle decorative blobs — amber/yellow theme, very low opacity for advanced depth */}
-      {/* Light mode */}
+      {/* Subtle decorative blobs — amber/yellow theme */}
       <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
 
-      {/* Dark mode — deeper, lower opacity */}
+      {/* Dark mode blobs */}
       <div className="hidden dark:block absolute top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-15" />
       <div className="hidden dark:block absolute bottom-20 right-20 w-80 h-80 bg-orange-900 rounded-full filter blur-3xl opacity-10" />
     </main>
