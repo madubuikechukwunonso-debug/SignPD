@@ -21,9 +21,9 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // FIXED: Use self-hosted local worker (reliable, no CDN/CORS issues)
+  // SWITCHED TO RELIABLE CDN (cdnjs) - version-matched, correct MIME type, no CORS issues
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
   }, []);
 
   // Early return with nice loading spinner (instead of plain "Redirecting...")
