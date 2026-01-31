@@ -78,47 +78,48 @@ export default function Home() {
         </div>
 
         {/* Glass card */}
-        <div className="relative p-10 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
-          {/* Optimized & responsive logo animation */}
+        <div className="relative p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
+          {/* Smaller, fully responsive & optimized logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-8"
+            className="mb-6 md:mb-8"
           >
-            <motion.h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300 whitespace-nowrap">
-              {/* Simple group stagger with lighter transforms */}
-              {["S", "i", "g", "n", "P", "D"].map((char, index) => (
-                <motion.span
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.4 + index * 0.1,
-                    ease: "easeOut",
-                  }}
-                  className="inline-block"
-                >
-                  {char}
-                </motion.span>
-              ))}
+            <motion.h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300 whitespace-nowrap overflow-hidden">
+              {/* Very lightweight stagger: grouped letters for less elements + simple bounce */}
+              <motion.span
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.4, ease: "backOut" }}
+                className="inline-block"
+              >
+                Sign
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 60 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.6, ease: "backOut" }}
+                className="inline-block ml-1 md:ml-2"
+              >
+                PD
+              </motion.span>
             </motion.h1>
 
-            {/* Simplified underline - lighter animation */}
+            {/* Subtle, responsive underline */}
             <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 1.2, duration: 0.8, ease: "easeOut" }}
-              className="h-2 md:h-3 mx-auto mt-4 md:mt-6 max-w-sm md:max-w-md bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 rounded-full opacity-80"
+              initial={{ width: 0 }}
+              animate={{ width: "70%" }}
+              transition={{ delay: 1.1, duration: 0.8, ease: "easeOut" }}
+              className="h-1.5 sm:h-2 md:h-3 mx-auto mt-3 sm:mt-4 md:mt-6 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 rounded-full opacity-80"
             />
           </motion.div>
 
           <motion.p
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="text-lg sm:text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
+            transition={{ delay: 0.7 }}
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
           >
             Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
           </motion.p>
@@ -131,23 +132,23 @@ export default function Home() {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 border-4 border-dashed border-amber-500 dark:border-amber-600 rounded-3xl flex items-center justify-center pointer-events-none z-10 backdrop-blur-sm"
               >
-                <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-amber-600 dark:text-amber-400 px-4">
+                <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-400 px-4">
                   Drop to start editing
                 </span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Beautiful button back in original position - fully clickable */}
+          {/* Button in original position – beautiful & fully functional */}
           <motion.button
             type="button"
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.9 }}
             onClick={openFilePicker}
-            className="relative z-50 inline-block px-10 sm:px-12 py-5 sm:py-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-xl sm:text-2xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64"
+            className="relative z-50 inline-block px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-lg sm:text-xl md:text-2xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-56"
             aria-label="Choose PDF file"
           >
             Choose PDF
@@ -156,8 +157,8 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
-            className="mt-8 text-base sm:text-lg text-gray-600 dark:text-gray-400"
+            transition={{ delay: 1.1 }}
+            className="mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400"
           >
             or drag & drop your file anywhere
           </motion.div>
