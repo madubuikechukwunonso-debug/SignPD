@@ -70,16 +70,16 @@ export default function Home() {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 100 }}
-        className="relative w-full max-w-3xl"
+        className="relative w-full max-w-3xl flex flex-col items-center"
       >
         {/* Theme Toggle */}
         <div className="absolute -top-20 right-0 z-50">
           <ThemeToggle />
         </div>
 
-        {/* Glass card */}
-        <div className="relative p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
-          {/* Smaller, fully responsive & optimized logo */}
+        {/* Glass card - content only (no button inside) */}
+        <div className="relative w-full p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
+          {/* Responsive logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -87,7 +87,6 @@ export default function Home() {
             className="mb-6 md:mb-8"
           >
             <motion.h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300 whitespace-nowrap overflow-hidden">
-              {/* Very lightweight stagger: grouped letters for less elements + simple bounce */}
               <motion.span
                 initial={{ opacity: 0, y: 60 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -106,7 +105,6 @@ export default function Home() {
               </motion.span>
             </motion.h1>
 
-            {/* Subtle, responsive underline */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "70%" }}
@@ -119,7 +117,7 @@ export default function Home() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed px-4"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed px-4"
           >
             Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
           </motion.p>
@@ -139,30 +137,31 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Button in original position – beautiful & fully functional */}
-          <motion.button
-            type="button"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ delay: 0.9 }}
-            onClick={openFilePicker}
-            className="relative z-50 inline-block px-8 sm:px-10 md:px-12 py-4 sm:py-5 md:py-6 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-lg sm:text-xl md:text-2xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-56"
-            aria-label="Choose PDF file"
-          >
-            Choose PDF
-          </motion.button>
-
+          {/* Drag hint inside card */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.1 }}
-            className="mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400"
+            transition={{ delay: 1.0 }}
+            className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400"
           >
             or drag & drop your file anywhere
           </motion.div>
         </div>
+
+        {/* Beautiful gradient button - now OUTSIDE the glass card for zero interference */}
+        <motion.button
+          type="button"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          whileHover={{ scale: 1.05, y: -5 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ delay: 1.0, duration: 0.6 }}
+          onClick={openFilePicker}
+          className="mt-12 relative z-50 inline-block px-10 sm:px-12 md:px-14 py-5 sm:py-6 md:py-7 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-full text-xl sm:text-2xl md:text-3xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64"
+          aria-label="Choose PDF file"
+        >
+          Choose PDF
+        </motion.button>
       </motion.div>
 
       {/* Decorative blobs */}
