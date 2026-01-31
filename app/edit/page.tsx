@@ -21,9 +21,7 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // RELIABLE LOCAL SELF-HOSTED WORKER (now that pdfjs-dist is installed)
-  // This uses the exact version-matched worker from your node_modules
-  // No CDN/MIME/CORS/version issues — 100% reliable
+  // LOCAL SELF-HOSTED WORKER (the only reliable fix)
   useEffect(() => {
     pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
   }, []);
