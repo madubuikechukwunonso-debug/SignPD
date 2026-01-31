@@ -1,7 +1,3 @@
-// app/page.tsx (full updated file - replace your existing app/page.tsx)
-// Now uses only usePDF() from context (removed usePdf hook import)
-// loadPdf now accepts a File directly
-
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -22,7 +18,6 @@ export default function Home() {
 
   useEffect(() => setMounted(true), []);
 
-  // Navigate only after PDF is fully loaded (no loading, no error)
   useEffect(() => {
     if (pdfBytes && !isLoading && !error && mounted) {
       router.push("/edit");
@@ -34,7 +29,6 @@ export default function Home() {
 
     setValidationError(null);
 
-    // Enhanced validation
     const isPdfByType = file.type === "application/pdf";
     const isPdfByName = file.name.toLowerCase().endsWith(".pdf");
     if (!isPdfByType && !isPdfByName) {
@@ -42,13 +36,11 @@ export default function Home() {
       return;
     }
 
-    // File size limit (50MB - adjust as needed)
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
       setValidationError("File too large. Maximum size is 50MB.");
       return;
     }
 
-    // Start loading (async, no await needed here - navigation watches state)
     loadPdf(file);
   };
 
@@ -78,7 +70,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Loading Overlay */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -116,7 +107,6 @@ export default function Home() {
         }}
         onDrop={onDrop}
       >
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -134,14 +124,11 @@ export default function Home() {
           transition={{ type: "spring", stiffness: 100 }}
           className="relative w-full max-w-3xl flex flex-col items-center"
         >
-          {/* Theme Toggle */}
           <div className="absolute -top-20 right-0 z-50">
             <ThemeToggle />
           </div>
 
-          {/* Glass card */}
           <div className="relative w-full p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
-            {/* Logo & Title */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -183,7 +170,6 @@ export default function Home() {
               Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
             </motion.p>
 
-            {/* Drag overlay */}
             <AnimatePresence>
               {dragActive && (
                 <motion.div
@@ -199,7 +185,6 @@ export default function Home() {
               )}
             </AnimatePresence>
 
-            {/* Drag hint */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -209,7 +194,6 @@ export default function Home() {
               or drag & drop your file anywhere
             </motion.div>
 
-            {/* Error display (validation or load error) */}
             <AnimatePresence>
               {(validationError || error) && (
                 <motion.div
@@ -226,7 +210,6 @@ export default function Home() {
             </AnimatePresence>
           </div>
 
-          {/* Choose PDF button */}
           <motion.button
             type="button"
             initial={{ y: 40, opacity: 0 }}
@@ -243,7 +226,6 @@ export default function Home() {
           </motion.button>
         </motion.div>
 
-        {/* Decorative blobs */}
         <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
         <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
