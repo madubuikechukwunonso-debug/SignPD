@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { usePDF } from './context/PDFContext';  // Use to watch loaded state
+import { usePDF } from './context/PDFContext';
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { usePdf } from "./hooks/usePdf";
@@ -10,38 +10,58 @@ import ThemeToggle from "./components/ThemeToggle";
 export default function Home() {
   const router = useRouter();
   const { loadPdf } = usePdf();
-  const { pdfBytes } = usePDF();  // Watch for loaded PDF bytes
-  const [drag, setDrag] = useState(false);
+  const { pdfBytes, isLoading = false, error = null } = usePDF();
+
+  const [dragActive, setDragActive] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
 
-  // NEW: Navigate to /edit only AFTER the PDF is fully loaded into context
+  // Navigate only after PDF is fully loaded (no loading, no error)
   useEffect(() => {
-    if (pdfBytes) {
+    if (pdfBytes && !isLoading && !error && mounted) {
       router.push("/edit");
     }
-  }, [pdfBytes, router]);
+  }, [pdfBytes, isLoading, error, mounted, router]);
 
   const handleFile = async (file: File) => {
-    if (file.type !== "application/pdf") return;
-    await loadPdf({ target: { files: [file] } } as any);
-    // REMOVED: router.push("/edit") — now handled by useEffect above
+    if (!file) return;
+
+    setValidationError(null);
+
+    // Enhanced validation
+    const isPdfByType = file.type === "application/pdf";
+    const isPdfByName = file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdfByType && !isPdfByName) {
+      setValidationError("Invalid file type. Please upload a PDF.");
+      return;
+    }
+
+    // Optional: limit file size to prevent memory issues (adjust as needed)
+    if (file.size > 50 * 1024 * 1024) {
+      setValidationError("File too large. Maximum size is 50MB.");
+      return;
+    }
+
+    await loadPdf({ target: { files: [file] } } as React.ChangeEvent<HTMLInputElement>);
   };
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
-      setDrag(false);
+      setDragActive(false);
+      if (isLoading) return; // Ignore drops while processing
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
-    []
+    [isLoading]
   );
 
   const openFilePicker = () => {
-    fileInputRef.current?.click();
+    if (!isLoading) fileInputRef.current?.click();
   };
 
   if (!mounted) return null;
@@ -50,134 +70,183 @@ export default function Home() {
     min-h-screen flex items-center justify-center px-6 transition-all duration-700
     bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50
     dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-black
-    ${drag ? "bg-amber-100 dark:bg-gray-800" : ""}
+    ${dragActive ? "bg-amber-100/80 dark:bg-gray-800/80" : ""}
   `.trim().replace(/\s+/g, " ");
 
   return (
-    <main
-      className={mainClasses}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDrag(true);
-      }}
-      onDragLeave={() => setDrag(false)}
-      onDrop={onDrop}
-    >
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/pdf"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleFile(file);
-        }}
-      />
-
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="relative w-full max-w-3xl flex flex-col items-center"
-      >
-        {/* Theme Toggle */}
-        <div className="absolute -top-20 right-0 z-50">
-          <ThemeToggle />
-        </div>
-
-        {/* Glass card - content only */}
-        <div className="relative w-full p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
-          {/* Responsive logo */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-6 md:mb-8"
-          >
-            <motion.h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300 whitespace-nowrap overflow-hidden">
-              <motion.span
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.4, ease: "backOut" }}
-                className="inline-block"
-              >
-                Sign
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.6, ease: "backOut" }}
-                className="inline-block ml-1 md:ml-2"
-              >
-                PD
-              </motion.span>
-            </motion.h1>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "70%" }}
-              transition={{ delay: 1.1, duration: 0.8, ease: "easeOut" }}
-              className="h-1.5 sm:h-2 md:h-3 mx-auto mt-3 sm:mt-4 md:mt-6 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 rounded-full opacity-80"
-            />
-          </motion.div>
-
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed px-4"
-          >
-            Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
-          </motion.p>
-
-          <AnimatePresence>
-            {drag && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 border-4 border-dashed border-amber-500 dark:border-amber-600 rounded-3xl flex items-center justify-center pointer-events-none z-10 backdrop-blur-sm"
-              >
-                <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-400 px-4">
-                  Drop to start editing
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Drag hint inside card */}
+    <>
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
-            className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400"
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm"
           >
-            or drag & drop your file anywhere
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl p-12 flex flex-col items-center gap-8 max-w-md"
+            >
+              <div className="animate-spin rounded-full h-20 w-20 border-8 border-amber-200 border-t-amber-600" />
+              <div className="text-center">
+                <p className="text-3xl font-bold text-gray-800 dark:text-white">Processing your PDF</p>
+                <p className="text-lg text-gray-600 dark:text-gray-400 mt-4">
+                  Large files may take a moment. Please wait...
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
-        </div>
+        )}
+      </AnimatePresence>
 
-        {/* Gradient button outside glass card */}
-        <motion.button
-          type="button"
-          initial={{ y: 40, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          whileHover={{ scale: 1.05, y: -5 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ delay: 1.0, duration: 0.6 }}
-          onClick={openFilePicker}
-          className="mt-12 relative z-50 inline-block px-10 sm:px-12 md:px-14 py-5 sm:py-6 md:py-7 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-full text-xl sm:text-2xl md:text-3xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64"
-          aria-label="Choose PDF file"
+      <main
+        className={mainClasses}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragActive(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setDragActive(false);
+        }}
+        onDrop={onDrop}
+      >
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+          }}
+        />
+
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="relative w-full max-w-3xl flex flex-col items-center"
         >
-          Choose PDF
-        </motion.button>
-      </motion.div>
+          {/* Theme Toggle */}
+          <div className="absolute -top-20 right-0 z-50">
+            <ThemeToggle />
+          </div>
 
-      {/* Decorative blobs */}
-      <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
-      <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
-      <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
-      <div className="hidden dark:block absolute top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-15" />
-      <div className="hidden dark:block absolute bottom-20 right-20 w-80 h-80 bg-orange-900 rounded-full filter blur-3xl opacity-10" />
-    </main>
+          {/* Glass card */}
+          <div className="relative w-full p-8 sm:p-12 md:p-16 text-center text-gray-800 dark:text-gray-100 glass hover:-translate-y-3 hover:shadow-3xl transition-all duration-500">
+            {/* Logo & Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="mb-6 md:mb-8"
+            >
+              <motion.h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-300 whitespace-nowrap overflow-hidden">
+                <motion.span
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.4, ease: "backOut" }}
+                  className="inline-block"
+                >
+                  Sign
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0, y: 60 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.6, ease: "backOut" }}
+                  className="inline-block ml-1 md:ml-2"
+                >
+                  PD
+                </motion.span>
+              </motion.h1>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "70%" }}
+                transition={{ delay: 1.1, duration: 0.8, ease: "easeOut" }}
+                className="h-1.5 sm:h-2 md:h-3 mx-auto mt-3 sm:mt-4 md:mt-6 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 rounded-full opacity-80"
+              />
+            </motion.div>
+
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed px-4"
+            >
+              Edit, sign, highlight & rearrange your PDFs in the browser—no uploads to any server.
+            </motion.p>
+
+            {/* Drag overlay */}
+            <AnimatePresence>
+              {dragActive && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 border-4 border-dashed border-amber-500 dark:border-amber-600 rounded-3xl flex items-center justify-center pointer-events-none z-10 backdrop-blur-sm"
+                >
+                  <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-amber-600 dark:text-amber-400 px-4">
+                    Drop to start editing
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Drag hint */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-400 mb-8"
+            >
+              or drag & drop your file anywhere
+            </motion.div>
+
+            {/* Error display (validation or load error) */}
+            <AnimatePresence>
+              {(validationError || error) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="mb-6"
+                >
+                  <p className="text-lg md:text-xl font-medium text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
+                    ⚠️ {validationError || error}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Choose PDF button */}
+          <motion.button
+            type="button"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            whileHover={{ scale: isLoading ? 1 : 1.05, y: isLoading ? 0 : -5 }}
+            whileTap={{ scale: isLoading ? 1 : 0.95 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
+            onClick={openFilePicker}
+            disabled={isLoading}
+            className="mt-12 relative z-50 inline-block px-10 sm:px-12 md:px-14 py-5 sm:py-6 md:py-7 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-full text-xl sm:text-2xl md:text-3xl font-bold shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64 transition-all"
+            aria-label="Choose PDF file"
+          >
+            {isLoading ? "Processing..." : "Choose PDF"}
+          </motion.button>
+        </motion.div>
+
+        {/* Decorative blobs */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
+        <div className="hidden dark:block absolute top-20 left-20 w-96 h-96 bg-amber-800 rounded-full filter blur-3xl opacity-15" />
+        <div className="hidden dark:block absolute bottom-20 right-20 w-80 h-80 bg-orange-900 rounded-full filter blur-3xl opacity-10" />
+      </main>
+    </>
   );
 }
