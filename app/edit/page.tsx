@@ -41,12 +41,20 @@ export default function EditPage() {
   };
 
   const handleDownload = () => {
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    if (!pdfBytes || !pdfFile) return;
+
+    // Use .buffer to get a clean ArrayBuffer (fixes TS error)
+    const blob = new Blob([pdfBytes.buffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = pdfFile.name.replace(/\.pdf$/i, '_edited.pdf');
+
+    // Append to DOM for better compatibility
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+
     URL.revokeObjectURL(url);
   };
 
@@ -109,7 +117,6 @@ export default function EditPage() {
         <button className="px-5 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 whitespace-nowrap">
           🖍️ Highlight
         </button>
-        {/* Add more tools here as we implement them */}
       </div>
 
       {/* Main content: Sidebar + Viewer */}
