@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 import { getStamps, saveStamps } from "@/app/lib/idb";
 
