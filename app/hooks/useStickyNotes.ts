@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { getStickyNotes, saveStickyNotes } from "@/app/lib/idb";
 
