@@ -1,16 +1,18 @@
+// app/page.tsx (full updated file - replace your existing app/page.tsx)
+// Now uses only usePDF() from context (removed usePdf hook import)
+// loadPdf now accepts a File directly
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePDF } from './context/PDFContext';
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { usePdf } from "./hooks/usePdf";
 import ThemeToggle from "./components/ThemeToggle";
 
 export default function Home() {
   const router = useRouter();
-  const { loadPdf } = usePdf();
-  const { pdfBytes, isLoading = false, error = null } = usePDF();
+  const { loadPdf, pdfBytes, isLoading, error } = usePDF();
 
   const [dragActive, setDragActive] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -40,20 +42,21 @@ export default function Home() {
       return;
     }
 
-    // Optional: limit file size to prevent memory issues (adjust as needed)
+    // File size limit (50MB - adjust as needed)
     if (file.size > 50 * 1024 * 1024) {
       setValidationError("File too large. Maximum size is 50MB.");
       return;
     }
 
-    await loadPdf({ target: { files: [file] } } as React.ChangeEvent<HTMLInputElement>);
+    // Start loading (async, no await needed here - navigation watches state)
+    loadPdf(file);
   };
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragActive(false);
-      if (isLoading) return; // Ignore drops while processing
+      if (isLoading) return;
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
