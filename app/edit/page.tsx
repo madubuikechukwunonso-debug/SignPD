@@ -43,8 +43,8 @@ export default function EditPage() {
   const handleDownload = () => {
     if (!pdfBytes || !pdfFile) return;
 
-    // Use .buffer to get a clean ArrayBuffer (fixes TS error)
-    const blob = new Blob([pdfBytes.buffer], { type: 'application/pdf' });
+    // Type assertion fixes the strict TS error (safe here — always ArrayBuffer)
+    const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
