@@ -21,9 +21,10 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // LOCAL SELF-HOSTED WORKER (the only reliable fix)
+  // UPDATED: Point to the actual file in public (pdf.worker.mjs for modern pdfjs-dist 4.x+)
+  // This matches the file you have in public/
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
   }, []);
 
   if (!pdfFile || !pdfBytes) {
