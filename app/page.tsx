@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { usePdf } from "./hooks/usePdf";
@@ -9,6 +9,10 @@ export default function Home() {
   const router = useRouter();
   const { loadPdf } = usePdf();
   const [drag, setDrag] = useState(false);
+
+  // === mount gate ===
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const handleFile = async (file: File) => {
     if (file.type !== "application/pdf") return;
@@ -25,6 +29,8 @@ export default function Home() {
     },
     [handleFile]
   );
+
+  if (!mounted) return null; // ← server/hydration safe
 
   return (
     <main
