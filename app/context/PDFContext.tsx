@@ -2,21 +2,19 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { PDFDocument } from 'pdf-lib';
-import { savePdfToIdb } from '@/app/lib/idb';
+import { savePdfToIdb } from '@/app/lib/idb'; // Keep your existing path
 
 type PDFContextType = {
   pdfFile: File | null;
   setPdfFile: (file: File | null) => void;
   pdfBytes: Uint8Array | null;
   setPdfBytes: (bytes: Uint8Array | null) => void;
-  pdfDoc: PDFDocument | null;
+  pdfDoc: PDFDocument | null; // For future editing with pdf-lib
   setPdfDoc: (doc: PDFDocument | null) => void;
   fileName: string;
   setFileName: (name: string) => void;
   isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
   error: string | null;
-  setError: (error: string | null) => void;
   loadPdf: (file: File) => Promise<void>;
 };
 
@@ -47,14 +45,14 @@ export const PDFProvider = ({ children }: { children: ReactNode }) => {
       setFileName(file.name.replace(/\.pdf$/i, '-signed.pdf'));
       await savePdfToIdb(bytes);
     } catch (err: any) {
-      let errorMessage = 'Failed to load PDF. It may be corrupted or invalid.';
-      if (err?.message?.toLowerCase().includes('password')) {
-        errorMessage = 'Password-protected PDFs are not supported.';
+      let message = 'Failed to load PDF. It may be corrupted or invalid.';
+      if (err.message?.toLowerCase().includes('password')) {
+        message = 'Password-protected PDFs are not supported.';
       }
-      setError(errorMessage);
+      setError(message);
       console.error('PDF load error:', err);
 
-      // Reset on failure
+      // Reset state on failure
       setPdfFile(null);
       setPdfBytes(null);
       setPdfDoc(null);
@@ -76,9 +74,7 @@ export const PDFProvider = ({ children }: { children: ReactNode }) => {
         fileName,
         setFileName,
         isLoading,
-        setIsLoading,
         error,
-        setError,
         loadPdf,
       }}
     >
