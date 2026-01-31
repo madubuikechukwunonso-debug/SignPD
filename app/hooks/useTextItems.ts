@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { getTextItems, saveTextItems } from "@/app/lib/idb";
 
