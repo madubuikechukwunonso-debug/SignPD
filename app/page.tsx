@@ -28,7 +28,6 @@ export default function Home() {
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -55,7 +54,7 @@ export default function Home() {
       onDragLeave={() => setDrag(false)}
       onDrop={onDrop}
     >
-      {/* Hidden native file input — placed at root level, completely outside any motion/animated elements */}
+      {/* Hidden native file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -138,36 +137,73 @@ export default function Home() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
 
-          {/* NEW BUTTON APPROACH: Standard <motion.button> with programmatic trigger */}
-          {/* This is the most reliable cross-platform (PC + mobile) method */}
-          {/* Larger tap area, high z-index, no label/input nesting issues */}
+        {/* New upload-style button – completely outside the glass card */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.8 }}
+          className="mt-16 flex flex-col items-center"
+        >
           <motion.button
             type="button"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ delay: 0.7 }}
             onClick={openFilePicker}
-            className="relative z-50 inline-block px-16 py-8 bg-gradient-to-r from-amber-600 to-orange-600 rounded-full text-3xl font-bold cursor-pointer shadow-2xl text-white focus:outline-none focus:ring-4 focus:ring-amber-300 dark:focus:ring-amber-800 min-w-64"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative w-48 h-48 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 shadow-2xl flex items-center justify-center overflow-hidden z-50"
             aria-label="Choose PDF file to edit"
           >
-            Choose PDF
+            {/* Cloud background (subtle) */}
+            <svg
+              className="absolute inset-0 w-full h-full text-white/30"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
+            </svg>
+
+            {/* Animated upward arrow (moves up into the cloud) */}
+            <motion.div
+              animate={{ y: [20, -20, 20] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="relative z-10"
+            >
+              <svg
+                className="w-32 h-32 text-white drop-shadow-lg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </motion.div>
           </motion.button>
 
-          <motion.div
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
-            className="mt-10 text-lg text-gray-600 dark:text-gray-400"
+            transition={{ delay: 1.2 }}
+            className="mt-8 text-2xl font-semibold text-gray-700 dark:text-gray-300"
+          >
+            Choose PDF to start editing
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4 }}
+            className="mt-4 text-lg text-gray-600 dark:text-gray-400"
           >
             or drag & drop your file anywhere
-          </motion.div>
-        </div>
+          </motion.p>
+        </motion.div>
       </motion.div>
 
-      {/* Subtle decorative blobs — amber/yellow theme */}
+      {/* Subtle decorative blobs */}
       <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-200 rounded-full filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute top-1/3 left-1/3 w-80 h-80 bg-yellow-200 rounded-full filter blur-3xl opacity-20" />
