@@ -62,14 +62,10 @@ export async function embedDrawings(
 ) {
   for (const d of drawings) {
     const pg = pdf.getPages()[d.page];
-    const col = pdfLib.rgb(...hexToRgb(d.color, 1).slice(0, 3));
+    const col = (() => { const [r, g, b] = hexToRgb(d.color, 1).slice(0, 3); return pdfLib.rgb(r, g, b); })();
 
     if (d.tool === "rectangle" && d.bounds) {
-      pg.drawRectangle({
-        ...d.bounds,
-        borderColor: col,
-        borderWidth: d.width,
-      });
+      pg.drawRectangle({ ...d.bounds, borderColor: col, borderWidth: d.width });
     } else if (d.tool === "circle" && d.bounds) {
       pg.drawCircle({
         x: d.bounds.x + d.bounds.w / 2,
@@ -80,12 +76,7 @@ export async function embedDrawings(
       });
     } else if (d.tool === "line" && d.points && d.points.length === 2) {
       const [a, b] = d.points;
-      pg.drawLine({
-        start: { x: a.x, y: a.y },
-        end: { x: b.x, y: b.y },
-        thickness: d.width,
-        color: col,
-      });
+      pg.drawLine({ start: { x: a.x, y: a.y }, end: { x: b.x, y: b.y }, thickness: d.width, color: col });
     } else if (d.points && d.points.length > 1) {
       const path = d.points.map((p) => `${p.x} ${p.y}`).join(" L ");
       pg.drawSvgPath(`M ${path}`, { borderColor: col, borderWidth: d.width });
