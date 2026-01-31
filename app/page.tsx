@@ -56,10 +56,8 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        {/* Glass card */}
-        <div className="absolute inset-0 glass" />
-
-        <div className="relative p-12 text-center text-gray-800 dark:text-white">
+        {/* Card with integrated glass effect - no more blocking overlay */}
+        <div className="relative p-12 text-center text-gray-800 dark:text-white glass">
           <motion.h1
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -83,7 +81,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 border-4 border-dashed border-indigo-500 rounded-3xl flex items-center justify-center pointer-events-none"
+                className="absolute inset-0 border-4 border-dashed border-indigo-500 rounded-3xl flex items-center justify-center pointer-events-none z-10"
               >
                 <span className="text-3xl font-semibold text-indigo-600 dark:text-indigo-400">
                   Drop to start editing
@@ -93,12 +91,14 @@ export default function Home() {
           </AnimatePresence>
 
           <motion.label
+            htmlFor="file-upload"  {/* Explicit association for reliability */}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
             className="inline-block px-10 py-5 bg-indigo-600 rounded-full text-xl font-semibold cursor-pointer hover:bg-indigo-700 transition shadow-xl text-white"
           >
             <input
+              id="file-upload"  {/* Matches htmlFor above */}
               type="file"
               accept="application/pdf"
               className="hidden"
