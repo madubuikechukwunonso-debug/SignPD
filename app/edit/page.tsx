@@ -9,8 +9,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { PDFDocument } from 'pdf-lib'; // Added: required for page ops
 
 // @ts-ignore - fabric.js types are incomplete; this import works at runtime
-import { fabric } from 'fabric';
-
+import * as fabric from 'fabric';
 export default function EditPage() {
   const router = useRouter();
   const { pdfFile, pdfBytes, pdfDoc, setPdfDoc, setPdfBytes } = usePDF();
