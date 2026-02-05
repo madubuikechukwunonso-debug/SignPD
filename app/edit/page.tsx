@@ -24,7 +24,7 @@ export default function EditPage() {
   // UPDATED: Point to the actual file in public (pdf.worker.mjs for modern pdfjs-dist 4.x+)
   // This matches the file you have in public/
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.min.mjs';
   }, []);
 
   if (!pdfFile || !pdfBytes) {
