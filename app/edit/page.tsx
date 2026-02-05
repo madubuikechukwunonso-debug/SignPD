@@ -6,7 +6,7 @@ import { usePDF } from '../context/PDFContext';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, degrees } from 'pdf-lib'; // Added degrees
 
 // Correct fabric.js import (standard for TypeScript)
 import * as fabric from 'fabric';
@@ -143,16 +143,15 @@ export default function EditPage() {
     updatePdfState(pdfDoc);
   };
 
-  // Rotate page (fixed: pass number directly with proper type assertion)
-  const rotatePage = (thumbIndex: number, degrees: number) => {
+  // Rotate page (fixed: use degrees() for proper Rotation type)
+  const rotatePage = (thumbIndex: number, degreesAmount: number) => {
     if (!pdfDoc) return;
     const actualIndex = pageOrder[thumbIndex];
     const page = pdfDoc.getPage(actualIndex);
     const currentRot = page.getRotation().angle;
-    let newAngle = (currentRot + degrees) % 360;
-    if (newAngle < 0) newAngle += 360;
-    // pdf-lib only supports 0, 90, 180, 270 — safe since we rotate by ±90
-    page.setRotation(newAngle as 0 | 90 | 180 | 270);
+    let newAngle = currentRot + degreesAmount;
+    newAngle = ((newAngle % 360) + 360) % 360; // Normalize to 0-359
+    page.setRotation(degrees(newAngle));
     updatePdfState(pdfDoc);
   };
 
