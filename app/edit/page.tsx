@@ -143,14 +143,16 @@ export default function EditPage() {
     updatePdfState(pdfDoc);
   };
 
-  // Rotate page (fixed: use { angle: ... } object)
+  // Rotate page (fixed: pass number directly with proper type assertion)
   const rotatePage = (thumbIndex: number, degrees: number) => {
     if (!pdfDoc) return;
     const actualIndex = pageOrder[thumbIndex];
     const page = pdfDoc.getPage(actualIndex);
     const currentRot = page.getRotation().angle;
-    const newAngle = (currentRot + degrees + 360) % 360;
-    page.setRotation({ angle: newAngle });
+    let newAngle = (currentRot + degrees) % 360;
+    if (newAngle < 0) newAngle += 360;
+    // pdf-lib only supports 0, 90, 180, 270 — safe since we rotate by ±90
+    page.setRotation(newAngle as 0 | 90 | 180 | 270);
     updatePdfState(pdfDoc);
   };
 
@@ -177,7 +179,7 @@ export default function EditPage() {
     rebuildDoc();
   };
 
-  // Add blank page (fixed: convert size object to [width, height] array)
+  // Add blank page
   const addBlankPage = async () => {
     if (!pdfDoc) return;
     const pages = pdfDoc.getPages();
