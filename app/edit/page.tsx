@@ -6,10 +6,11 @@ import { usePDF } from '../context/PDFContext';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { PDFDocument } from 'pdf-lib'; // Added: required for page ops
+import { PDFDocument } from 'pdf-lib';
 
-// @ts-ignore - fabric.js types are incomplete; this import works at runtime
+// Correct fabric.js import (standard for TypeScript)
 import * as fabric from 'fabric';
+
 export default function EditPage() {
   const router = useRouter();
   const { pdfFile, pdfBytes, pdfDoc, setPdfDoc, setPdfBytes } = usePDF();
@@ -48,19 +49,20 @@ export default function EditPage() {
     pageContainers.current = [];
 
     for (let i = 0; i < numPages; i++) {
-      const el = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement;
-      if (el) {
-        const container = document.querySelector(`#main-page-${i}`) as HTMLDivElement;
+      const canvasEl = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement;
+      const container = document.getElementById(`main-page-${i}`) as HTMLDivElement;
+      if (canvasEl && container) {
         pageContainers.current[i] = container;
-        if (container) {
-          const { clientWidth, clientHeight } = container;
-          const fCanvas = new fabric.Canvas(el, {
-            width: clientWidth,
-            height: clientHeight,
-            backgroundColor: 'transparent',
-          });
-          canvases.current.push(fCanvas);
-        }
+
+        const { clientWidth, clientHeight } = container;
+
+        const fCanvas = new fabric.Canvas(canvasEl, {
+          width: clientWidth,
+          height: clientHeight,
+          backgroundColor: 'transparent',
+        });
+
+        canvases.current.push(fCanvas);
       }
     }
 
@@ -70,20 +72,23 @@ export default function EditPage() {
     };
   }, [numPages]);
 
-  // Update tool modes
+  // Update tool modes (fixed: explicitly initialize brush to avoid undefined)
   useEffect(() => {
     canvases.current.forEach(c => {
       if (selectedTool === 'draw') {
         c.isDrawingMode = true;
+        c.freeDrawingBrush = new fabric.PencilBrush(c);
         c.freeDrawingBrush.color = '#000000';
         c.freeDrawingBrush.width = 5;
       } else if (selectedTool === 'highlight') {
         c.isDrawingMode = true;
+        c.freeDrawingBrush = new fabric.PencilBrush(c);
         c.freeDrawingBrush.color = 'rgba(255,255,0,0.5)';
         c.freeDrawingBrush.width = 20;
       } else if (selectedTool === 'text') {
         c.isDrawingMode = false;
         c.defaultCursor = 'text';
+        c.off('mouse:down');
         c.on('mouse:down', (opt) => {
           const pointer = c.getPointer(opt.e);
           const text = new fabric.Textbox('Edit text...', {
@@ -92,10 +97,12 @@ export default function EditPage() {
             fontSize: 20,
             width: 200,
             backgroundColor: 'rgba(255,255,255,0.8)',
+            editable: true,
           });
           c.add(text);
           c.setActiveObject(text);
           text.enterEditing();
+          c.renderAll();
         });
       } else {
         c.isDrawingMode = false;
@@ -215,7 +222,7 @@ export default function EditPage() {
     return <div className="flex min-h-screen items-center justify-center">Preparing editor...</div>;
   }
 
-  const file = { data: pdfBytes }; // Use bytes for reliable re-rendering on edits
+  const file = { data: pdfBytes }; // Bytes for reliable re-rendering after edits
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-950 dark:via-slate-900 dark:to-black overflow-hidden">
@@ -302,7 +309,11 @@ export default function EditPage() {
                   className="mb-16 mx-auto max-w-5xl shadow-2xl bg-white rounded-2xl overflow-hidden border-4 border-amber-200/50 relative"
                 >
                   <Page pageNumber={actualIndex + 1} scale={zoom} />
-                  <canvas id={`fabric-canvas-${displayIndex}`} className="absolute top-0 left-0 pointer-events-auto" style={{ width: '100%', height: '100%' }} />
+                  <canvas
+                    id={`fabric-canvas-${displayIndex}`}
+                    className="absolute top-0 left-0 pointer-events-auto"
+                    style={{ width: '100%', height: '100%' }}
+                  />
                 </div>
               ))}
             </Document>
