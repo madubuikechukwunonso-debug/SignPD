@@ -199,7 +199,10 @@ export default function EditPage() {
     for (let i = 0; i < numPages; i++) {
       const c = canvases.current[i];
       if (c && c.getObjects().length > 0) {
-        const dataUrl = c.toDataURL({ format: 'png' });
+        const dataUrl = c.toDataURL({
+          format: 'png',
+          multiplier: 2, // Required for type safety and better quality
+        });
         const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
         const img = await docToSave.embedPng(imgBytes);
         const page = docToSave.getPage(pageOrder[i]);
