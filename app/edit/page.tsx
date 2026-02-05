@@ -6,6 +6,9 @@ import { usePDF } from '../context/PDFContext';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { PDFDocument } from 'pdf-lib'; // Added: required for page ops
+
+// @ts-ignore - fabric.js types are incomplete; this import works at runtime
 import { fabric } from 'fabric';
 
 export default function EditPage() {
@@ -29,7 +32,7 @@ export default function EditPage() {
 
   // Worker src (your local file)
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
   }, []);
 
   // Initialize page order on load
@@ -42,26 +45,25 @@ export default function EditPage() {
   useEffect(() => {
     if (numPages === null) return;
 
-    const initCanvases = () => {
-      canvases.current = [];
-      for (let i = 0; i < numPages; i++) {
-        const el = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement;
-        if (el) {
-          const container = pageContainers.current[i];
-          if (container) {
-            const { clientWidth, clientHeight } = container;
-            const fCanvas = new fabric.Canvas(el, {
-              width: clientWidth,
-              height: clientHeight,
-              backgroundColor: 'transparent',
-            });
-            canvases.current.push(fCanvas);
-          }
+    canvases.current = [];
+    pageContainers.current = [];
+
+    for (let i = 0; i < numPages; i++) {
+      const el = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement;
+      if (el) {
+        const container = document.querySelector(`#main-page-${i}`) as HTMLDivElement;
+        pageContainers.current[i] = container;
+        if (container) {
+          const { clientWidth, clientHeight } = container;
+          const fCanvas = new fabric.Canvas(el, {
+            width: clientWidth,
+            height: clientHeight,
+            backgroundColor: 'transparent',
+          });
+          canvases.current.push(fCanvas);
         }
       }
-    };
-
-    initCanvases();
+    }
 
     return () => {
       canvases.current.forEach(c => c.dispose());
@@ -90,9 +92,11 @@ export default function EditPage() {
             top: pointer.y,
             fontSize: 20,
             width: 200,
+            backgroundColor: 'rgba(255,255,255,0.8)',
           });
           c.add(text);
           c.setActiveObject(text);
+          text.enterEditing();
         });
       } else {
         c.isDrawingMode = false;
@@ -115,79 +119,82 @@ export default function EditPage() {
     });
   }, [zoom]);
 
-  // Page management functions
-  const updatePdfState = async (newDoc: any) => {
+  // Update PDF state after modifications
+  const updatePdfState = async (newDoc: PDFDocument) => {
     const newBytesArray = await newDoc.save();
     const newBytes = new Uint8Array(newBytesArray);
     setPdfBytes(newBytes);
     setPdfDoc(newDoc);
   };
 
-  const deletePage = (thumbnailIndex: number) => {
+  // Delete page
+  const deletePage = (thumbIndex: number) => {
     if (!pdfDoc || numPages === 1) return;
-    const actualIndex = pageOrder[thumbnailIndex];
+    const actualIndex = pageOrder[thumbIndex];
     pdfDoc.removePage(actualIndex);
-    const newOrder = pageOrder.filter((_, i) => i !== thumbnailIndex);
+    const newOrder = pageOrder.filter((_, i) => i !== thumbIndex);
     setPageOrder(newOrder);
     updatePdfState(pdfDoc);
   };
 
-  const rotatePage = (thumbnailIndex: number, degrees: number) => {
+  // Rotate page
+  const rotatePage = (thumbIndex: number, degrees: number) => {
     if (!pdfDoc) return;
-    const actualIndex = pageOrder[thumbnailIndex];
+    const actualIndex = pageOrder[thumbIndex];
     const page = pdfDoc.getPage(actualIndex);
-    const currentRot = page.getRotation().angle;
-    page.setRotation({ angle: (currentRot + degrees) % 360 });
+    const currentRot = page.getRotation();
+    page.setRotation((currentRot + degrees + 360) % 360);
     updatePdfState(pdfDoc);
   };
 
-  const movePage = (thumbnailIndex: number, direction: 'up' | 'down') => {
-    if (!pdfDoc) return;
+  // Move page (reorder)
+  const movePage = (thumbIndex: number, direction: 'up' | 'down') => {
     const newOrder = [...pageOrder];
-    if (direction === 'up' && thumbnailIndex > 0) {
-      [newOrder[thumbnailIndex - 1], newOrder[thumbnailIndex]] = [newOrder[thumbnailIndex], newOrder[thumbnailIndex - 1]];
-    } else if (direction === 'down' && thumbnailIndex < newOrder.length - 1) {
-      [newOrder[thumbnailIndex], newOrder[thumbnailIndex + 1]] = [newOrder[thumbnailIndex + 1], newOrder[thumbnailIndex]];
+    if (direction === 'up' && thumbIndex > 0) {
+      [newOrder[thumbIndex - 1], newOrder[thumbIndex]] = [newOrder[thumbIndex], newOrder[thumbIndex - 1]];
+    } else if (direction === 'down' && thumbIndex < newOrder.length - 1) {
+      [newOrder[thumbIndex], newOrder[thumbIndex + 1]] = [newOrder[thumbIndex + 1], newOrder[thumbIndex]];
     } else return;
+
     setPageOrder(newOrder);
 
-    // Rebuild doc with new order
     const rebuildDoc = async () => {
+      if (!pdfDoc) return;
       const tempDoc = await PDFDocument.create();
       for (const idx of newOrder) {
-        const [copied] = await pdfDoc.copyPages(pdfDoc, [idx]);
-        tempDoc.addPage(copied);
+        const [copiedPage] = await tempDoc.copyPages(pdfDoc, [idx]);
+        tempDoc.addPage(copiedPage);
       }
       updatePdfState(tempDoc);
     };
     rebuildDoc();
   };
 
+  // Add blank page
   const addBlankPage = async () => {
     if (!pdfDoc) return;
-    pdfDoc.addPage();
+    const pages = pdfDoc.getPages();
+    const size = pages[0]?.getSize() ?? [612, 792]; // US Letter fallback
+    pdfDoc.addPage(size);
     updatePdfState(pdfDoc);
   };
 
-  // Flatten annotations + download
+  // Download with flattened annotations
   const handleDownload = async () => {
-    if (!pdfDoc || !pdfFile) return;
+    if (!pdfDoc || !pdfFile || !numPages) return;
 
     let docToSave = pdfDoc;
 
-    // Flatten fabric overlays if any annotations exist
-    const hasAnnotations = canvases.current.some(c => c.getObjects().length > 0);
-    if (hasAnnotations) {
-      for (let i = 0; i < numPages!; i++) {
-        const c = canvases.current[i];
-        if (c.getObjects().length > 0) {
-          const dataUrl = c.toDataURL({ format: 'png' });
-          const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
-          const img = await docToSave.embedPng(imgBytes);
-          const page = docToSave.getPage(pageOrder[i]);
-          const { width, height } = page.getSize();
-          page.drawImage(img, { x: 0, y: 0, width, height });
-        }
+    // Flatten annotations if present
+    for (let i = 0; i < numPages; i++) {
+      const c = canvases.current[i];
+      if (c && c.getObjects().length > 0) {
+        const dataUrl = c.toDataURL({ format: 'png' });
+        const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
+        const img = await docToSave.embedPng(imgBytes);
+        const page = docToSave.getPage(pageOrder[i]);
+        const { width, height } = page.getSize();
+        page.drawImage(img, { x: 0, y: 0, width, height });
       }
     }
 
@@ -209,7 +216,7 @@ export default function EditPage() {
     return <div className="flex min-h-screen items-center justify-center">Preparing editor...</div>;
   }
 
-  const file = pdfFile; // Fixed: use native File for reliable loading
+  const file = { data: pdfBytes }; // Use bytes for reliable re-rendering on edits
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-950 dark:via-slate-900 dark:to-black overflow-hidden">
@@ -224,9 +231,13 @@ export default function EditPage() {
             Download Edited PDF
           </button>
           <div className="flex items-center gap-3 bg-amber-700/50 px-4 py-2 rounded-lg backdrop-blur-sm">
-            <button onClick={() => setZoom(z => Math.max(0.5, z - 0.2))}>-</button>
+            <button onClick={() => setZoom(z => Math.max(0.5, z - 0.2))} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
+              −
+            </button>
             <span className="w-20 text-center font-medium">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom(z => z + 0.2)}>+</button>
+            <button onClick={() => setZoom(z => z + 0.2)} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
+              +
+            </button>
           </div>
         </div>
       </header>
@@ -237,7 +248,7 @@ export default function EditPage() {
           + Add Blank Page
         </button>
         <button onClick={() => setSelectedTool('draw')} className={`px-6 py-3 rounded-xl transition font-medium whitespace-nowrap shadow-lg ${selectedTool === 'draw' ? 'bg-amber-600 text-white' : 'bg-amber-700 text-white hover:bg-amber-600'}`}>
-          ✒️ Add Signature / ✏️ Draw
+          ✒️ Signature / ✏️ Draw
         </button>
         <button onClick={() => setSelectedTool('text')} className={`px-6 py-3 rounded-xl transition font-medium whitespace-nowrap shadow-lg ${selectedTool === 'text' ? 'bg-amber-600 text-white' : 'bg-amber-700 text-white hover:bg-amber-600'}`}>
           T Add Text
@@ -265,8 +276,10 @@ export default function EditPage() {
                   <button onClick={() => rotatePage(thumbIndex, 90)} className="text-xs px-2 py-1 bg-amber-600 text-white rounded">↻</button>
                   <button onClick={() => deletePage(thumbIndex)} className="text-xs px-2 py-1 bg-red-600 text-white rounded">Delete</button>
                 </div>
-                <div className="border-4 border-amber-300/50 rounded-xl overflow-hidden shadow-md bg-white cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  onClick={() => document.getElementById(`main-page-${thumbIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>
+                <div
+                  className="border-4 border-amber-300/50 rounded-xl overflow-hidden shadow-md bg-white cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  onClick={() => document.getElementById(`main-page-${thumbIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                >
                   <Page pageNumber={actualIndex + 1} width={200} />
                 </div>
                 <p className="text-center text-lg font-medium mt-3 text-amber-900 dark:text-amber-400">{thumbIndex + 1}</p>
@@ -287,11 +300,10 @@ export default function EditPage() {
                 <div
                   key={displayIndex}
                   id={`main-page-${displayIndex}`}
-                  ref={el => pageContainers.current[displayIndex] = el}
                   className="mb-16 mx-auto max-w-5xl shadow-2xl bg-white rounded-2xl overflow-hidden border-4 border-amber-200/50 relative"
                 >
                   <Page pageNumber={actualIndex + 1} scale={zoom} />
-                  <canvas id={`fabric-canvas-${displayIndex}`} className="absolute top-0 left-0 w-full h-full pointer-events-auto" />
+                  <canvas id={`fabric-canvas-${displayIndex}`} className="absolute top-0 left-0 pointer-events-auto" style={{ width: '100%', height: '100%' }} />
                 </div>
               ))}
             </Document>
