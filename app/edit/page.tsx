@@ -26,34 +26,29 @@ export default function EditPage() {
   const canvases = useRef<fabric.Canvas[]>([]);
   const pageContainers = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Undo / Redo history
-  const history = useRef<string[][]>([]);
-  const historyIndex = useRef<number[]>([]);
-
-  /* -------------------- Guards -------------------- */
+  /* ---------------- Redirect guard ---------------- */
   useEffect(() => {
     if (!pdfFile || !pdfBytes) router.push('/');
   }, [pdfFile, pdfBytes, router]);
 
-  /* -------------------- PDF Load -------------------- */
+  /* ---------------- Load PDF ---------------- */
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setPageOrder(Array.from({ length: numPages }, (_, i) => i));
   };
 
-  /* -------------------- Fabric Init -------------------- */
+  /* ---------------- Fabric init ---------------- */
   useEffect(() => {
     if (numPages === null) return;
 
     canvases.current = [];
     pageContainers.current = [];
-    history.current = [];
-    historyIndex.current = [];
 
     for (let i = 0; i < numPages; i++) {
       const canvasEl = document.getElementById(
         `fabric-canvas-${i}`
       ) as HTMLCanvasElement | null;
+
       const container = document.getElementById(
         `main-page-${i}`
       ) as HTMLDivElement | null;
@@ -69,19 +64,6 @@ export default function EditPage() {
         selection: true,
       });
 
-      history.current[i] = [];
-      historyIndex.current[i] = -1;
-
-      const saveHistory = () => {
-        history.current[i].splice(historyIndex.current[i] + 1);
-        history.current[i].push(JSON.stringify(c.toJSON()));
-        historyIndex.current[i]++;
-      };
-
-      c.on('object:added', saveHistory);
-      c.on('object:modified', saveHistory);
-      c.on('object:removed', saveHistory);
-
       canvases.current.push(c);
     }
 
@@ -91,11 +73,11 @@ export default function EditPage() {
     };
   }, [numPages]);
 
-  /* -------------------- Tool Handling -------------------- */
+  /* ---------------- Tools ---------------- */
   useEffect(() => {
     canvases.current.forEach(c => {
-      c.off('mouse:down');
       c.isDrawingMode = false;
+      c.off('mouse:down');
 
       if (selectedTool === 'draw' || selectedTool === 'highlight') {
         c.isDrawingMode = true;
@@ -108,15 +90,15 @@ export default function EditPage() {
       }
 
       if (selectedTool === 'erase') {
-        c.on('mouse:down', opt => {
-          const target = c.findTarget(opt.e);
+        c.on('mouse:down', e => {
+          const target = c.findTarget(e.e);
           if (target) c.remove(target);
         });
       }
 
       if (selectedTool === 'text') {
-        c.on('mouse:down', opt => {
-          const p = c.getPointer(opt.e);
+        c.on('mouse:down', e => {
+          const p = c.getPointer(e.e);
           const text = new fabric.Textbox('Edit text', {
             left: p.x,
             top: p.y,
@@ -133,7 +115,7 @@ export default function EditPage() {
     });
   }, [selectedTool]);
 
-  /* -------------------- Zoom Resize -------------------- */
+  /* ---------------- Zoom resize ---------------- */
   useEffect(() => {
     canvases.current.forEach((c, i) => {
       const container = pageContainers.current[i];
@@ -147,58 +129,37 @@ export default function EditPage() {
     });
   }, [zoom]);
 
-  /* -------------------- Undo / Redo -------------------- */
-  const undo = (i: number) => {
-    if (historyIndex.current[i] <= 0) return;
-    historyIndex.current[i]--;
-    canvases.current[i].loadFromJSON(
-      history.current[i][historyIndex.current[i]],
-      () => canvases.current[i].renderAll()
-    );
-  };
-
-  const redo = (i: number) => {
-    if (historyIndex.current[i] >= history.current[i].length - 1) return;
-    historyIndex.current[i]++;
-    canvases.current[i].loadFromJSON(
-      history.current[i][historyIndex.current[i]],
-      () => canvases.current[i].renderAll()
-    );
-  };
-
-  /* -------------------- Image Insert (FIXED TYPES) -------------------- */
-  const addImage = (file: File) => {
+  /* ---------------- Image insert (FIXED) ---------------- */
+  const addImage = async (file: File) => {
     const reader = new FileReader();
 
-    reader.onload = () => {
-      fabric.Image.fromURL(
-        reader.result as string,
-        (img: fabric.Image) => {
-          img.scaleToWidth(200);
-          img.set({
-            left: 50,
-            top: 50,
-            selectable: true,
-          });
+    reader.onload = async () => {
+      if (!reader.result) return;
 
-          canvases.current[0]?.add(img);
-          canvases.current[0]?.setActiveObject(img);
-          canvases.current[0]?.renderAll();
-        },
+      const img = await fabric.Image.fromURL(
+        reader.result as string,
         { crossOrigin: 'anonymous' }
       );
+
+      img.scaleToWidth(200);
+      img.set({
+        left: 50,
+        top: 50,
+        selectable: true,
+      });
+
+      const canvas = canvases.current[0];
+      if (!canvas) return;
+
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.renderAll();
     };
 
     reader.readAsDataURL(file);
   };
 
-  /* -------------------- PDF Save -------------------- */
-  const updatePdfState = async (doc: PDFDocument) => {
-    const bytes = await doc.save();
-    setPdfBytes(new Uint8Array(bytes));
-    setPdfDoc(doc);
-  };
-
+  /* ---------------- Download ---------------- */
   const handleDownload = async () => {
     if (!pdfDoc || !numPages) return;
 
@@ -215,10 +176,10 @@ export default function EditPage() {
       page.drawImage(img, { x: 0, y: 0, width, height });
     }
 
-    const savedBytes = await pdfDoc.save();
-    const blob = new Blob([savedBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
+    const saved = await pdfDoc.save();
+    const blob = new Blob([saved], { type: 'application/pdf' });
 
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = pdfFile!.name.replace(/\.pdf$/i, '_edited.pdf');
@@ -227,14 +188,10 @@ export default function EditPage() {
   };
 
   if (!pdfFile || !pdfBytes) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Preparing editor…
-      </div>
-    );
+    return <div className="flex h-screen items-center justify-center">Loading…</div>;
   }
 
-  /* -------------------- UI -------------------- */
+  /* ---------------- UI ---------------- */
   return (
     <div className="flex flex-col h-screen">
       <header className="p-4 bg-amber-600 text-white flex gap-3">
@@ -264,10 +221,6 @@ export default function EditPage() {
                 className="absolute top-0 left-0"
                 style={{ width: '100%', height: '100%' }}
               />
-              <div className="flex gap-2 mt-2">
-                <button onClick={() => undo(i)}>Undo</button>
-                <button onClick={() => redo(i)}>Redo</button>
-              </div>
             </div>
           ))}
         </Document>
