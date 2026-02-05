@@ -72,7 +72,7 @@ export default function EditPage() {
     };
   }, [numPages]);
 
-  // Update tool modes (fixed: explicitly initialize brush to avoid undefined)
+  // Update tool modes (explicitly initialize brush)
   useEffect(() => {
     canvases.current.forEach(c => {
       if (selectedTool === 'draw') {
@@ -143,13 +143,14 @@ export default function EditPage() {
     updatePdfState(pdfDoc);
   };
 
-  // Rotate page
+  // Rotate page (fixed: use { angle: ... } object)
   const rotatePage = (thumbIndex: number, degrees: number) => {
     if (!pdfDoc) return;
     const actualIndex = pageOrder[thumbIndex];
     const page = pdfDoc.getPage(actualIndex);
-    const currentRot = page.getRotation();
-    page.setRotation((currentRot + degrees + 360) % 360);
+    const currentRot = page.getRotation().angle;
+    const newAngle = (currentRot + degrees + 360) % 360;
+    page.setRotation({ angle: newAngle });
     updatePdfState(pdfDoc);
   };
 
@@ -176,11 +177,12 @@ export default function EditPage() {
     rebuildDoc();
   };
 
-  // Add blank page
+  // Add blank page (fixed: convert size object to [width, height] array)
   const addBlankPage = async () => {
     if (!pdfDoc) return;
     const pages = pdfDoc.getPages();
-    const size = pages[0]?.getSize() ?? [612, 792]; // US Letter fallback
+    const firstPageSize = pages[0]?.getSize();
+    const size = firstPageSize ? [firstPageSize.width, firstPageSize.height] : [612, 792];
     pdfDoc.addPage(size);
     updatePdfState(pdfDoc);
   };
