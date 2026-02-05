@@ -32,7 +32,7 @@ export default function EditPage() {
 
   // Worker src (your local file)
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js';
   }, []);
 
   // Initialize page order on load
