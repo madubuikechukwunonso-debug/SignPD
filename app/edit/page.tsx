@@ -201,7 +201,7 @@ export default function EditPage() {
       if (c && c.getObjects().length > 0) {
         const dataUrl = c.toDataURL({
           format: 'png',
-          multiplier: 2, // Required for type safety and better quality
+          multiplier: 2, // Better quality
         });
         const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
         const img = await docToSave.embedPng(imgBytes);
@@ -212,7 +212,7 @@ export default function EditPage() {
     }
 
     const savedBytes = await docToSave.save();
-    const blob = new Blob([savedBytes], { type: 'application/pdf' });
+    const blob = new Blob([savedBytes.buffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
