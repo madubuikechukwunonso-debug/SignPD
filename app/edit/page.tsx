@@ -6,7 +6,7 @@ import { usePDF } from '../context/PDFContext';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { PDFDocument, degrees } from 'pdf-lib'; // Added degrees
+import { PDFDocument, degrees } from 'pdf-lib'; // degrees for rotation
 
 // Correct fabric.js import (standard for TypeScript)
 import * as fabric from 'fabric';
@@ -143,7 +143,7 @@ export default function EditPage() {
     updatePdfState(pdfDoc);
   };
 
-  // Rotate page (fixed: use degrees() for proper Rotation type)
+  // Rotate page
   const rotatePage = (thumbIndex: number, degreesAmount: number) => {
     if (!pdfDoc) return;
     const actualIndex = pageOrder[thumbIndex];
@@ -178,13 +178,14 @@ export default function EditPage() {
     rebuildDoc();
   };
 
-  // Add blank page
+  // Add blank page (fixed: use literal tuple for type safety)
   const addBlankPage = async () => {
     if (!pdfDoc) return;
     const pages = pdfDoc.getPages();
     const firstPageSize = pages[0]?.getSize();
-    const size = firstPageSize ? [firstPageSize.width, firstPageSize.height] : [612, 792];
-    pdfDoc.addPage(size);
+    const width = firstPageSize?.width ?? 612;
+    const height = firstPageSize?.height ?? 792;
+    pdfDoc.addPage([width, height]);
     updatePdfState(pdfDoc);
   };
 
@@ -209,7 +210,7 @@ export default function EditPage() {
 
     const savedBytes = await docToSave.save();
     const blob = new Blob([savedBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
+    const const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = pdfFile.name.replace(/\.pdf$/i, '_edited.pdf');
