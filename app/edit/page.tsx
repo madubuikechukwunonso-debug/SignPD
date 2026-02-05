@@ -178,7 +178,7 @@ export default function EditPage() {
     rebuildDoc();
   };
 
-  // Add blank page (fixed: use literal tuple for type safety)
+  // Add blank page
   const addBlankPage = async () => {
     if (!pdfDoc) return;
     const pages = pdfDoc.getPages();
@@ -210,7 +210,7 @@ export default function EditPage() {
 
     const savedBytes = await docToSave.save();
     const blob = new Blob([savedBytes], { type: 'application/pdf' });
-    const const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = pdfFile.name.replace(/\.pdf$/i, '_edited.pdf');
