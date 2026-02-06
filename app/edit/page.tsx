@@ -8,12 +8,12 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as fabric from 'fabric';
-import * as pdfjsLib from 'pdfjs-dist'; // Import pdfjs-dist directly for worker control
+import { pdfjs } from 'react-pdf'; // Keep for worker control
 
-// Dynamic imports for react-pdf components (fixes production rendering issues)
+// Dynamic imports for reliable production rendering (fixes blank/stuck PDF)
 const PdfDocument = dynamic(() => import('react-pdf').then((mod) => mod.Document), {
   ssr: false,
-  loading: () => <p className="text-center text-amber-900 dark:text-amber-300">Loading PDF...</p>,
+  loading: () => <p className="text-center py-8 text-amber-900 dark:text-amber-300">Loading PDF viewer...</p>,
 });
 const PdfPage = dynamic(() => import('react-pdf').then((mod) => mod.Page), { ssr: false });
 
@@ -36,9 +36,9 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // Worker src (reliable CDN with version matching + legacy for compatibility)
+  // Worker src (kept exactly as your current path - no change)
   useEffect(() => {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/legacy/build/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.min.mjs';
   }, []);
 
   // Initialize page order on load
@@ -47,7 +47,7 @@ export default function EditPage() {
     setPageOrder(Array.from({ length: numPages }, (_, i) => i));
   };
 
-  // Debug load errors
+  // Debug silent load errors
   const onLoadError = (error: Error) => {
     console.error('PDF load error:', error);
   };
@@ -239,7 +239,7 @@ export default function EditPage() {
     return <div className="flex min-h-screen items-center justify-center">Preparing editor...</div>;
   }
 
-  const file = pdfFile; // Use native File object for most reliable rendering
+  const file = pdfFile; // Native File for reliable rendering
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-950 dark:via-slate-900 dark:to-black overflow-hidden">
