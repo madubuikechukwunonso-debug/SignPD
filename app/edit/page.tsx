@@ -10,7 +10,7 @@ import { PDFDocument, degrees } from 'pdf-lib';
 import * as fabric from 'fabric';
 import { pdfjs } from 'react-pdf'; // For worker control
 
-// Dynamic imports (fixes production rendering/blank pages)
+// Dynamic imports (fixes production blank/no-render)
 const PdfDocument = dynamic(() => import('react-pdf').then((mod) => mod.Document), {
   ssr: false,
   loading: () => <p className="text-center py-8 text-amber-900 dark:text-amber-300">Loading PDF viewer...</p>,
@@ -36,7 +36,7 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // Worker src (kept exactly as your current code - no change)
+  // Worker src (kept exactly as your code - no change)
   useEffect(() => {
     pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.min.mjs';
   }, []);
@@ -83,7 +83,7 @@ export default function EditPage() {
     };
   }, [numPages]);
 
-  // Update tool modes (explicitly initialize brush)
+  // Update tool modes
   useEffect(() => {
     canvases.current.forEach((c) => {
       if (selectedTool === 'draw') {
