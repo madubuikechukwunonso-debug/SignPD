@@ -32,7 +32,7 @@ export default function EditPage() {
 
   // Worker src (your local file)
   useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.mjs';
   }, []);
 
   // Initialize page order on load
@@ -212,7 +212,8 @@ export default function EditPage() {
     }
 
     const savedBytes = await docToSave.save();
-    const blob = new Blob([savedBytes], { type: 'application/pdf' });
+    // Fixed: Safe cast to ArrayBuffer (pdf-lib always uses standard ArrayBuffer)
+    const blob = new Blob([savedBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
