@@ -3,13 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePDF } from '../context/PDFContext';
-import { Document, Page, pdfjs } from 'react-pdf';
+import dynamic from 'next/dynamic';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
-import { PDFDocument, degrees } from 'pdf-lib'; // degrees for rotation
-
-// Correct fabric.js import (standard for TypeScript)
+import { PDFDocument, degrees } from 'pdf-lib';
 import * as fabric from 'fabric';
+import { pdfjs } from 'react-pdf'; // Keep pdfjs import for worker control
+
+// Dynamic imports for react-pdf (fixes production blank/no-render issues)
+const PdfDocument = dynamic(() => import('react-pdf').then((mod) => mod.Document), {
+  ssr: false,
+  loading: () => <p className="text-center py-8 text-amber-900 dark:text-amber-300">Loading PDF viewer...</p>,
+});
+const PdfPage = dynamic(() => import('react-pdf').then((mod) => mod.Page), { ssr: false });
 
 export default function EditPage() {
   const router = useRouter();
@@ -30,7 +36,7 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // Worker src (your local file)
+  // Worker src (kept exactly as requested - do not change)
   useEffect(() => {
     pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.min.mjs';
   }, []);
@@ -41,6 +47,11 @@ export default function EditPage() {
     setPageOrder(Array.from({ length: numPages }, (_, i) => i));
   };
 
+  // Debug any silent load errors
+  const onLoadError = (error: Error) => {
+    console.error('PDF load error:', error);
+  };
+
   // Initialize and cleanup fabric canvases
   useEffect(() => {
     if (numPages === null) return;
@@ -49,8 +60,8 @@ export default function EditPage() {
     pageContainers.current = [];
 
     for (let i = 0; i < numPages; i++) {
-      const canvasEl = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement;
-      const container = document.getElementById(`main-page-${i}`) as HTMLDivElement;
+      const canvasEl = document.getElementById(`fabric-canvas-${i}`) as HTMLCanvasElement | null;
+      const container = document.getElementById(`main-page-${i}`) as HTMLDivElement | null;
       if (canvasEl && container) {
         pageContainers.current[i] = container;
 
@@ -67,14 +78,14 @@ export default function EditPage() {
     }
 
     return () => {
-      canvases.current.forEach(c => c.dispose());
+      canvases.current.forEach((c) => c.dispose());
       canvases.current = [];
     };
   }, [numPages]);
 
-  // Update tool modes (explicitly initialize brush)
+  // Update tool modes
   useEffect(() => {
-    canvases.current.forEach(c => {
+    canvases.current.forEach((c) => {
       if (selectedTool === 'draw') {
         c.isDrawingMode = true;
         c.freeDrawingBrush = new fabric.PencilBrush(c);
@@ -150,7 +161,7 @@ export default function EditPage() {
     const page = pdfDoc.getPage(actualIndex);
     const currentRot = page.getRotation().angle;
     let newAngle = currentRot + degreesAmount;
-    newAngle = ((newAngle % 360) + 360) % 360; // Normalize to 0-359
+    newAngle = ((newAngle % 360) + 360) % 360;
     page.setRotation(degrees(newAngle));
     updatePdfState(pdfDoc);
   };
@@ -195,15 +206,14 @@ export default function EditPage() {
 
     let docToSave = pdfDoc;
 
-    // Flatten annotations if present
     for (let i = 0; i < numPages; i++) {
       const c = canvases.current[i];
       if (c && c.getObjects().length > 0) {
         const dataUrl = c.toDataURL({
           format: 'png',
-          multiplier: 2, // Better quality
+          multiplier: 2,
         });
-        const imgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
+        const imgBytes = await fetch(dataUrl).then((r) => r.arrayBuffer());
         const img = await docToSave.embedPng(imgBytes);
         const page = docToSave.getPage(pageOrder[i]);
         const { width, height } = page.getSize();
@@ -212,7 +222,6 @@ export default function EditPage() {
     }
 
     const savedBytes = await docToSave.save();
-    // Fixed: Safe cast to ArrayBuffer (pdf-lib always uses standard ArrayBuffer)
     const blob = new Blob([savedBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -230,7 +239,7 @@ export default function EditPage() {
     return <div className="flex min-h-screen items-center justify-center">Preparing editor...</div>;
   }
 
-  const file = { data: pdfBytes }; // Bytes for reliable re-rendering after edits
+  const file = pdfFile; // Switched to native File for reliable production rendering
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 dark:from-gray-950 dark:via-slate-900 dark:to-black overflow-hidden">
@@ -245,11 +254,11 @@ export default function EditPage() {
             Download Edited PDF
           </button>
           <div className="flex items-center gap-3 bg-amber-700/50 px-4 py-2 rounded-lg backdrop-blur-sm">
-            <button onClick={() => setZoom(z => Math.max(0.5, z - 0.2))} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
+            <button onClick={() => setZoom((z) => Math.max(0.5, z - 0.2))} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
               −
             </button>
             <span className="w-20 text-center font-medium">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom(z => z + 0.2)} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
+            <button onClick={() => setZoom((z) => z + 0.2)} className="px-3 py-1 bg-amber-800 rounded hover:bg-amber-700 transition">
               +
             </button>
           </div>
@@ -279,8 +288,10 @@ export default function EditPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Thumbnail Sidebar */}
         <div className="w-80 bg-amber-50/90 dark:bg-gray-900 border-r border-amber-200 dark:border-gray-700 overflow-y-auto p-6">
-          <h2 className="text-xl font-bold text-amber-900 dark:text-amber-300 mb-5">Pages {numPages ? `(${numPages})` : ''}</h2>
-          <Document file={file} onLoadSuccess={onDocumentLoadSuccess} loading={null}>
+          <h2 className="text-xl font-bold text-amber-900 dark:text-amber-300 mb-5">
+            Pages {numPages ? `(${numPages})` : ''}
+          </h2>
+          <PdfDocument file={file} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onLoadError} loading={null}>
             {pageOrder.map((actualIndex, thumbIndex) => (
               <div key={thumbIndex} className="mb-8 relative group">
                 <div className="flex justify-center gap-2 mb-2 opacity-0 group-hover:opacity-100 transition">
@@ -294,12 +305,12 @@ export default function EditPage() {
                   className="border-4 border-amber-300/50 rounded-xl overflow-hidden shadow-md bg-white cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105"
                   onClick={() => document.getElementById(`main-page-${thumbIndex}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                 >
-                  <Page pageNumber={actualIndex + 1} width={200} />
+                  <PdfPage pageNumber={actualIndex + 1} width={200} />
                 </div>
                 <p className="text-center text-lg font-medium mt-3 text-amber-900 dark:text-amber-400">{thumbIndex + 1}</p>
               </div>
             ))}
-          </Document>
+          </PdfDocument>
         </div>
 
         {/* Main Viewer */}
@@ -309,14 +320,14 @@ export default function EditPage() {
               <p className="text-2xl font-medium text-amber-900 dark:text-amber-300">Loading PDF pages...</p>
             </div>
           ) : (
-            <Document file={file} loading={null}>
+            <PdfDocument file={file} onLoadError={onLoadError} loading={null}>
               {pageOrder.map((actualIndex, displayIndex) => (
                 <div
                   key={displayIndex}
                   id={`main-page-${displayIndex}`}
                   className="mb-16 mx-auto max-w-5xl shadow-2xl bg-white rounded-2xl overflow-hidden border-4 border-amber-200/50 relative"
                 >
-                  <Page pageNumber={actualIndex + 1} scale={zoom} />
+                  <PdfPage pageNumber={actualIndex + 1} scale={zoom} />
                   <canvas
                     id={`fabric-canvas-${displayIndex}`}
                     className="absolute top-0 left-0 pointer-events-auto"
@@ -324,7 +335,7 @@ export default function EditPage() {
                   />
                 </div>
               ))}
-            </Document>
+            </PdfDocument>
           )}
         </div>
       </div>
