@@ -8,9 +8,9 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as fabric from 'fabric';
-import { pdfjs } from 'react-pdf'; // Keep for worker control
+import { pdfjs } from 'react-pdf'; // For worker control
 
-// Dynamic imports for reliable production rendering (fixes blank/stuck PDF)
+// Dynamic imports (fixes production rendering/blank pages)
 const PdfDocument = dynamic(() => import('react-pdf').then((mod) => mod.Document), {
   ssr: false,
   loading: () => <p className="text-center py-8 text-amber-900 dark:text-amber-300">Loading PDF viewer...</p>,
@@ -36,7 +36,7 @@ export default function EditPage() {
     }
   }, [pdfFile, pdfBytes, router]);
 
-  // Worker src (kept exactly as your current path - no change)
+  // Worker src (kept exactly as your current code - no change)
   useEffect(() => {
     pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs';
   }, []);
@@ -47,7 +47,7 @@ export default function EditPage() {
     setPageOrder(Array.from({ length: numPages }, (_, i) => i));
   };
 
-  // Debug silent load errors
+  // Debug load errors
   const onLoadError = (error: Error) => {
     console.error('PDF load error:', error);
   };
@@ -83,7 +83,7 @@ export default function EditPage() {
     };
   }, [numPages]);
 
-  // Update tool modes
+  // Update tool modes (explicitly initialize brush)
   useEffect(() => {
     canvases.current.forEach((c) => {
       if (selectedTool === 'draw') {
