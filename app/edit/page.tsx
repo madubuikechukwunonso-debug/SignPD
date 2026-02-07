@@ -273,7 +273,7 @@ export default function EditPage() {
     canvases.current = newCanvases;
   };
 
-  // Download - FIXED TYPE ERROR
+  // Download - FIXED TYPE ERROR (strict TS compatibility)
   const handleDownload = async () => {
     if (!originalDoc || !pdfFile) return;
 
@@ -307,9 +307,8 @@ export default function EditPage() {
     }
 
     const savedBytes = await newDoc.save();
-    // Fixed: Extract clean ArrayBuffer to satisfy strict Blob typing
-    const pdfBuffer = savedBytes.buffer.slice(savedBytes.byteOffset, savedBytes.byteOffset + savedBytes.byteLength);
-    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    // Fixed: Copy to new Uint8Array to ensure non-shared ArrayBuffer (satisfies strict Blob typings)
+    const blob = new Blob([new Uint8Array(savedBytes)], { type: 'application/pdf' });
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
