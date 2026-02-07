@@ -8,7 +8,7 @@ import ThemeToggle from "./components/ThemeToggle";
 
 export default function Home() {
   const router = useRouter();
-  const { loadPdf, pdfBytes, isLoading, error } = usePDF();
+  const { loadPdf, pdfFile, isLoading, error } = usePDF();
 
   const [dragActive, setDragActive] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -19,10 +19,10 @@ export default function Home() {
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (pdfBytes && !isLoading && !error && mounted) {
+    if (pdfFile && !isLoading && !error && mounted) {
       router.push("/edit");
     }
-  }, [pdfBytes, isLoading, error, mounted, router]);
+  }, [pdfFile, isLoading, error, mounted, router]);
 
   const handleFile = async (file: File) => {
     if (!file) return;
@@ -31,6 +31,7 @@ export default function Home() {
 
     const isPdfByType = file.type === "application/pdf";
     const isPdfByName = file.name.toLowerCase().endsWith(".pdf");
+
     if (!isPdfByType && !isPdfByName) {
       setValidationError("Invalid file type. Please upload a PDF.");
       return;
@@ -41,7 +42,7 @@ export default function Home() {
       return;
     }
 
-    loadPdf(file);
+    await loadPdf(file);
   };
 
   const onDrop = useCallback(
@@ -49,6 +50,7 @@ export default function Home() {
       e.preventDefault();
       setDragActive(false);
       if (isLoading) return;
+
       const file = e.dataTransfer.files?.[0];
       if (file) handleFile(file);
     },
@@ -153,6 +155,7 @@ export default function Home() {
                   PD
                 </motion.span>
               </motion.h1>
+
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: "70%" }}
