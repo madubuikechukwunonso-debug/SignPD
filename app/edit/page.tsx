@@ -273,7 +273,7 @@ export default function EditPage() {
     canvases.current = newCanvases;
   };
 
-  // Download - FIXED TYPE ERROR (strict TS compatibility)
+  // Download
   const handleDownload = async () => {
     if (!originalDoc || !pdfFile) return;
 
@@ -307,7 +307,6 @@ export default function EditPage() {
     }
 
     const savedBytes = await newDoc.save();
-    // Fixed: Copy to new Uint8Array to ensure non-shared ArrayBuffer (satisfies strict Blob typings)
     const blob = new Blob([new Uint8Array(savedBytes)], { type: 'application/pdf' });
 
     const url = URL.createObjectURL(blob);
@@ -379,14 +378,29 @@ export default function EditPage() {
 
         <div className="bg-amber-100 p-4 flex gap-4 overflow-x-auto">
           <button onClick={addBlankPage} className="bg-amber-700 text-white px-6 py-3 rounded">+ Blank Page</button>
-          <button onClick={() => setSelectedTool('draw')} className={selectedTool === 'draw' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded>✏️ Draw</button>
-          <button onClick={() => setSelectedTool('text')} className={selectedTool === 'text' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded>T Text</button>
-          <button onClick={() => setSelectedTool('highlight')} className={selectedTool === 'highlight' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded>🖍️ Highlight</button>
+          <button 
+            onClick={() => setSelectedTool('draw')} 
+            className={`${selectedTool === 'draw' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded`}
+          >
+            ✏️ Draw
+          </button>
+          <button 
+            onClick={() => setSelectedTool('text')} 
+            className={`${selectedTool === 'text' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded`}
+          >
+            T Text
+          </button>
+          <button 
+            onClick={() => setSelectedTool('highlight')} 
+            className={`${selectedTool === 'highlight' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded`}
+          >
+            🖍️ Highlight
+          </button>
           <button onClick={() => setSelectedTool('none')} className="bg-gray-600 text-white px-6 py-3 rounded">Select</button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Thumbnails sidebar - now rendered properly */}
+          {/* Thumbnails sidebar */}
           <div className="w-80 bg-white dark:bg-gray-800 overflow-y-auto p-6 border-r">
             {pageConfigs.map((config, i) => (
               <Thumbnail key={i} index={i} config={config} />
