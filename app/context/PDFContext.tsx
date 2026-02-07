@@ -2,15 +2,16 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { PDFDocument } from 'pdf-lib';
-import { savePdfToIdb } from '@/app/lib/idb'; // Keep your existing path
 
 type PDFContextType = {
   pdfFile: File | null;
   setPdfFile: (file: File | null) => void;
-  pdfBytes: Uint8Array | null;
-  setPdfBytes: (bytes: Uint8Array | null) => void;
-  pdfDoc: PDFDocument | null; // For future editing with pdf-lib
-  setPdfDoc: (doc: PDFDocument | null) => void;
+  originalBytes: Uint8Array | null;
+  setOriginalBytes: (bytes: Uint8Array | null) => void;
+  originalDoc: PDFDocument | null;
+  setOriginalDoc: (doc: PDFDocument | null) => void;
+  blankPageSize: { width: number; height: number } | null;
+  setBlankPageSize: (size: { width: number; height: number } | null) => void;
   fileName: string;
   setFileName: (name: string) => void;
   isLoading: boolean;
@@ -22,8 +23,9 @@ const PDFContext = createContext<PDFContextType | undefined>(undefined);
 
 export const PDFProvider = ({ children }: { children: ReactNode }) => {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
-  const [pdfDoc, setPdfDoc] = useState<PDFDocument | null>(null);
+  const [originalBytes, setOriginalBytes] = useState<Uint8Array | null>(null);
+  const [originalDoc, setOriginalDoc] = useState<PDFDocument | null>(null);
+  const [blankPageSize, setBlankPageSize] = useState<{ width: number; height: number } | null>(null);
   const [fileName, setFileName] = useState('edited.pdf');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,10 +42,13 @@ export const PDFProvider = ({ children }: { children: ReactNode }) => {
 
       const doc = await PDFDocument.load(bytes);
 
-      setPdfBytes(bytes);
-      setPdfDoc(doc);
+      const firstPage = doc.getPages()[0];
+      const size = firstPage ? firstPage.getSize() : { width: 612, height: 792 }; // Fallback A4
+
+      setOriginalBytes(bytes);
+      setOriginalDoc(doc);
+      setBlankPageSize(size);
       setFileName(file.name.replace(/\.pdf$/i, '-signed.pdf'));
-      await savePdfToIdb(bytes);
     } catch (err: any) {
       let message = 'Failed to load PDF. It may be corrupted or invalid.';
       if (err.message?.toLowerCase().includes('password')) {
@@ -52,10 +57,10 @@ export const PDFProvider = ({ children }: { children: ReactNode }) => {
       setError(message);
       console.error('PDF load error:', err);
 
-      // Reset state on failure
       setPdfFile(null);
-      setPdfBytes(null);
-      setPdfDoc(null);
+      setOriginalBytes(null);
+      setOriginalDoc(null);
+      setBlankPageSize(null);
       setFileName('edited.pdf');
     } finally {
       setIsLoading(false);
@@ -67,10 +72,12 @@ export const PDFProvider = ({ children }: { children: ReactNode }) => {
       value={{
         pdfFile,
         setPdfFile,
-        pdfBytes,
-        setPdfBytes,
-        pdfDoc,
-        setPdfDoc,
+        originalBytes,
+        setOriginalBytes,
+        originalDoc,
+        setOriginalDoc,
+        blankPageSize,
+        setBlankPageSize,
         fileName,
         setFileName,
         isLoading,
