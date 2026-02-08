@@ -19,7 +19,7 @@ export default function EditPage() {
 
   const [pdfjsDoc, setPdfjsDoc] = useState<any>(null);
   const [pageConfigs, setPageConfigs] = useState<PageConfig[]>([]);
-  const [zoom, setZoom] = useState(1.0); // Lower default for better mobile fit
+  const [zoom, setZoom] = useState(1.0);
   const [selectedTool, setSelectedTool] = useState<'none' | 'draw' | 'text' | 'highlight'>('none');
 
   const canvases = useRef<fabric.Canvas[]>([]);
@@ -85,12 +85,11 @@ export default function EditPage() {
     };
   }, [pageConfigs.length]);
 
-  // Apply selected tool to all canvases (re-applies when new pages are added)
+  // Apply selected tool to all canvases
   useEffect(() => {
     canvases.current.forEach((c) => {
       if (!c) return;
 
-      // Reset common properties
       c.isDrawingMode = false;
       c.defaultCursor = 'default';
       c.off('mouse:down');
@@ -122,7 +121,6 @@ export default function EditPage() {
           c.renderAll();
         });
       } else {
-        // 'none' = select mode
         c.selection = true;
       }
 
@@ -130,7 +128,7 @@ export default function EditPage() {
     });
   }, [selectedTool, pageConfigs.length]);
 
-  // Global delete key for removing selected annotations
+  // Delete selected annotations with keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -150,7 +148,7 @@ export default function EditPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Render functions
+  // Render main pages - FIXED render call
   const renderAllBases = async () => {
     for (let i = 0; i < pageConfigs.length; i++) {
       const config = pageConfigs[i];
@@ -161,42 +159,54 @@ export default function EditPage() {
       if (!context) continue;
 
       try {
-        let viewport;
         if (config.type === 'original') {
           const page = await pdfjsDoc.getPage(config.originalIndex + 1);
-          viewport = page.getViewport({ scale: zoom, rotation: config.rotation });
+          const viewport = page.getViewport({ scale: zoom, rotation: config.rotation });
+
+          baseCanvas.width = viewport.width;
+          baseCanvas.height = viewport.height;
+
+          const overlayCanvas = document.getElementById(`overlay-canvas-${i}`) as HTMLCanvasElement;
+          if (overlayCanvas && canvases.current[i]) {
+            overlayCanvas.width = viewport.width;
+            overlayCanvas.height = viewport.height;
+            canvases.current[i].setDimensions({ width: viewport.width, height: viewport.height });
+            canvases.current[i].renderAll();
+          }
+
+          await page.render({ canvasContext: context, viewport }).promise;
         } else {
           // Blank page
           let width = (blankPageSize?.width || 612) * zoom;
           let height = (blankPageSize?.height || 792) * zoom;
           if (config.rotation % 180 === 90) [width, height] = [height, width];
-          viewport = { width, height } as any;
+
+          baseCanvas.width = width;
+          baseCanvas.height = height;
           context.fillStyle = '#ffffff';
           context.fillRect(0, 0, width, height);
-        }
 
-        if (config.type === 'original') {
-          baseCanvas.width = viewport.width;
-          baseCanvas.height = viewport.height;
-          await (viewport as any).page.render({ canvasContext: context, viewport }).promise;
-        } else {
-          baseCanvas.width = viewport.width;
-          baseCanvas.height = viewport.height;
-        }
-
-        const overlayCanvas = document.getElementById(`overlay-canvas-${i}`) as HTMLCanvasElement;
-        if (overlayCanvas && canvases.current[i]) {
-          overlayCanvas.width = viewport.width;
-          overlayCanvas.height = viewport.height;
-          canvases.current[i].setDimensions({ width: viewport.width, height: viewport.height });
-          canvases.current[i].renderAll();
+          const overlayCanvas = document.getElementById(`overlay-canvas-${i}`) as HTMLCanvasElement;
+          if (overlayCanvas && canvases.current[i]) {
+            overlayCanvas.width = width;
+            overlayCanvas.height = height;
+            canvases.current[i].setDimensions({ width, height });
+            canvases.current[i].renderAll();
+          }
         }
       } catch (err) {
         console.error(`Failed to render page ${i + 1}:`, err);
+        context.fillStyle = '#fee2e2';
+        context.fillRect(0, 0, baseCanvas.width || 800, baseCanvas.height || 600);
+        context.fillStyle = '#991b1b';
+        context.font = '20px sans-serif';
+        context.textAlign = 'center';
+        context.fillText('Render failed', (baseCanvas.width || 800) / 2, (baseCanvas.height || 600) / 2);
       }
     }
   };
 
+  // Render thumbnails
   const renderThumbnails = async () => {
     if (!pdfjsDoc) return;
 
@@ -244,14 +254,15 @@ export default function EditPage() {
     }
   };
 
+  // Re-render on changes
   useEffect(() => {
-    if (pdfjsDoc && pageConfigs.length > 0 && canvases.current.length === pageConfigs.length) {
+    if (pdfjsDoc && pageConfigs.length > 0) {
       renderAllBases();
       renderThumbnails();
     }
-  }, [pdfjsDoc, pageConfigs, zoom]);
+  }, [pdfjsDoc, pageConfigs, zoom, canvases.current.length]);
 
-  // Page operations (re-render after changes)
+  // Page operations
   const addBlankPage = () => {
     setPageConfigs([...pageConfigs, { type: 'blank', rotation: 0 }]);
   };
@@ -380,7 +391,6 @@ export default function EditPage() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
-        {/* Responsive header */}
         <header className="bg-amber-600 text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <button onClick={() => router.push('/')} className="bg-amber-800 px-6 py-2 rounded hover:bg-amber-900">← Back</button>
           <h1 className="text-lg sm:text-xl font-bold truncate max-w-full px-4">Editing: {pdfFile?.name}</h1>
@@ -394,7 +404,6 @@ export default function EditPage() {
           </div>
         </header>
 
-        {/* Tool bar */}
         <div className="bg-amber-100 dark:bg-amber-900 p-4 flex gap-3 overflow-x-auto">
           <button onClick={addBlankPage} className="bg-amber-700 text-white px-6 py-3 rounded flex-shrink-0">+ Blank Page</button>
           <button onClick={() => setSelectedTool('draw')} className={`${selectedTool === 'draw' ? 'bg-amber-600' : 'bg-amber-700'} text-white px-6 py-3 rounded flex-shrink-0`}>✏️ Draw</button>
@@ -403,9 +412,7 @@ export default function EditPage() {
           <button onClick={() => setSelectedTool('none')} className="bg-gray-600 text-white px-6 py-3 rounded flex-shrink-0">Select</button>
         </div>
 
-        {/* Responsive layout: column on mobile, row on desktop */}
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-          {/* Thumbnails sidebar - horizontal on mobile, vertical on desktop */}
           <div className="w-full md:w-80 bg-white dark:bg-gray-800 overflow-x-auto md:overflow-y-auto p-4 border-b md:border-b-0 md:border-r">
             <div className="flex flex-row md:flex-col gap-6">
               {pageConfigs.map((config, i) => (
@@ -414,7 +421,6 @@ export default function EditPage() {
             </div>
           </div>
 
-          {/* Main viewer */}
           <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50 dark:bg-gray-900">
             <div className="max-w-full md:max-w-5xl mx-auto space-y-8">
               {pageConfigs.map((config, i) => (
