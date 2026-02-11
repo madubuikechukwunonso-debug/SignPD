@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePDF } from '../context/PDFContext';
 import * as pdfjsLib from 'pdfjs-dist';
-import { fabric } from 'fabric';
+import * as fabric from 'fabric';
 import { PDFDocument, degrees } from 'pdf-lib';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 type PageConfig =
-  | { type: 'original'; originalIndex: number; rotation: number }
+  | { type: 'original'; originalIndex:: number; rotation: number }
   | { type: 'blank'; rotation: number };
 
 export default function EditPage() {
@@ -191,8 +191,8 @@ export default function EditPage() {
             canvases.current[i] = fCanvas;
             applyToolToCanvas(fCanvas);
           } else {
-            canvases.current[i].setDimensions({ width: baseCanvas.width, height: baseCanvas.height });
-            canvases.current[i].renderAll();
+            canvases.current[i]!.setDimensions({ width: baseCanvas.width, height: baseCanvas.height });
+            canvases.current[i]!.renderAll();
           }
         }
       } catch (err) {
@@ -218,7 +218,7 @@ export default function EditPage() {
           const page = await pdfjsDoc.getPage(config.originalIndex + 1);
           let viewport = page.getViewport({ scale: 1, rotation: config.rotation });
           const scale = targetWidth / viewport.width;
-          viewport = page.getViewport({ scale: scale * scale, rotation: config.rotation });
+          viewport = page.getViewport({ scale, rotation: config.rotation });
 
           canvas.width = Math.round(viewport.width);
           canvas.height = Math.round(viewport.height);
