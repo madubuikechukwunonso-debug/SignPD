@@ -59,7 +59,7 @@ export default function EditPage() {
 
     const calculateFitZoom = async () => {
       try {
-        const page = await, await pdfjsDoc.getPage(1);
+        const page = await pdfjsDoc.getPage(1);
         const viewport = page.getViewport({ scale: 1 });
         const containerWidth = viewerRef.current!.clientWidth;
         const newZoom = (containerWidth * 0.85) / viewport.width;
