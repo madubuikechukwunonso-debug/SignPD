@@ -10,7 +10,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 type PageConfig =
-  | { type: 'original'; originalIndex:: number; rotation: number }
+  | { type: 'original'; originalIndex: number; rotation: number }
   | { type: 'blank'; rotation: number };
 
 export default function EditPage() {
@@ -59,7 +59,7 @@ export default function EditPage() {
 
     const calculateFitZoom = async () => {
       try {
-        const page = await pdfjsDoc.getPage(1);
+        const page = await, await pdfjsDoc.getPage(1);
         const viewport = page.getViewport({ scale: 1 });
         const containerWidth = viewerRef.current!.clientWidth;
         const newZoom = (containerWidth * 0.85) / viewport.width;
