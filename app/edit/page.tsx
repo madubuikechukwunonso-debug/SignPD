@@ -337,8 +337,8 @@ export default function EditPage() {
     const [{ isDragging }, drag] = useDrag({
       type: 'page',
       item: { index },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
+      collect: (state) => ({
+        isDragging: state.isDragging(),
       }),
     });
 
@@ -439,7 +439,11 @@ export default function EditPage() {
             {pageConfigs.map((config, i) => (
               <div key={i} className="relative shadow-2xl my-12 bg-white mx-auto">
                 <canvas
-                  ref={el => el && (baseCanvases.current[i] = el)}
+                  ref={(el) => {
+                    if (el) {
+                      baseCanvases.current[i] = el;
+                    }
+                  }}
                   className="block pointer-events-none"
                 />
                 <canvas
